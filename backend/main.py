@@ -289,6 +289,7 @@ def health_check(db: Session = Depends(get_db)):
     }
 
 
+@app.get("/api/scan/trigger")
 @app.post("/api/scan/trigger")
 async def trigger_scan():
     """Manually trigger a scan (for testing or on-demand refresh)."""
