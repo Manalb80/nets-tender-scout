@@ -297,6 +297,37 @@ async def trigger_scan():
     return {"status": "scan_triggered", "message": "Scan started in background"}
 
 
+@app.get("/api/seed")
+def seed_demo_data(db: Session = Depends(get_db)):
+    """Load demo tenders for testing."""
+    from scorer import score_tender
+    import json as _json
+    demos = [
+        {"id": "S-26080803636", "title": "Maintenance & Support of Dell Servers", "dept": "IT", "ad": "1-Aug-2026", "cl": "15-Dec-2026"},
+        {"id": "S-26070703412", "title": "Supply of Cisco Network Switches & Routers", "dept": "IT", "ad": "15-Jul-2026", "cl": "20-Dec-2026"},
+        {"id": "S-26090904001", "title": "Cybersecurity Assessment & Firewall Deployment", "dept": "IT", "ad": "5-Sep-2026", "cl": "25-Dec-2026"},
+        {"id": "S-26100105523", "title": "Data Centre UPS & Power Infrastructure Upgrade", "dept": "IT", "ad": "1-Oct-2026", "cl": "30-Dec-2026"},
+        {"id": "S-26101005890", "title": "Annual Maintenance Contract for Storage SAN", "dept": "IT", "ad": "10-Oct-2026", "cl": "10-Jan-2027"},
+        {"id": "S-26110506401", "title": "Cloud Migration & Virtualization Services", "dept": "IT", "ad": "5-Nov-2026", "cl": "20-Jan-2027"},
+        {"id": "S-26111006555", "title": "Managed IT Support Services (NOC Operations)", "dept": "IT", "ad": "10-Nov-2026", "cl": "25-Jan-2027"},
+        {"id": "S-26111506700", "title": "Supply of WiFi Access Points & Wireless Network", "dept": "IT", "ad": "15-Nov-2026", "cl": "30-Jan-2027"},
+        {"id": "S-26112006801", "title": "Structured Cabling for New Branch Offices", "dept": "Admin", "ad": "20-Nov-2026", "cl": "5-Feb-2027"},
+        {"id": "S-26112506900", "title": "Supply & Installation of Solar Power System", "dept": "Admin", "ad": "25-Nov-2026", "cl": "10-Feb-2027"},
+    ]
+    added = 0
+    for d in demos:
+        if db.query(Tender).filter(Tender.id == d["id"]).first():
+            continue
+        score, verdict, solutions, keywords = score_tender(d["title"])
+        if score < 70:
+            continue
+        tender = Tender(id=d["id"], title=d["title"], department=d["dept"], advertised=d["ad"], closing=d["cl"], is_open=True, days_remaining=60, score=score, verdict=verdict, matched_keywords=keywords, matched_solutions=solutions, source_url="https://sindhbank.com.pk/tenders")
+        db.add(tender)
+        added += 1
+    scan = ScanLog(date=datetime.utcnow().strftime("%Y-%m-%d %H:%M"), total_on_portal=867, qualified_count=added, open_qualified_count=added, new_count=added, duration_seconds=0.1, status="success")
+    db.add(scan)
+    db.commit()
+    return {"status": "seeded", "tenders_added": added}
 # ── Serve the frontend ──
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
