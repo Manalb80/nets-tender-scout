@@ -1,0 +1,11 @@
+{
+  "final_status": "FULLY_APPROVED",
+  "writer_iterations": 5,
+  "regulatory_iterations": 3,
+  "technical_score": 94,
+  "regulatory_score": 96,
+  "data_sovereignty": true,
+  "red_flags": [],
+  "ppra_status": "Fully compliant with Federal PPRA 2004, Sindh Provincial PPRA Rules, and SECP Companies Act 2017. Evaluation methodology is transparent with published weighted criteria. Open competitive bidding language used throughout.",
+  "all_checks_passed": true
+}

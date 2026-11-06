@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  tender-scout:
+    build: .
+    container_name: nets-tender-scout
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data          # persist database across restarts
+    environment:
+      - DATABASE_URL=sqlite:////app/data/tender_scout.db
+      - SCAN_HOUR=5               # scrape at 05:47 UK time
+      - SCAN_MINUTE=47
+    restart: unless-stopped
+
+  # Optional: swap SQLite for PostgreSQL in production
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: tender_scout
+  #     POSTGRES_USER: nets
+  #     POSTGRES_PASSWORD: changeme
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   pgdata:

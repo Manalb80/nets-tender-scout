@@ -1,0 +1,13 @@
+{
+  "mode": "SIMULATED (no API key)",
+  "final_status": "FULLY_APPROVED",
+  "writer_iterations": 4,
+  "regulatory_iterations": 3,
+  "proposal_words": 683,
+  "technical_score": 92,
+  "regulatory_score": 96,
+  "data_sovereignty": true,
+  "red_flags": [],
+  "all_checks_passed": true,
+  "timestamp": "2026-11-06T20:44:08.140271"
+}

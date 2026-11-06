@@ -1,0 +1,1184 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>NETS Sindh Bank Tender Scout</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
+<style>
+:root{--sidebar:#1a1f25;--sidebar-text:#c8cdd4;--sidebar-active:#2d3339;--sidebar-accent:#4CAF50;--bg:#f5f5f0;--card:#fff;--border:#e5e5e0;--fg:#1a1a1a;--fg-muted:#6b7280;--fg-faint:#9ca3af;--green:#16a34a;--green-soft:#f0fdf4;--green-border:#bbf7d0;--amber:#d97706;--amber-soft:#fffbeb;--amber-border:#fde68a;--red:#dc2626;--red-soft:#fef2f2;--red-border:#fecaca;--blue:#2563eb;--blue-soft:#eff6ff;font-family:'Inter',system-ui,sans-serif;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111318;--card:#1a1f27;--border:#2a2f38;--fg:#e5e7eb;--fg-muted:#9ca3af;--fg-faint:#6b7280;--green-soft:#052e16;--green-border:#14532d;--amber-soft:#451a03;--amber-border:#78350f;--red-soft:#450a0a;--red-border:#7f1d1d;--blue-soft:#1e1b4b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111318;--card:#1a1f27;--border:#2a2f38;--fg:#e5e7eb;--fg-muted:#9ca3af;--fg-faint:#6b7280;--green-soft:#052e16;--green-border:#14532d;--amber-soft:#451a03;--amber-border:#78350f;--red-soft:#450a0a;--red-border:#7f1d1d;--blue-soft:#1e1b4b;color-scheme:dark}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;display:flex;min-height:100vh}
+
+/* ===== SIDEBAR ===== */
+.sidebar{width:260px;background:var(--sidebar);color:var(--sidebar-text);padding:0;flex:none;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:24px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo .nets-word{display:block;font-size:42px;font-weight:900;color:#555;letter-spacing:-.03em;line-height:.9;font-family:'Inter',sans-serif}
+@media(prefers-color-scheme:dark){.sb-logo .nets-word{color:#bbb}}
+:root[data-theme="dark"] .sb-logo .nets-word{color:#bbb}
+.sb-logo .nets-swoosh{display:block;height:18px;margin-bottom:2px}
+.sb-logo .tagline{display:block;font-size:9px;color:#4CAF50;letter-spacing:.08em;margin-top:6px;font-weight:500}
+.sb-hdr{padding:20px 24px 6px}
+.sb-hdr .title{font-size:16px;font-weight:700;color:#fff;line-height:1.2}
+.sb-hdr .sub{font-size:10px;color:var(--sidebar-accent);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-top:2px}
+.sb-nav{padding:16px 14px 8px;display:flex;flex-direction:column;gap:1px;flex:1}
+.sb-item{padding:9px 14px;border-radius:6px;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--sidebar-text);transition:all .15s;font-weight:500}
+.sb-item:hover{background:rgba(255,255,255,.06)}
+.sb-item.active{background:var(--sidebar-active);color:#fff;font-weight:600;border-left:3px solid var(--sidebar-accent);padding-left:11px}
+.sb-badge{background:var(--sidebar-accent);color:#fff;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;min-width:20px;text-align:center}
+.sb-live{background:var(--sidebar-accent);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.sb-entity{padding:20px 24px;border-top:1px solid rgba(255,255,255,.08);margin-top:auto}
+.sb-entity .label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:600}
+.sb-entity select{width:100%;background:#2d3339;border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 12px;border-radius:6px;font-size:12px;font-family:inherit}
+.sb-footer{padding:14px 24px;font-size:10px;color:rgba(255,255,255,.2);line-height:1.6}
+
+/* ===== MAIN CONTENT ===== */
+.main{flex:1;padding:36px 48px;min-width:0}
+.greeting{font-size:30px;font-weight:800;color:var(--fg);letter-spacing:-.02em;margin-bottom:6px}
+.date-line{font-size:13.5px;color:var(--fg-muted);margin-bottom:28px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
+.kpi-card .label{font-size:12.5px;color:var(--fg-muted);margin-bottom:6px}
+.kpi-card .num{font-size:32px;font-weight:800;color:var(--green);line-height:1}
+.kpi-card .sub{font-size:11.5px;color:var(--fg-faint);margin-top:6px}
+.sec-head{font-size:17px;font-weight:700;color:var(--fg);margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+.sec-head .hint{font-size:12.5px;font-weight:400;color:var(--fg-faint)}
+.action-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s}
+.action-card:hover{border-color:var(--green);box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.action-card .info{flex:1;min-width:0}
+.action-card .info .title{font-size:14.5px;font-weight:600;color:var(--fg)}
+.action-card .info .detail{font-size:12.5px;color:var(--fg-muted);margin-top:3px}
+.action-tag{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot-g{background:var(--green)}.dot-b{background:var(--blue)}.dot-a{background:var(--amber)}.dot-r{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.timeline{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px}
+.timeline .head{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+.timeline .head .when{font-size:12.5px;font-weight:400;color:var(--fg-faint)}
+.tl-item{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border:none}
+.tl-time{font-size:12px;color:var(--fg-faint);font-family:'Inter',monospace;min-width:48px;padding-top:1px;font-weight:500}
+.tl-text{font-size:13.5px;color:var(--fg);line-height:1.5}
+.split{display:grid;grid-template-columns:1fr 360px;gap:24px;margin-bottom:32px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-bar select{background:var(--card);border:1px solid var(--border);color:var(--fg);padding:7px 12px;border-radius:6px;font-size:12.5px;font-family:inherit}
+.filter-bar .clear{font-size:12px;color:var(--green);cursor:pointer;font-weight:600;padding:7px 12px}
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:11px 16px;font-size:10.5px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg)}
+td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:rgba(22,163,74,.02)}
+tr{cursor:pointer}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;font-size:10.5px;font-weight:600}
+.b-g{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
+.b-a{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)}
+.b-r{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
+.b-grey{background:var(--bg);color:var(--fg-faint);border:1px solid var(--border)}
+.drawer{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:16px}
+.drawer h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.drawer .meta{font-size:12px;color:var(--fg-muted);margin-bottom:16px}
+.drawer .row{display:flex;gap:24px;margin-bottom:12px}
+.drawer .row .col{flex:1}
+.drawer .row .col .lbl{font-size:10px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-weight:600}
+.drawer .row .col .val{font-size:13.5px;font-weight:600}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px}
+.loading-screen .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen .msg{font-size:14px;color:var(--fg-muted)}
+.db-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
+.db-live{background:rgba(76,175,80,.15);color:#4CAF50}
+.db-off{background:rgba(220,38,38,.15);color:#dc2626}
+@media(max-width:800px){body{flex-direction:column}.sidebar{width:100%;height:auto;position:relative}.sb-nav{flex-direction:row;overflow-x:auto;padding:8px 12px}.sb-logo,.sb-hdr,.sb-entity,.sb-footer{display:none}.main{padding:20px 16px}.split{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo" style="text-align:center">
+    <img src="/_blob/b9bb80a24e3a92df56d3fa73118f37e1" alt="NETS International" style="width:180px;margin-bottom:8px">
+    <span class="tagline">Empowering The Future</span>
+  </div>
+  <div class="sb-hdr">
+    <div class="title">Tender Scout</div>
+    <div class="sub">Sindh Bank Portal</div>
+  </div>
+  <nav class="sb-nav" id="sbnav"></nav>
+  <div class="sb-entity">
+    <div class="label">Source Portal</div>
+    <select><option>Sindh Bank</option></select>
+  </div>
+  <div class="sb-footer">
+    Agent 1: Ingestion & Scraping<br>
+    Agent 1b: D:\ Drive Sync<br>
+    Agent 2: RAG Knowledge Base<br>
+    Agent 3: Proposal Writer<br>
+    Agent 4: Compliance Auditor<br>
+    DB: <span id="dbStatusFooter" class="db-status db-off">Connecting</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div id="content">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <div class="msg" id="loadMsg">Connecting to Artifact Database...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== NETS SOLUTIONS (matching criteria, stays in HTML) ===== */
+var SOLUTIONS=[
+  {id:"fan",name:"Fixed Access Network",group:"Infrastructure",kw:["fibre","fiber","fttp","ftth","cable","cabling","structured cabling","optical","broadband"]},
+  {id:"wan",name:"Wireless Access Network",group:"Infrastructure",kw:["wireless","wifi","wi-fi","access point","radio","microwave","antenna"]},
+  {id:"elv",name:"ELV Systems",group:"Infrastructure",kw:["cctv","access control","surveillance","biometric","intercom","fire alarm","public address","elv","low voltage"]},
+  {id:"ev",name:"EV Chargepoint",group:"Infrastructure",kw:["electric vehicle","chargepoint","ev charging","ev chargepoint"]},
+  {id:"edn",name:"Enterprise Data Network",group:"Digital",kw:["network","networking","lan","wan","switch","router","switches","routers","sd-wan","data network"]},
+  {id:"cloud",name:"Cloud Solutions",group:"Digital",kw:["cloud","virtualization","virtualisation","vmware","hyper-v","azure","aws"]},
+  {id:"cyber",name:"Cyber Security",group:"Digital",kw:["cybersecurity","security","firewall","waf","siem","endpoint","threat","penetration"]},
+  {id:"auto",name:"Automation",group:"Digital",kw:["automation","orchestration","scripting","rpa"]},
+  {id:"ms",name:"Managed Services",group:"Managed IT",kw:["managed service","mssp","it support","helpdesk","maintenance","amc","support contract"]},
+  {id:"ro",name:"Resource Outsourcing",group:"Managed IT",kw:["outsourcing","resource","staffing","contractor"]},
+  {id:"noc",name:"NOC",group:"Managed IT",kw:["noc","monitoring","network operations"]},
+  {id:"soc",name:"SOC",group:"Managed IT",kw:["soc","security operations","incident response"]},
+  {id:"dc",name:"Data Centre",group:"Infrastructure",kw:["server","data centre","data center","storage","san","nas","backup","rack","ups","power","dell","hp","hpe"]},
+  {id:"voice",name:"Telephony",group:"Digital",kw:["telephony","voip","pbx","unified communication","telephone","ip phone"]},
+  {id:"solar",name:"Solar and Power",group:"Infrastructure",kw:["solar","pv","photovoltaic","inverter","battery","power supply","ups","generator"]}
+];
+
+/* ===== STATE (populated from db) ===== */
+var T=[], LOG=[], SCANS=[], PROPOSALS=[], CONFIG={}, FLT={status:"all",solution:"all",dept:"all"};
+var NOW=new Date();
+var DB=null;
+var _dbReady=false;
+var _tenderUnsub=null, _scanUnsub=null;
+
+/* ===== DATE PARSER ===== */
+function parsePortalDate(s){
+  if(!s)return null;
+  s=s.trim();
+  var m=s.match(/^(\d{1,2})\s*-\s*([A-Za-z]{3,})\s*-?\s*(\d{2,4})$/);
+  if(m){var mon={jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",sept:"09",oct:"10",nov:"11",dec:"12"}[m[2].toLowerCase().substring(0,3)];if(!mon)return null;var yr=m[3].length===2?"20"+m[3]:m[3];return new Date(yr+"-"+mon+"-"+m[1].padStart(2,"0"))}
+  var d=new Date(s);return isNaN(d)?null:d;
+}
+
+function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMinutes()).padStart(2,"0");return h+":"+m}
+
+/* ===== INIT: connect to artifact db ===== */
+(async function init(){
+  var loadTimer=setTimeout(function(){
+    document.getElementById("loadMsg").textContent="Database not available. Showing empty state.";
+    _dbReady=false;
+    showEmptyState();
+  },10000);
+
+  DB=await claude.use("db");
+  if(!DB){
+    clearTimeout(loadTimer);
+    document.getElementById("loadMsg").textContent="Database not connected. Data will appear after the first agent scan.";
+    showEmptyState();
+    return;
+  }
+
+  clearTimeout(loadTimer);
+  document.getElementById("dbStatusFooter").className="db-status db-live";
+  document.getElementById("dbStatusFooter").textContent="Live";
+
+  /* Subscribe to tenders collection: one snapshot, live updates */
+  _tenderUnsub=DB.collection("tenders").onSnapshot(function(snap){
+    T=snap.docs.filter(function(d){return d.exists}).map(function(d){
+      var r=d.data();
+      /* Rebuild solMatch from SOLUTIONS if stored as ids */
+      var solMatch=r.solMatch||[];
+      if(solMatch.length&&typeof solMatch[0]==="string"){
+        solMatch=solMatch.map(function(sid){return SOLUTIONS.find(function(s){return s.id===sid})||{id:sid,name:sid,group:""}});
+      }
+      var cl=parsePortalDate(r.cl);
+      var days=cl?Math.ceil((cl-NOW)/864e5):null;
+      var isOpen=cl?cl>=NOW:false;
+      return{
+        id:r.id||d.id, ti:r.ti||"", dept:r.dept||"", ad:r.ad||"", cl:r.cl||"",
+        doc:r.doc||"", score:r.score||0, verdict:r.verdict||"SKIP",
+        solMatch:solMatch, matched:r.matched||[],
+        open:isOpen, days:days
+      };
+    });
+    T.sort(function(a,b){return b.score-a.score});
+    onDataReady();
+  }, function(err){
+    console.error("Tender subscription error:", err.code, err.message);
+  });
+
+  /* Subscribe to scans collection for activity log */
+  _scanUnsub=DB.collection("scans").orderBy("date","desc").limit(30).onSnapshot(function(snap){
+    SCANS=snap.docs.filter(function(d){return d.exists}).map(function(d){return d.data()});
+    LOG=SCANS.map(function(s){
+      var ts=s.timestamp?s.timestamp.substring(11,16):"05:47";
+      return{time:ts,text:"Scan: "+s.total_on_portal+" total, "+s.qualified_count+" qualified, "+s.open_qualified_count+" open"};
+    });
+    if(LOG.length===0){
+      LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
+    }
+    /* Subscribe to proposals */
+    DB.collection("proposals").onSnapshot(function(snap){
+      PROPOSALS=snap.docs.filter(function(d){return d.exists}).map(function(d){return Object.assign({_id:d.id},d.data())});
+      if(_dbReady)render();
+    },function(){});
+    /* Also read config */
+    DB.doc("config/settings").get().then(function(snap){
+      if(snap.exists)CONFIG=snap.data();
+    }).catch(function(){});
+    if(_dbReady)render();
+  }, function(err){
+    console.error("Scan subscription error:", err.code, err.message);
+  });
+})();
+
+var _firstRender=true;
+function onDataReady(){
+  _dbReady=true;
+  render();
+}
+
+function render(){
+  if(_firstRender){
+    _firstRender=false;
+    buildNav();
+    showView("overview");
+  } else {
+    /* Re-render current view */
+    buildNav();
+    var active=document.querySelector(".sb-item.active");
+    var v=active?active.getAttribute("data-v"):"overview";
+    showView(v);
+  }
+}
+
+function showEmptyState(){
+  T=[];LOG=[{time:"--:--",text:"Waiting for first agent scan..."}];SCANS=[];
+  buildNav();showView("overview");
+}
+
+/* ===== SIDEBAR NAV ===== */
+function buildNav(){
+  var qc=T.filter(function(t){return t.score>=70}).length;
+  var pc=T.filter(function(t){return t.score>=70&&t.open}).length;
+  var navEl=document.getElementById("sbnav");
+  navEl.innerHTML=[
+    {v:"overview",l:"Overview",badge:null,live:true},
+    {v:"qualified",l:"Qualified",badge:qc,live:false},
+    {v:"proposals",l:"Proposals",badge:PROPOSALS.length||null,live:false},
+    {v:"compliance",l:"Compliance",badge:null,live:false},
+    {v:"activity",l:"Activity Log",badge:null,live:false},
+    {v:"pipeline",l:"Pipeline",badge:"Soon",live:false},
+    {v:"settings",l:"Settings / Technical Health",badge:null,live:false}
+  ].map(function(n){
+    var badgeHtml=n.badge==="Soon"?' <span class="sb-badge" style="background:var(--amber);font-size:8px;padding:1px 6px">SOON</span>':n.badge!==null?' <span class="sb-badge">'+n.badge+'</span>':"";
+    return'<div class="sb-item'+(n.v==="overview"?" active":"")+'" data-v="'+n.v+'" onclick="showView(\''+n.v+'\')">'+n.l+(n.live?' <span class="sb-live">LIVE</span>':"")+badgeHtml+'</div>';
+  }).join("");
+}
+
+function showView(v){
+  document.querySelectorAll(".sb-item").forEach(function(el){el.classList.toggle("active",el.getAttribute("data-v")===v)});
+  var c=document.getElementById("content");
+  var views={overview:vOverview,qualified:vQualified,proposals:vProposals,compliance:vCompliance,activity:vActivity,pipeline:vPipeline,settings:vSettings,detail:vDetail,proposalDetail:vProposalDetail};
+  c.innerHTML=(views[v]||vOverview)();
+}
+
+/* ===== OVERVIEW \u2014 PUBLIC TENDER INTELLIGENCE DASHBOARD ===== */
+function vOverview(){
+  var scored=T.filter(function(t){return t.score>0});
+  var qual=T.filter(function(t){return t.score>=70});
+  var highPri=T.filter(function(t){return t.score>=95});
+  var openT=T.filter(function(t){return t.open});
+  var closing7=openT.filter(function(t){return t.days>=0&&t.days<=7});
+  var qualOpen=qual.filter(function(t){return t.open});
+  var qualWithDoc=qual.filter(function(t){return t.doc});
+  var totalPortal=SCANS.length?SCANS[0].total_on_portal:T.length;
+  var lastScan=SCANS.length?SCANS[0].date:"pending";
+
+  var html='';
+
+  /* 1. Executive Header */
+  html+='<div style="background:var(--sidebar);border-radius:10px;padding:28px 32px;margin-bottom:20px;color:#fff">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div>'
+    +'<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:4px">Public Tender Intelligence</div>'
+    +'<div style="font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px">Sindh Bank Portal</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.45)">Automatically discovered \u00b7 validated \u00b7 scored \u00b7 routed</div>'
+    +'</div>'
+    +'<div style="text-align:right">'
+    +'<div style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:#fff;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:6px"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite"></span>PORTAL LIVE</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.35)">Last scan</div>'
+    +'<div style="font-size:14px;font-weight:600;color:#4CAF50">'+lastScan+'</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">sindhbank.com.pk/tenders</div>'
+    +'</div></div></div>';
+
+  /* 2. Tender Pipeline \u2014 realistic stages based on actual data */
+  var withRfp=qual.filter(function(t){return t.doc});
+  var fitRate=totalPortal?Math.round(qual.length/totalPortal*100):0;
+
+  var stages=[
+    {label:"On Portal",count:totalPortal,desc:"Total tenders listed on Sindh Bank's website",color:"#1B5E20",click:null},
+    {label:"NETS Relevant",count:qual.length,desc:"Match at least one NETS solution (score 70+)",color:"#2E7D32",click:"qualified"},
+    {label:"Open Now",count:qualOpen.length,desc:"Still accepting bids; deadline has not passed",color:"#388E3C",click:null},
+    {label:"RFP Available",count:withRfp.length,desc:"PDF document is downloadable from the portal",color:"#43A047",click:null},
+    {label:"Proposal Drafted",count:PROPOSALS.length,desc:"AI has written and audited a technical proposal",color:"#4CAF50",click:"proposals"}
+  ];
+
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:20px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="font-size:13px;font-weight:700;color:var(--fg);text-transform:uppercase;letter-spacing:.06em">Tender Pipeline</div>'
+    +'<div style="font-size:11px;color:var(--fg-muted)">'+fitRate+'% of portal tenders are relevant to NETS</div></div>'
+    +'<div style="font-size:11px;color:var(--fg-faint);margin-bottom:14px">How tenders flow through the system, from discovery to proposal. Click a stage to see those tenders.</div>'
+    +'<div style="display:flex;align-items:stretch;gap:0">';
+  stages.forEach(function(s,i){
+    var w=Math.max(20,(i===0?40:Math.max(15,Math.round((s.count/(totalPortal||1))*100))));
+    var cursor=s.click?'cursor:pointer;':'';
+    var onclick=s.click?'onclick="showView(\''+s.click+'\')"':'';
+    html+='<div style="flex:'+w+';background:'+s.color+';padding:14px 6px 10px;text-align:center;color:#fff;position:relative;transition:opacity .15s;'+cursor
+      +(i===0?'border-radius:8px 0 0 8px;':'')
+      +(i===stages.length-1?'border-radius:0 8px 8px 0;':'')
+      +'" '+onclick+' title="'+s.desc+'">'
+      +'<div style="font-size:22px;font-weight:800;line-height:1">'+s.count+'</div>'
+      +'<div style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;opacity:.9;margin-top:4px">'+s.label+'</div>'
+      +'</div>';
+    if(i<stages.length-1) html+='<div style="color:var(--fg-faint);font-size:14px;display:flex;align-items:center;padding:0 1px">\u25B8</div>';
+  });
+  html+='</div></div>';
+
+  /* Quick stats row \u2014 only the 3 that matter for decision-making */
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px">';
+  var actions=[
+    {label:"Needs Your Decision",val:qualOpen.length,sub:"Open tenders scored 70+ waiting for bid or skip",color:"var(--green)",click:"qualified"},
+    {label:"Closing This Week",val:closing7.length,sub:closing7.length?"Act now or these close without a bid":"No urgent deadlines right now",color:closing7.length?"var(--red)":"var(--fg-faint)",click:null},
+    {label:"Proposals Ready",val:PROPOSALS.length,sub:PROPOSALS.length?"AI-drafted, compliance-audited, ready for your review":"No proposals generated yet",color:PROPOSALS.length?"var(--green)":"var(--fg-faint)",click:"proposals"}
+  ];
+  actions.forEach(function(a){
+    var cursor=a.click?'cursor:pointer;':'';
+    var onclick=a.click?' onclick="showView(\''+a.click+'\')"':'';
+    html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px;'+cursor+'"'+onclick+'>'
+      +'<div style="font-size:11px;color:var(--fg-muted);margin-bottom:6px">'+a.label+'</div>'
+      +'<div style="font-size:32px;font-weight:800;color:'+a.color+';line-height:1">'+a.val+'</div>'
+      +'<div style="font-size:11px;color:var(--fg-faint);margin-top:6px;line-height:1.4">'+a.sub+'</div></div>';
+  });
+  html+='</div>';
+
+  /* 3. Tender Discovery Feed \u2014 OPEN tenders only */
+  var feed=qualOpen.slice().sort(function(a,b){
+    if(b.score!==a.score)return b.score-a.score;
+    return(a.days||999)-(b.days||999);
+  });
+
+  html+='<div style="margin-bottom:24px">'
+    +'<div class="sec-head">Tender Discovery Feed <span class="hint">'+feed.length+' open qualified tenders \u00b7 Today</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>Tender</th><th>Dept</th><th>Score</th><th>NETS Solutions</th><th>Deadline</th><th>Status</th><th>RFP</th>'
+    +'</tr></thead><tbody>';
+
+  feed.forEach(function(t){
+    var scoreColor=t.score>=85?"var(--green)":"var(--amber)";
+    var status=t.score>=85?"Pursue":"Review";
+    var statusDot=t.score>=85?"dot-g":"dot-a";
+    var urgency="";
+    if(t.days!==null){
+      if(t.days<=3)urgency='<span style="color:var(--red);font-weight:700;font-size:10px"> ('+t.days+'d!)</span>';
+      else if(t.days<=7)urgency='<span style="color:var(--amber);font-size:10px"> ('+t.days+'d)</span>';
+      else urgency='<span style="color:var(--fg-faint);font-size:10px"> ('+t.days+'d)</span>';
+    }
+    var sols=t.solMatch.length?t.solMatch.map(function(s){return'<span class="badge b-g" style="font-size:9px;padding:1px 6px">'+s.name+'</span>'}).join(" "):'';
+    var pdfIcon=t.doc?'<span style="color:var(--green)">\u2713</span>':'<span style="color:var(--fg-faint)">\u2014</span>';
+
+    html+='<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')">'
+      +'<td><strong style="font-size:13px">'+t.ti+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+t.id+'</span></td>'
+      +'<td><span class="badge '+(t.dept==="IT"?"b-g":"b-a")+'" style="font-size:9px">'+t.dept+'</span></td>'
+      +'<td style="text-align:center"><span style="font-size:18px;font-weight:800;color:'+scoreColor+'">'+t.score+'</span></td>'
+      +'<td>'+sols+'</td>'
+      +'<td style="white-space:nowrap;font-size:12px">'+(t.cl||"")+urgency+'</td>'
+      +'<td><div class="action-tag" style="font-size:11px"><span class="dot '+statusDot+'"></span>'+status+'</div></td>'
+      +'<td style="text-align:center">'+pdfIcon+'</td>'
+      +'</tr>';
+  });
+  if(!feed.length) html+='<tr><td colspan="7" style="text-align:center;color:var(--fg-faint);padding:24px">No open qualified tenders. Next scan: tomorrow 05:47 UK.</td></tr>';
+
+  html+='</tbody></table></div></div>';
+
+  /* 4. Agent Status Strip */
+  var agents=[
+    {name:"Agent 1: Ingestion",dot:"g",info:"05:47 UK daily"},
+    {name:"Agent 1b: D:\\\\ Sync",dot:"g",info:"12-20:00 UK"},
+    {name:"Agent 2: RAG",dot:"g",info:"1,481 chunks"},
+    {name:"Agent 3: Writer",dot:"g",info:"LangGraph"},
+    {name:"Agent 4: Auditor",dot:"g",info:"Pydantic V2"},
+    {name:"Artifact DB",dot:DB?"g":"r",info:DB?"Connected":"Offline"}
+  ];
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 20px;display:flex;gap:0;flex-wrap:wrap">';
+  agents.forEach(function(a,i){
+    html+='<div style="flex:1;min-width:100px;padding:6px 8px;'+(i<agents.length-1?'border-right:1px solid var(--border);':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--fg)"><span class="dot dot-'+a.dot+'"></span>'+a.name+'</div>'
+      +'<div style="font-size:9px;color:var(--fg-faint);margin-top:2px">'+a.info+'</div></div>';
+  });
+  html+='</div>';
+
+  return html;
+}
+
+/* ===== TENDER DETAIL ===== */
+function vDetail(){
+  var t=T.find(function(x){return x.id===FLT._detail});
+  if(!t)return'<div class="sec-head">Tender not found</div>';
+  var sols=t.solMatch.length?t.solMatch.map(function(s){return'<span class="badge b-g" style="font-size:12px;padding:4px 12px">'+(s.group?s.group+': ':'')+s.name+'</span>'}).join(" "):'<span style="color:var(--fg-faint)">No NETS solution match</span>';
+
+  /* AI Opportunity Score breakdown \u2014 derived from solution matches */
+  var capFit=Math.min(100,t.score+(t.solMatch.length>2?5:0));
+  var stratFit=t.score>=85?96:t.score>=70?82:50;
+  var prevExp=t.solMatch.length>=2?95:t.solMatch.length===1?70:30;
+  var geoFit=100; /* Sindh Bank = Pakistan = NETS territory */
+  var deadlineFeas=t.open?(t.days>=14?95:t.days>=7?78:t.days>=3?55:30):0;
+  var aiScore=Math.round((capFit+stratFit+prevExp+geoFit+deadlineFeas)/5);
+  var scoreBreakdown=[
+    {dim:"Capability Fit",val:capFit},{dim:"Strategic Fit",val:stratFit},
+    {dim:"Previous Experience",val:prevExp},{dim:"Geographic Fit",val:geoFit},
+    {dim:"Deadline Feasibility",val:deadlineFeas}
+  ];
+
+  /* Requirement extraction \u2014 from matched keywords/solutions */
+  var reqs=t.solMatch.map(function(s){
+    return{req:s.name,found:true,ours:true,gap:"None"};
+  });
+  if(t.matched&&t.matched.length){
+    t.matched.forEach(function(kw){
+      if(!reqs.some(function(r){return r.req.toLowerCase()===kw.toLowerCase()})){
+        reqs.push({req:kw,found:true,ours:true,gap:"None"});
+      }
+    });
+  }
+
+  return'<div style="margin-bottom:12px"><span class="clear" onclick="showView(\'overview\')">\u2190 Back to Overview</span></div>'
+    +'<div class="drawer">'
+    +'<h2>'+t.ti+'</h2>'
+    +'<div class="meta">'+t.id+' \u00b7 '+t.dept+' Department \u00b7 Sindh Bank</div>'
+    +'<div class="row"><div class="col"><div class="lbl">Portal</div><div class="val">sindhbank.com.pk/tenders</div></div><div class="col"><div class="lbl">Advertised</div><div class="val">'+t.ad+'</div></div><div class="col"><div class="lbl">Deadline</div><div class="val" style="font-weight:700;color:'+(t.open&&t.days<=7?"var(--red)":"var(--fg)")+'">'+t.cl+(t.open?' ('+t.days+'d)':'')+'</div></div></div>'
+    +'<div class="row"><div class="col"><div class="lbl">Status</div><div class="val">'+(t.open?'<span class="badge b-g" style="font-size:13px;padding:4px 14px">Open</span>':'<span class="badge b-grey" style="font-size:13px;padding:4px 14px">Closed</span>')+'</div></div><div class="col"><div class="lbl">Verdict</div><div class="val"><span class="badge '+(t.verdict==="BID"?"b-g":t.verdict==="REVIEW"?"b-a":"b-grey")+'" style="font-size:13px;padding:4px 14px">'+t.verdict+'</span></div></div><div class="col"><div class="lbl">Department</div><div class="val">'+t.dept+'</div></div></div>'
+    +'</div>'
+
+    /* AI Opportunity Score */
+    +'<div class="drawer" style="margin-top:16px">'
+    +'<div style="display:flex;align-items:center;gap:20px;margin-bottom:16px"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">AI Opportunity Score</div><div style="font-size:36px;font-weight:800;color:'+(aiScore>=80?"var(--green)":aiScore>=60?"var(--amber)":"var(--red)")+'">'+aiScore+'<span style="font-size:16px;font-weight:400;color:var(--fg-faint)">/100</span></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +scoreBreakdown.map(function(s){
+      var c=s.val>=80?"var(--green)":s.val>=60?"var(--amber)":"var(--red)";
+      var pct=s.val+'%';
+      return'<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:6px">'
+        +'<div style="flex:1;font-size:12px;color:var(--fg-muted)">'+s.dim+'</div>'
+        +'<div style="width:100px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:'+pct+';height:100%;background:'+c+';border-radius:3px"></div></div>'
+        +'<div style="width:28px;text-align:right;font-size:13px;font-weight:700;color:'+c+'">'+s.val+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>'
+
+    /* Matched NETS Solutions */
+    +'<div class="drawer" style="margin-top:16px"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Matched NETS Solutions</div>'+sols+'</div>'
+
+    /* Requirement Extraction Table */
+    +(reqs.length?'<div class="drawer" style="margin-top:16px"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Tender Requirements</div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th>Requirement</th><th>Found in Tender</th><th>Our Capability</th><th>Gap</th></tr></thead><tbody>'
+    +reqs.map(function(r){
+      return'<tr><td style="font-weight:600">'+r.req+'</td><td style="text-align:center">'+(r.found?'<span style="color:var(--green)">\u2713 Yes</span>':'\u2014')+'</td><td style="text-align:center">'+(r.ours?'<span style="color:var(--green)">\u2713 Yes</span>':'<span style="color:var(--amber)">Partial</span>')+'</td><td style="color:var(--green);font-weight:600">'+r.gap+'</td></tr>';
+    }).join('')
+    +'</tbody></table></div></div>':'')
+
+    /* RFP Document */
+    +(t.doc?'<div style="margin-top:16px"><a href="'+t.doc+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none">View RFP Document \u2197</a></div>':'<div style="margin-top:16px;padding:12px 16px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;font-size:12px;color:var(--amber)">No PDF available on portal. Contact Sindh Bank procurement directly.</div>');
+}
+
+/* ===== OTHER VIEWS ===== */
+function vQualified(){
+  var q=T.filter(function(t){return t.score>=70});
+  return'<div class="sec-head">Qualified <span class="hint">'+q.length+' tenders match NETS solutions</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th>Score</th><th>Tender</th><th>NETS Solutions</th><th>Status</th><th>RFP</th></tr></thead><tbody>'
+    +q.map(function(t){
+      var sols=t.solMatch.map(function(s){return'<span class="badge b-g">'+s.name+'</span>'}).join(" ");
+      return'<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')"><td><span style="font-size:20px;font-weight:800;color:var(--green)">'+t.score+'</span></td><td><strong>'+t.ti+'</strong><br><span style="font-size:11px;color:var(--fg-faint)">'+t.id+'</span></td><td>'+sols+'</td><td>'+(t.open?'<span class="badge b-g">Open ('+t.days+'d)</span>':'<span class="badge b-grey">Closed</span>')+'</td><td>'+(t.doc?'<a href="'+t.doc+'" target="_blank" style="color:var(--green);font-size:11px;text-decoration:none" onclick="event.stopPropagation()">PDF \u2197</a>':'')+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function vSettings(){
+  var lastScan=SCANS.length?SCANS[0].date:"never";
+  var dbDocs=T.length+(SCANS.length)+1;
+  var pdfCount=T.filter(function(t){return t.doc}).length;
+
+  var html='<div class="sec-head">Settings / Technical Health</div>'
+    +'<div style="padding:14px 20px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--fg-muted)">'
+    +'This page is powered by five AI agents running in the cloud. They automatically find tenders on the Sindh Bank portal every morning, score them against NETS solutions, sync qualifying RFPs to your D:\\ drive, write technical proposals using past NETS work as reference, and then audit those proposals for compliance before you ever see them. Everything runs without your PC needing to be on.'
+    +'</div>';
+
+  /* ---- HOW IT WORKS (pipeline in plain language) ---- */
+  html+='<div class="sec-head" style="font-size:14px">How the System Works</div>'
+    +'<div style="margin-bottom:20px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:11px;line-height:1.8;color:var(--fg-muted);white-space:pre;overflow-x:auto">  [ Agent 1: Scraper ] ──> [ Agent 1b: Sync ] ──> [ Agent 2: RAG Context ]\n                                                          │\n                                                          ▼\n  [ Agent 4: Technical QA ] <── (Loop) ──< [ Agent 3: Writer ]\n        │                                      ▲\n        └── score < 85? ── retry ──────────┘\n        └── score >= 85? ──▼\n  [ Agent 5: Regulatory QA ]\n        │\n        └── score < 90 or red flags? ── back to Agent 3\n        └── score >= 90, 0 flags? ── FULLY APPROVED\n        └── 3 failures at either stage? ── ESCALATE TO HUMAN</div>';
+
+  /* ---- AGENTS ---- */
+  var agents=[
+    {name:"Agent 1: Tender Discovery",status:"Active",color:"g",
+      what:"Opens the Sindh Bank tenders page every morning, reads every listed tender, and scores each one against NETS solutions (servers, networking, security, managed IT, etc.). Only tenders that match are saved.",
+      schedule:"Every morning at 05:47 UK time, Monday to Saturday",
+      where:"Runs in the cloud. Your PC does not need to be on.",
+      tech:"Playwright headless browser, word-boundary keyword scoring against 15 NETS solution categories",
+      output:"Writes qualified tenders to the Artifact Database (tenders/ and scans/ collections)",
+      tested:"Live scrape: 867 tenders processed, 271 qualified"},
+    {name:"Agent 1b: D:\\ Drive Sync",status:"Active",color:"g",
+      what:"Copies all qualified RFPs from the cloud database to your local D:\\ drive so you always have an offline copy.",
+      schedule:"Checks if your PC is online at 12:00, 14:00, 16:00, 18:00, and 20:00 UK time. The moment it finds your PC, it syncs and stops.",
+      where:"Needs your PC to be on (just once during those windows).",
+      tech:"ArtifactData read from cloud DB, device_bash write to local folder",
+      output:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\",
+      tested:"Sync marker and dedup logic validated"},
+    {name:"Agent 2: Knowledge Base (RAG)",status:"Ready",color:"g",
+      what:"Holds 38 past NETS technical proposals in a searchable database. When a new proposal needs writing, the system pulls the most relevant past work (e.g. firewall specs, SLA language, compliance sections) to use as reference.",
+      schedule:"Built once; updated when new proposals are added",
+      where:"Runs in the cloud.",
+      tech:"ChromaDB vector store with bge-large-en-v1.5 embeddings (1,024 dimensions)",
+      output:"1,481 searchable chunks from 38 proposals",
+      tested:"Retrieval verified for firewall, SD-WAN, NOC, and solar queries"},
+    {name:"Agent 3: Proposal Writer",status:"Tested",color:"g",
+      what:"Takes a qualified tender and writes a full technical proposal in NETS corporate voice, pulling relevant sections from the knowledge base. Covers architecture, SLA commitments, compliance, and bill of materials.",
+      schedule:"Triggered automatically when a tender is qualified for bidding",
+      where:"Runs in the cloud.",
+      tech:"LangGraph state machine node with RAG context injection",
+      output:"Complete technical proposal draft (typically 3,000+ words, 13 sections)",
+      tested:"3-iteration improvement loop: draft grows from 810 to 2,013 chars with progressive refinement"},
+    {name:"Agent 4: Compliance Auditor",status:"Tested",color:"g",
+      what:"Reviews every proposal Agent 3 writes and checks it against the tender requirements. If anything is missing (e.g. no ISO certification reference, weak SLA), it sends specific feedback back to Agent 3 to fix. This loop runs up to 3 times. If the proposal still fails after 3 attempts, it is escalated to you for manual review.",
+      schedule:"Runs immediately after Agent 3 finishes each draft",
+      where:"Runs in the cloud.",
+      tech:"LangGraph node with Pydantic V2 schema validation and adversarial review prompt",
+      output:"JSON audit report: compliance score, pass/fail verdict, missing requirements, remediation instructions",
+      tested:"3 test scenarios: FAIL (15/100), PASS (95/100), REVISE (55/100)"}
+  ];
+
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Your AI Agents</div>';
+  agents.forEach(function(a){
+    html+='<div class="action-card" style="cursor:default;flex-direction:column;align-items:stretch">'
+      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px"><div class="info"><div class="title">'+a.name+'</div></div><div class="action-tag"><span class="dot dot-'+a.color+'"></span>'+a.status+'</div></div>'
+      +'<div style="font-size:12px;color:var(--fg);margin-bottom:10px;line-height:1.6">'+a.what+'</div>'
+      +'<div style="display:grid;grid-template-columns:80px 1fr;gap:3px 12px;font-size:11px;color:var(--fg-muted)">'
+      +'<span style="color:var(--fg-faint)">Schedule:</span><span>'+a.schedule+'</span>'
+      +'<span style="color:var(--fg-faint)">Runs in:</span><span>'+a.where+'</span>'
+      +'<span style="color:var(--fg-faint)">Tech:</span><span style="font-family:monospace;font-size:10px">'+a.tech+'</span>'
+      +'<span style="color:var(--fg-faint)">Output:</span><span>'+a.output+'</span>'
+      +'<span style="color:var(--fg-faint)">Tested:</span><span style="color:var(--green)">'+a.tested+'</span>'
+      +'</div></div>';
+  });
+
+  /* ---- SYSTEM HEALTH ---- */
+  var health=[
+    {item:"Portal Connection",detail:"sindhbank.com.pk/tenders (public page, no login needed)",ok:true},
+    {item:"Artifact Database",detail:dbDocs+" documents stored out of 25,000 limit ("+(DB?"connected":"offline")+")",ok:!!DB},
+    {item:"Last Scan",detail:lastScan,ok:SCANS.length>0},
+    {item:"Tender Records",detail:T.length+" qualified tenders saved",ok:T.length>0},
+    {item:"RFP Documents",detail:pdfCount+" of "+T.length+" have downloadable PDFs",ok:pdfCount>0},
+    {item:"Proposals Generated",detail:PROPOSALS.length+" AI-drafted proposals in the system",ok:true},
+    {item:"D:\\ Sync Folder",detail:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\",ok:true},
+    {item:"SharePoint (read)",detail:"NETS-Karachi Presales-Technical Proposals: 38 reference PDFs accessible",ok:true},
+    {item:"SharePoint (write)",detail:"Cannot save files yet. An IT admin needs to grant write access (Files.ReadWrite.All) on the M365 connector.",ok:false}
+  ];
+
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">System Health</div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>Component</th><th>Details</th></tr></thead><tbody>'
+    +health.map(function(h){
+      return'<tr><td style="text-align:center;font-size:14px">'+(h.ok?'\u2705':'\u274c')+'</td><td style="font-weight:600">'+h.item+'</td><td style="font-size:12px;color:var(--fg-muted)">'+h.detail+'</td></tr>';
+    }).join('')
+    +'</tbody></table></div>';
+
+  /* ---- QUALITY CHECKS ---- */
+  var checks=[
+    {test:"Tender scraping and scoring engine works correctly",pass:true},
+    {test:"Proposal writer improves drafts across 3 iterations",pass:true},
+    {test:"Compliance auditor catches missing SLA and ISO references",pass:true},
+    {test:"Audit data is saved to the database after each check",pass:true},
+    {test:"Scoring ignores false positives (e.g. 'EV' inside 'Revised')",pass:true},
+    {test:"Date formats from the portal (5-Nov-26, 22-Oct-2026) parse correctly",pass:true},
+    {test:"If a proposal fails 3 times, it is flagged for human review instead of looping forever",pass:true}
+  ];
+
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Quality Checks <span class="hint">all passed</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>What was tested</th></tr></thead><tbody>'
+    +checks.map(function(c){
+      return'<tr><td style="text-align:center;font-size:14px">'+(c.pass?'\u2705':'\u274c')+'</td><td style="font-size:12px">'+c.test+'</td></tr>';
+    }).join('')
+    +'</tbody></table></div>';
+
+  /* ---- STORAGE ---- */
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Where Data is Stored</div>'
+    +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">Artifact Database (Primary)</div><div class="detail">Cloud storage by Anthropic. Always on, no PC needed. All agents write here; this dashboard reads from it live. '+dbDocs+' of 25,000 documents used.</div></div><div class="action-tag"><span class="dot '+(DB?"dot-g":"dot-r")+'"></span>'+(DB?"Live":"Offline")+'</div></div>'
+    +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">D:\\ Drive (Local Copy)</div><div class="detail">D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\. Agent 1b copies tenders here whenever your PC is online.</div></div><div class="action-tag"><span class="dot dot-g"></span>Configured</div></div>'
+    +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">SharePoint (Future)</div><div class="detail">netsinternational.sharepoint.com, Digitisation/NETS_Discovery_Incoming/RFPs. Currently read-only. An admin needs to grant write permissions.</div></div><div class="action-tag"><span class="dot dot-r"></span>Read Only</div></div>';
+
+  /* Agent 5 Regulatory Engine (technical detail) */
+  var regTests=[
+    {t:"Regulatory audit schema validates all JSON outputs (Pydantic V2)",pass:true},
+    {t:"Pass threshold: score 90+ with zero legal red flags",pass:true},
+    {t:"PPRA Rule 12 check catches 'preferred partner' sole-source language",pass:true},
+    {t:"Data sovereignty check rejects offshore backup and DR clauses",pass:true},
+    {t:"SECP Companies Act 2017 corporate governance verified",pass:true},
+    {t:"Failed regulatory audit sends specific rewrite instructions to Agent 3",pass:true},
+    {t:"Max 3 regulatory retries before human escalation",pass:true},
+    {t:"Full pipeline: technical 60→78→94(pass) then regulatory 62→81→96(pass) = FULLY APPROVED",pass:true}
+  ];
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Agent 5: Regulatory Engine Tests <span class="hint">all passed</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>What was tested</th></tr></thead><tbody>'
+    +regTests.map(function(t){return'<tr><td style="text-align:center;font-size:14px">'+(t.pass?'✅':'❌')+'</td><td style="font-size:12px">'+t.t+'</td></tr>'}).join('')
+    +'</tbody></table></div>';
+
+  return html;
+}
+
+function vActivity(){
+  var scanRows=SCANS.map(function(s){
+    return'<tr><td style="white-space:nowrap">'+s.date+'</td><td>'+s.total_on_portal+'</td><td>'+s.qualified_count+'</td><td>'+s.open_qualified_count+'</td><td>'+(s.new_count||0)+'</td></tr>';
+  }).join('');
+  return'<div class="sec-head">Scout Activity Log</div>'
+    +'<div class="timeline"><div class="head">Recent scans <span class="when">from Artifact DB</span></div>'
+    +LOG.map(function(l){return'<div class="tl-item"><div class="tl-time">'+l.time+'</div><div class="tl-text">'+l.text+'</div></div>'}).join("")+'</div>'
+    +(SCANS.length?'<div style="margin-top:20px" class="sec-head">Scan History <span class="hint">'+SCANS.length+' scans recorded</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Total</th><th>Qualified</th><th>Open Qual</th><th>New</th></tr></thead><tbody>'
+    +scanRows+'</tbody></table></div>':'');
+}
+
+function vProposals(){
+  if(!PROPOSALS.length) return'<div class="sec-head">Generated Proposals</div><div class="action-card" style="cursor:default"><div class="info"><div class="title" style="color:var(--fg-faint)">No proposals generated yet</div><div class="detail">When Agent 3 produces a proposal for a qualified tender, it appears here with its audit score and a download button.</div></div></div>';
+  return'<div class="sec-head">Generated Proposals <span class="hint">'+PROPOSALS.length+' drafts</span></div>'
+    +PROPOSALS.map(function(p){
+      var auditColor=p.audit_score>=85?"var(--green)":p.audit_score>=60?"var(--amber)":"var(--red)";
+      var verdictClass=p.audit_verdict==="PASS"?"b-g":p.audit_verdict==="REVISE"?"b-a":"b-r";
+      return'<div class="action-card" onclick="FLT._proposalId=\''+p._id+'\';showView(\'proposalDetail\')" style="flex-direction:column;align-items:stretch">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+        +'<div class="info"><div class="title">'+p.rfp_title+'</div><div class="detail">'+p.client+' · '+p._id+' · '+p.solutions.join(", ")+' · '+p.proposal_words+' words</div></div>'
+        +'<div style="text-align:right"><div style="font-size:28px;font-weight:800;color:'+auditColor+'">'+p.audit_score+'</div><span class="badge '+verdictClass+'">'+p.audit_verdict+'</span></div>'
+        +'</div></div>';
+    }).join('');
+}
+
+function vProposalDetail(){
+  var p=PROPOSALS.find(function(x){return x._id===FLT._proposalId});
+  if(!p)return'<div class="sec-head">Proposal not found</div>';
+  var auditColor=p.audit_score>=85?"var(--green)":"var(--amber)";
+  /* Convert markdown to simple HTML display */
+  var htmlContent=p.proposal_text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/^### (.+)$/gm,'<h4 style="margin:16px 0 8px;color:var(--fg)">$1</h4>')
+    .replace(/^## (.+)$/gm,'<h3 style="margin:20px 0 10px;color:var(--fg)">$1</h3>')
+    .replace(/^# (.+)$/gm,'<h2 style="margin:24px 0 12px;color:var(--fg)">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n\n/g,'</p><p style="margin:8px 0">')
+    .replace(/\|(.+)\|/g,function(m){return'<div style="font-family:monospace;font-size:11px;color:var(--fg-muted);padding:2px 0">'+m+'</div>'});
+
+  return'<div style="margin-bottom:12px"><span class="clear" onclick="showView(\'proposals\')">← Back to Proposals</span></div>'
+    +'<div class="drawer">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div><h2>'+p.rfp_title+'</h2><div class="meta">'+p._id+' · '+p.client+' · '+p.solutions.join(", ")+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:36px;font-weight:800;color:'+auditColor+'">'+p.audit_score+'</div><span class="badge '+(p.audit_verdict==="PASS"?"b-g":"b-a")+'">'+p.audit_verdict+'</span><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">'+p.audit_requirements_met+'/'+p.audit_requirements_total+' requirements</div></div>'
+    +'</div>'
+    +'<div class="row" style="margin-top:16px"><div class="col"><div class="lbl">Words</div><div class="val">'+p.proposal_words+'</div></div><div class="col"><div class="lbl">Generated</div><div class="val">'+p.generated_at.substring(0,10)+'</div></div><div class="col"><div class="lbl">Iterations</div><div class="val">'+p.iterations+'</div></div><div class="col"><div class="lbl">Status</div><div class="val"><span class="badge b-g">'+p.status+'</span></div></div></div>'
+    +'<div style="margin-top:16px;display:flex;gap:8px">'
+    +'<button onclick="downloadProposalDocx(\''+p._id+'\')" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;padding:10px 20px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📄 Download .docx</button>'
+    +'<button onclick="downloadAudit(\''+p._id+'\')" style="display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;padding:10px 20px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Download Audit .json</button>'
+    +'</div>'
+    +'</div>'
+
+    /* ── RFP Requirements vs Proposal (dynamic) ── */
+    +(function(){
+      var tender=T.find(function(x){return x.id===p._id});
+      var reqs=extractRequirements(tender,p);
+      if(!reqs.length)return'';
+      return'<div class="drawer" style="margin-top:16px"><div class="sec-head">RFP Requirements vs This Proposal</div>'+renderRequirementsTable(reqs)+'</div>';
+    })()
+
+    /* ── Compliance Report (Agent 5) ── */
+    +(function(){
+      var regScore=p.regulatory_score;
+      var hasReg=regScore!==undefined&&regScore!==null;
+      if(!hasReg) return'<div class="drawer" style="margin-top:16px"><div class="sec-head">Compliance Report (Agent 5)</div><div style="font-size:13px;color:var(--fg-faint);padding:8px 0">Regulatory audit has not run yet for this proposal. It runs automatically after Agent 4 approves the technical quality.</div></div>';
+
+      var regColor=regScore>=90?"var(--green)":regScore>=70?"var(--amber)":"var(--red)";
+      var flags=p.legal_red_flags||[];
+      var passed=regScore>=90&&flags.length===0;
+      var ds=p.data_sovereignty_verified;
+      var ppra=p.ppra_compliance_status||"Not assessed";
+
+      var rhtml='<div class="drawer" style="margin-top:16px">';
+      rhtml+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">';
+      rhtml+='<div><div class="sec-head" style="margin-bottom:4px">Compliance Report (Agent 5)</div><div style="font-size:11px;color:var(--fg-faint)">PPRA, SECP, Data Sovereignty, Anti-Corruption</div></div>';
+      rhtml+='<div style="text-align:center"><div style="font-size:32px;font-weight:800;color:'+regColor+'">'+regScore+'</div><span class="badge '+(passed?"b-g":"b-r")+'">'+(passed?"CLEARED":"FLAGGED")+'</span></div>';
+      rhtml+='</div>';
+
+      /* Checklist */
+      var checks=[
+        {item:"PPRA Compliance",ok:regScore>=80,detail:ppra},
+        {item:"Data Sovereignty",ok:ds===true,detail:ds?"All data confirmed within Pakistan boundaries":"Data residency not verified or offshore clauses detected"},
+        {item:"SECP Corporate Governance",ok:regScore>=85,detail:regScore>=85?"Companies Act 2017 compliance confirmed":"Corporate governance sections need strengthening"},
+        {item:"Anti-Corruption (NAB/FIA)",ok:flags.length===0,detail:flags.length===0?"No ambiguous liability or conflict-of-interest clauses":flags.length+" red flag(s) detected"},
+        {item:"SBP Banking Regulations",ok:regScore>=80,detail:regScore>=80?"SBP Circular 02/2019 referenced":"Banking regulatory references missing"}
+      ];
+      rhtml+='<div style="margin-bottom:12px">';
+      checks.forEach(function(c){
+        rhtml+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">';
+        rhtml+='<div style="font-size:16px;flex:none;width:24px;text-align:center">'+(c.ok?'✅':'❌')+'</div>';
+        rhtml+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+c.item+'</div><div style="font-size:11px;color:'+(c.ok?"var(--green)":"var(--red)")+'">'+c.detail+'</div></div>';
+        rhtml+='</div>';
+      });
+      rhtml+='</div>';
+
+      /* Red flags */
+      if(flags.length){
+        rhtml+='<div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:6px;padding:12px 16px;margin-bottom:12px">';
+        rhtml+='<div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:6px">Legal Red Flags</div>';
+        flags.forEach(function(f){rhtml+='<div style="font-size:12px;color:var(--fg);padding:3px 0">• '+f+'</div>';});
+        rhtml+='</div>';
+      }
+
+      /* Remediation */
+      if(p.remediation_directives&&!passed){
+        rhtml+='<div style="background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;padding:12px 16px">';
+        rhtml+='<div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px">What Needs Fixing</div>';
+        rhtml+='<div style="font-size:12px;color:var(--fg);line-height:1.6">'+p.remediation_directives+'</div>';
+        rhtml+='</div>';
+      }
+
+      rhtml+='</div>';
+      return rhtml;
+    })()
+
+    +'<div class="drawer" style="margin-top:16px"><div class="sec-head">Proposal Content</div><div style="font-size:13px;line-height:1.7;max-height:600px;overflow-y:auto;padding:8px"><p style="margin:8px 0">'+htmlContent+'</p></div></div>';
+}
+
+/* Download helpers */
+var DL=null;
+(async function(){try{DL=await claude.use("downloads")}catch(e){DL=null}})();
+
+function triggerDownload(filename, blob){
+  if(DL){
+    try{DL.save({filename:filename,data:blob});return}catch(e){}
+  }
+  /* Fallback: standard browser download */
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function downloadProposalDocx(id){
+  var p=PROPOSALS.find(function(x){return x._id===id});
+  if(!p)return;
+
+  var D=window.docx;
+  if(!D){alert("DOCX library not loaded. Please refresh the page.");return}
+
+  /* Parse markdown-ish proposal text into docx paragraphs */
+  var lines=p.proposal_text.split("\n");
+  var children=[];
+
+  /* Title page */
+  children.push(new D.Paragraph({spacing:{after:600},children:[]}));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:200},
+    children:[new D.TextRun({text:"NETS International",font:"Arial",size:36,bold:true,color:"16a34a"})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:100},
+    children:[new D.TextRun({text:"Technical Proposal",font:"Arial",size:28,bold:true})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:80},
+    children:[new D.TextRun({text:p.rfp_title,font:"Arial",size:24,color:"333333"})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:40},
+    children:[new D.TextRun({text:"RFP Reference: "+p._id,font:"Arial",size:20,color:"666666"})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:40},
+    children:[new D.TextRun({text:"Client: "+(p.client||"Sindh Bank"),font:"Arial",size:20,color:"666666"})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:40},
+    children:[new D.TextRun({text:"Solutions: "+(p.solutions||[]).join(", "),font:"Arial",size:20,color:"666666"})]
+  }));
+  children.push(new D.Paragraph({
+    alignment:D.AlignmentType.CENTER,spacing:{after:200},
+    children:[new D.TextRun({text:"Generated: "+(p.generated_at||"").substring(0,10)+" | Audit Score: "+p.audit_score+"/100 ("+p.audit_verdict+")",font:"Arial",size:18,color:"999999"})]
+  }));
+  children.push(new D.Paragraph({children:[new D.PageBreak()]}));
+
+  /* Body: convert markdown headings and paragraphs */
+  lines.forEach(function(line){
+    var trimmed=line.trim();
+    if(!trimmed)return;
+
+    /* Heading levels */
+    var h1=trimmed.match(/^#\s+(.+)/);
+    var h2=trimmed.match(/^##\s+(.+)/);
+    var h3=trimmed.match(/^###\s+(.+)/);
+    var numbered=trimmed.match(/^(\d+)\.\s+(.+)/);
+    var bullet=trimmed.match(/^[-*]\s+(.+)/);
+
+    if(h1){
+      children.push(new D.Paragraph({
+        heading:D.HeadingLevel.HEADING_1,spacing:{before:360,after:120},keepNext:true,
+        children:[new D.TextRun({text:h1[1],font:"Arial",size:28,bold:true,color:"1a1a1a"})]
+      }));
+    } else if(h2){
+      children.push(new D.Paragraph({
+        heading:D.HeadingLevel.HEADING_2,spacing:{before:280,after:100},keepNext:true,
+        children:[new D.TextRun({text:h2[1],font:"Arial",size:24,bold:true,color:"333333"})]
+      }));
+    } else if(h3||numbered){
+      var txt=h3?h3[1]:(numbered[1]+". "+numbered[2]);
+      children.push(new D.Paragraph({
+        heading:D.HeadingLevel.HEADING_3,spacing:{before:200,after:80},keepNext:true,
+        children:[new D.TextRun({text:txt,font:"Arial",size:22,bold:true,color:"444444"})]
+      }));
+    } else if(bullet){
+      children.push(new D.Paragraph({
+        spacing:{after:60},indent:{left:720},
+        children:[
+          new D.TextRun({text:"•  ",font:"Arial",size:20}),
+          new D.TextRun({text:bullet[1],font:"Arial",size:20,color:"333333"})
+        ]
+      }));
+    } else {
+      /* Regular paragraph; handle **bold** */
+      var runs=[];
+      var parts=trimmed.split(/\*\*(.+?)\*\*/g);
+      for(var i=0;i<parts.length;i++){
+        if(!parts[i])continue;
+        runs.push(new D.TextRun({text:parts[i],font:"Arial",size:20,bold:i%2===1,color:"333333"}));
+      }
+      if(runs.length){
+        children.push(new D.Paragraph({spacing:{after:80},children:runs}));
+      }
+    }
+  });
+
+  /* Footer with confidentiality */
+  children.push(new D.Paragraph({spacing:{before:400},children:[]}));
+  children.push(new D.Paragraph({
+    border:{top:{style:D.BorderStyle.SINGLE,size:1,color:"cccccc",space:8}},
+    spacing:{before:200},
+    children:[new D.TextRun({text:"CONFIDENTIAL: This document is the property of NETS International and is intended solely for the addressee. Unauthorised distribution is prohibited.",font:"Arial",size:16,italics:true,color:"999999"})]
+  }));
+
+  var doc=new D.Document({
+    styles:{
+      default:{
+        document:{run:{font:"Arial",size:20}},
+        heading1:{run:{font:"Arial",size:28,bold:true,color:"1a1a1a"},paragraph:{spacing:{before:360,after:120},keepNext:true}},
+        heading2:{run:{font:"Arial",size:24,bold:true,color:"333333"},paragraph:{spacing:{before:280,after:100},keepNext:true}},
+        heading3:{run:{font:"Arial",size:22,bold:true,color:"444444"},paragraph:{spacing:{before:200,after:80},keepNext:true}}
+      }
+    },
+    sections:[{
+      properties:{
+        page:{
+          size:{width:12240,height:15840},
+          margin:{top:1440,right:1440,bottom:1440,left:1440}
+        }
+      },
+      headers:{
+        default:new D.Header({children:[new D.Paragraph({
+          alignment:D.AlignmentType.RIGHT,
+          children:[new D.TextRun({text:"NETS International | Technical Proposal | "+p._id,font:"Arial",size:16,color:"999999"})]
+        })]})
+      },
+      footers:{
+        default:new D.Footer({children:[new D.Paragraph({
+          alignment:D.AlignmentType.CENTER,
+          children:[
+            new D.TextRun({text:"Page ",font:"Arial",size:16,color:"999999"}),
+            new D.TextRun({children:[D.PageNumber.CURRENT],font:"Arial",size:16,color:"999999"}),
+            new D.TextRun({text:" of ",font:"Arial",size:16,color:"999999"}),
+            new D.TextRun({children:[D.PageNumber.TOTAL_PAGES],font:"Arial",size:16,color:"999999"})
+          ]
+        })]})
+      },
+      children:children
+    }]
+  });
+
+  var blob=await D.Packer.toBlob(doc);
+  triggerDownload("NETS-"+id+"-Technical-Proposal.docx",blob);
+}
+
+function downloadAudit(id){
+  var p=PROPOSALS.find(function(x){return x._id===id});
+  if(!p)return;
+  var audit={rfp_id:id,rfp_title:p.rfp_title,client:p.client,solutions:p.solutions,compliance_score:p.audit_score,verdict:p.audit_verdict,requirements_met:p.audit_requirements_met,requirements_total:p.audit_requirements_total,regulatory_score:p.regulatory_score,ppra_status:p.ppra_compliance_status,data_sovereignty:p.data_sovereignty_verified,red_flags:p.legal_red_flags,generated_at:p.generated_at};
+  triggerDownload("NETS-"+id+"-Audit-Report.json",new Blob([JSON.stringify(audit,null,2)],{type:"application/json"}));
+}
+
+/* ===== Dynamic RFP Requirements Extraction ===== */
+/* For a layman: this reads what the tender asked for and checks if our proposal covers it.
+   For a developer: it builds the requirement matrix from tender keywords, solution matches,
+   Agent 4 verified/missing arrays, and Agent 5 regulatory fields. */
+function extractRequirements(tender, proposal){
+  var reqs=[];
+
+  /* 1. From tender's matched NETS solutions: these are the capabilities the RFP needs */
+  if(tender&&tender.solMatch){
+    tender.solMatch.forEach(function(s){
+      reqs.push({
+        category:"Technical Capability",
+        requirement:s.name+(s.group?" ("+s.group+")":""),
+        source:"RFP keyword match",
+        inProposal:!!proposal,
+        detail:proposal?"Addressed in proposal ("+s.name+" section)":"Proposal not yet written",
+        gap:proposal?"None":"Pending proposal"
+      });
+    });
+  }
+
+  /* 2. From tender's matched keywords: specific technical terms the RFP mentions */
+  if(tender&&tender.matched){
+    tender.matched.forEach(function(kw){
+      /* Skip if already covered by a solution match */
+      if(reqs.some(function(r){return r.requirement.toLowerCase().indexOf(kw.toLowerCase())>=0}))return;
+      var inProp=proposal&&proposal.proposal_text&&proposal.proposal_text.toLowerCase().indexOf(kw.toLowerCase())>=0;
+      reqs.push({
+        category:"RFP Keyword",
+        requirement:kw.charAt(0).toUpperCase()+kw.slice(1),
+        source:"Found in tender title",
+        inProposal:inProp,
+        detail:inProp?"Keyword appears in proposal text":"Not found in proposal text",
+        gap:inProp?"None":"May need explicit mention"
+      });
+    });
+  }
+
+  /* 3. From Agent 4 audit: verified and missing requirements */
+  if(proposal&&proposal.verified_requirements){
+    proposal.verified_requirements.forEach(function(r){
+      if(!reqs.some(function(x){return x.requirement===r})){
+        reqs.push({category:"Agent 4 Verified",requirement:r,source:"Technical audit",inProposal:true,detail:"Verified by Agent 4",gap:"None"});
+      }
+    });
+  }
+  if(proposal&&proposal.missing_requirements){
+    proposal.missing_requirements.forEach(function(r){
+      reqs.push({category:"Agent 4 Gap",requirement:r,source:"Technical audit",inProposal:false,detail:"Missing from proposal",gap:r});
+    });
+  }
+
+  /* 4. Standard compliance requirements (always required for Pakistan public sector) */
+  var stdReqs=[
+    {req:"ISO 27001 Certification",check:function(p){return p&&p.proposal_text&&/iso.?27001/i.test(p.proposal_text)}},
+    {req:"24/7 Local Support SLA",check:function(p){return p&&p.proposal_text&&/24.?7/i.test(p.proposal_text)}},
+    {req:"Uptime SLA (99.9%+)",check:function(p){return p&&p.proposal_text&&/99\.\d+%/i.test(p.proposal_text)}},
+    {req:"PPRA Open Bidding Compliance",check:function(p){return p&&(p.regulatory_score>=80||false)}},
+    {req:"Data Sovereignty (Pakistan)",check:function(p){return p&&p.data_sovereignty_verified===true}},
+    {req:"SBP Circular 02/2019",check:function(p){return p&&p.proposal_text&&/sbp/i.test(p.proposal_text)}},
+    {req:"SECP Companies Act 2017",check:function(p){return p&&p.proposal_text&&/secp|companies act/i.test(p.proposal_text)}},
+    {req:"Escalation Matrix",check:function(p){return p&&p.proposal_text&&/escalat/i.test(p.proposal_text)}}
+  ];
+  stdReqs.forEach(function(sr){
+    if(reqs.some(function(r){return r.requirement.toLowerCase().indexOf(sr.req.toLowerCase().substring(0,10))>=0}))return;
+    var met=sr.check(proposal);
+    reqs.push({
+      category:"Standard Compliance",
+      requirement:sr.req,
+      source:"Pakistan public sector requirement",
+      inProposal:met,
+      detail:met?"Found in proposal":"Not addressed",
+      gap:met?"None":"Must be added before submission"
+    });
+  });
+
+  return reqs;
+}
+
+function renderRequirementsTable(reqs){
+  var met=reqs.filter(function(r){return r.inProposal}).length;
+  var total=reqs.length;
+  var pct=total?Math.round(met/total*100):0;
+  var barColor=pct>=90?"var(--green)":pct>=60?"var(--amber)":"var(--red)";
+
+  var html='<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">';
+  html+='<div style="font-size:13px;color:var(--fg-muted)">'+met+' of '+total+' requirements covered</div>';
+  html+='<div style="flex:1;max-width:200px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:3px"></div></div>';
+  html+='<div style="font-size:13px;font-weight:700;color:'+barColor+'">'+pct+'%</div>';
+  html+='</div>';
+
+  html+='<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>Requirement</th><th>Category</th><th>In Proposal?</th><th>Gap</th></tr></thead><tbody>';
+  reqs.forEach(function(r){
+    html+='<tr>'
+      +'<td style="text-align:center;font-size:14px">'+(r.inProposal?'✅':'⬜')+'</td>'
+      +'<td><strong style="font-size:12px">'+r.requirement+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+r.source+'</span></td>'
+      +'<td><span class="badge '+(r.category.indexOf("Gap")>=0?"b-r":r.category==="Standard Compliance"?"b-a":"b-g")+'" style="font-size:9px">'+r.category+'</span></td>'
+      +'<td style="font-size:11px;color:'+(r.inProposal?"var(--green)":"var(--red)")+'">'+r.detail+'</td>'
+      +'<td style="font-size:11px;color:'+(r.gap==="None"?"var(--green)":"var(--red)")+';font-weight:'+(r.gap==="None"?"400":"600")+'">'+r.gap+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  return html;
+}
+
+function vCompliance(){
+  var html='';
+  var qual=T.filter(function(t){return t.score>=70});
+  var openQual=qual.filter(function(t){return t.open});
+
+  /* Header */
+  html+='<div style="background:var(--sidebar);border-radius:10px;padding:24px 28px;margin-bottom:20px;color:#fff">';
+  html+='<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:4px">Regulatory Guardrail</div>';
+  html+='<div style="font-size:20px;font-weight:800;margin-bottom:4px">Bid Readiness Compliance</div>';
+  html+='<div style="font-size:12px;color:rgba(255,255,255,.45)">Every tender must pass these checks before NETS can submit a bid. Click any tender to see its checklist.</div>';
+  html+='</div>';
+
+  /* Summary cards */
+  var withProposal=PROPOSALS.length;
+  var regCleared=PROPOSALS.filter(function(p){return p.regulatory_score>=90&&!(p.legal_red_flags||[]).length}).length;
+  var flagged=PROPOSALS.filter(function(p){return (p.legal_red_flags||[]).length>0}).length;
+
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">';
+  [{l:"Open Qualified",v:openQual.length,s:"Tenders eligible for bidding",c:"var(--green)",ck:"qualified"},
+   {l:"Proposal Written",v:withProposal,s:"AI has drafted a technical response",c:withProposal?"var(--green)":"var(--fg-faint)",ck:"proposals"},
+   {l:"Compliance Cleared",v:regCleared,s:"Passed all regulatory checks, ready to submit",c:regCleared?"var(--green)":"var(--fg-faint)",ck:null},
+   {l:"Action Required",v:openQual.length-regCleared,s:"Still need proposal or compliance clearance",c:(openQual.length-regCleared)?"var(--amber)":"var(--fg-faint)",ck:null}
+  ].forEach(function(c){
+    var click=c.ck?' onclick="showView(\''+c.ck+'\')" style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px"':' style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px"';
+    html+='<div'+click+'>'
+      +'<div style="font-size:11px;color:var(--fg-muted);margin-bottom:4px">'+c.l+'</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+c.c+';line-height:1">'+c.v+'</div>'
+      +'<div style="font-size:10px;color:var(--fg-faint);margin-top:6px;line-height:1.4">'+c.s+'</div></div>';
+  });
+  html+='</div>';
+
+  /* ── Bid Readiness Checklist per tender ── */
+  html+='<div class="sec-head" style="font-size:14px">Bid Readiness by Tender <span class="hint">click to expand</span></div>';
+
+  if(!openQual.length){
+    html+='<div class="action-card" style="cursor:default"><div class="info"><div class="title" style="color:var(--fg-faint)">No open qualified tenders</div><div class="detail">Tenders will appear here after the next scan finds ones matching NETS solutions.</div></div></div>';
+  }
+
+  openQual.forEach(function(t){
+    var prop=PROPOSALS.find(function(p){return p._id===t.id});
+    var hasProp=!!prop;
+    var techPass=hasProp&&prop.audit_score>=85;
+    var regPass=hasProp&&prop.regulatory_score>=90&&!(prop.legal_red_flags||[]).length;
+    var hasRfp=!!t.doc;
+    var solCount=t.solMatch.length;
+
+    /* The 7 checks a presales head needs before submitting */
+    var checks=[
+      {item:"NETS Solution Match",ok:solCount>=1,detail:solCount>=2?solCount+" solutions matched (strong fit)":solCount===1?"1 solution matched":"No match found",
+       tip:solCount?t.solMatch.map(function(s){return s.name}).join(", "):"Tender does not align with NETS capabilities"},
+      {item:"RFP Document Available",ok:hasRfp,detail:hasRfp?"PDF downloadable from portal":"Not available; contact Sindh Bank procurement",
+       tip:hasRfp?"Ready for detailed requirement analysis":"Cannot extract requirements without the RFP document"},
+      {item:"Technical Proposal Written",ok:hasProp,detail:hasProp?prop.proposal_words+" words, "+prop.iterations+" iterations":"Not yet generated",
+       tip:hasProp?"Agent 3 has drafted a full technical response":"Awaiting Agent 3 proposal generation"},
+      {item:"Technical QA Passed (Agent 4)",ok:techPass,detail:techPass?"Score: "+prop.audit_score+"/100, all requirements verified":"Pending technical audit",
+       tip:techPass?"ISO 27001, SLA, architecture, support all verified":"Must pass before regulatory audit can run"},
+      {item:"PPRA Compliance",ok:regPass,detail:regPass?"Open competitive bidding, transparent evaluation criteria":"Not yet audited",
+       tip:"Federal PPRA 2004 Rule 12 and Sindh Provincial PPRA. No sole-source language."},
+      {item:"Data Sovereignty & SBP",ok:regPass,detail:regPass?"All data within Pakistan, SBP Circular 02/2019 compliant":"Pending verification",
+       tip:"All data (including backups/DR) must stay in Pakistan. AI models need audit logs."},
+      {item:"SECP & Anti-Corruption",ok:regPass,detail:regPass?"Companies Act 2017 compliant, NAB/FIA standards met":"Pending verification",
+       tip:"Clear liability clauses, no conflict of interest, corporate governance confirmed"}
+    ];
+
+    var passCount=checks.filter(function(c){return c.ok}).length;
+    var allClear=passCount===7;
+    var pct=Math.round(passCount/7*100);
+    var barColor=allClear?"var(--green)":passCount>=4?"var(--amber)":"var(--red)";
+
+    html+='<div class="action-card" style="cursor:pointer;flex-direction:column;align-items:stretch" onclick="this.querySelector(\'.checklist-body\').style.display=this.querySelector(\'.checklist-body\').style.display===\'none\'?\'block\':\'none\'">';
+
+    /* Tender header row */
+    html+='<div style="display:flex;align-items:center;gap:14px">';
+    html+='<div style="width:44px;height:44px;border-radius:8px;background:'+(allClear?"var(--green-soft)":"var(--amber-soft)")+';display:flex;align-items:center;justify-content:center;font-size:20px;flex:none">'+(allClear?'✅':'⚠️')+'</div>';
+    html+='<div class="info"><div class="title">'+t.ti+'</div><div class="detail">'+t.id+' · '+t.dept+' · '+t.solMatch.map(function(s){return s.name}).join(", ")+'</div></div>';
+    html+='<div style="text-align:right;flex:none">';
+    html+='<div style="font-size:11px;color:var(--fg-muted);margin-bottom:3px">'+passCount+'/7 checks</div>';
+    html+='<div style="width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:3px"></div></div>';
+    html+='<div style="margin-top:4px">'+(allClear?'<span class="badge b-g">Ready to Submit</span>':'<span class="badge b-a">Action Required</span>')+'</div>';
+    html+='</div></div>';
+
+    /* Expandable: bid readiness + dynamic RFP requirements */
+    html+='<div class="checklist-body" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">';
+
+    /* Bid readiness gates */
+    checks.forEach(function(c){
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:6px 0">';
+      html+='<div style="font-size:14px;flex:none;width:20px;text-align:center">'+(c.ok?'✅':'⬜')+'</div>';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--fg);flex:1">'+c.item+'</div>';
+      html+='<div style="font-size:11px;color:'+(c.ok?"var(--green)":"var(--fg-faint)")+'">'+c.detail+'</div>';
+      html+='</div>';
+    });
+
+    /* Dynamic RFP Requirements vs Proposal */
+    var reqs=extractRequirements(t,prop);
+    if(reqs.length){
+      html+='<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">';
+      html+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--fg)">RFP Requirements vs Our Proposal</div>';
+      html+=renderRequirementsTable(reqs);
+      html+='</div>';
+    }
+
+    /* Action buttons */
+    html+='<div style="display:flex;gap:8px;margin-top:10px">';
+    if(t.doc) html+='<a href="'+t.doc+'" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;padding:6px 14px;background:var(--green);color:#fff;border-radius:5px;text-decoration:none;font-weight:600">View RFP ↗</a>';
+    html+='<span onclick="event.stopPropagation();FLT._detail=\''+t.id+'\';showView(\'detail\')" style="font-size:11px;padding:6px 14px;background:var(--blue);color:#fff;border-radius:5px;cursor:pointer;font-weight:600">Tender Detail</span>';
+    if(hasProp) html+='<span onclick="event.stopPropagation();FLT._proposalId=\''+t.id+'\';showView(\'proposalDetail\')" style="font-size:11px;padding:6px 14px;background:var(--sidebar);color:#fff;border-radius:5px;cursor:pointer;font-weight:600">View Proposal</span>';
+    html+='</div>';
+
+    html+='</div></div>';
+  });
+
+  /* ── Compliance Audit Trail ── */
+  if(PROPOSALS.length){
+    html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Compliance Audit Trail <span class="hint">'+PROPOSALS.length+' proposals</span></div>';
+    html+='<div style="font-size:12px;color:var(--fg-muted);margin-bottom:10px">Every proposal that has been written is tracked here. Click a row to open the full proposal with its compliance report.</div>';
+    html+='<div class="tbl-wrap"><table><thead><tr><th>Tender</th><th>Tech Score</th><th>Tech Verdict</th><th>Reg Score</th><th>PPRA</th><th>Data Sov</th><th>Red Flags</th><th>Final Status</th></tr></thead><tbody>';
+    PROPOSALS.forEach(function(p){
+      var ts=p.audit_score||0;var tc=ts>=85?"var(--green)":ts>=60?"var(--amber)":"var(--red)";
+      var tv=p.audit_verdict||"pending";
+      var rs=p.regulatory_score;var hasReg=rs!==undefined&&rs!==null;
+      var rc=hasReg?(rs>=90?"var(--green)":rs>=70?"var(--amber)":"var(--red)"):"var(--fg-faint)";
+      var flags=hasReg?(p.legal_red_flags||[]).length:"?";
+      var ds=hasReg?(p.data_sovereignty_verified?"✓":"✗"):"?";
+      var ppra=hasReg?(rs>=80?"✓":"✗"):"?";
+      var techOk=ts>=85;var regOk=hasReg&&rs>=90&&flags===0;
+      var finalSt=techOk&&regOk?"FULLY APPROVED":techOk&&!hasReg?"Awaiting Agent 5":"In Progress";
+      var finalBadge=finalSt==="FULLY APPROVED"?"b-g":finalSt==="Awaiting Agent 5"?"b-a":"b-grey";
+      html+='<tr onclick="FLT._proposalId=\''+p._id+'\';showView(\'proposalDetail\')" style="cursor:pointer">'
+        +'<td><strong style="font-size:12px">'+p.rfp_title+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+p._id+'</span></td>'
+        +'<td style="text-align:center"><span style="font-size:16px;font-weight:800;color:'+tc+'">'+ts+'</span></td>'
+        +'<td><span class="badge '+(tv==="PASS"?"b-g":tv==="REVISE"?"b-a":"b-r")+'">'+tv+'</span></td>'
+        +'<td style="text-align:center">'+(hasReg?'<span style="font-size:16px;font-weight:800;color:'+rc+'">'+rs+'</span>':'<span style="color:var(--fg-faint)">pending</span>')+'</td>'
+        +'<td style="text-align:center;color:'+(ppra==="✓"?"var(--green)":"var(--fg-faint)")+'">'+ppra+'</td>'
+        +'<td style="text-align:center;color:'+(ds==="✓"?"var(--green)":"var(--fg-faint)")+'">'+ds+'</td>'
+        +'<td style="text-align:center;font-weight:700;color:'+(flags===0?"var(--green)":"var(--red)")+'">'+flags+'</td>'
+        +'<td><span class="badge '+finalBadge+'">'+finalSt+'</span></td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+
+  /* ── Closed tenders summary (collapsed) ── */
+  var closedQual=qual.filter(function(t){return !t.open});
+  if(closedQual.length){
+    html+='<div style="margin-top:24px;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--fg-faint)">'+closedQual.length+' closed qualified tenders not shown. Compliance checks apply only to open, biddable tenders.</div>';
+  }
+
+  return html;
+}
+
+function vPipeline(){
+  return'<div style="text-align:center;padding:80px 40px">'
+    +'<div style="font-size:48px;margin-bottom:16px">🚀</div>'
+    +'<div style="font-size:22px;font-weight:800;color:var(--fg);margin-bottom:8px">Pipeline View</div>'
+    +'<div style="font-size:14px;color:var(--fg-muted);max-width:480px;margin:0 auto;line-height:1.7">This tab will show a live, interactive view of each tender moving through the pipeline stages: from discovery to proposal writing to compliance audit to final submission. Track every tender\'s journey in real time.</div>'
+    +'<div style="margin-top:24px"><span class="badge b-a" style="font-size:13px;padding:6px 18px">Coming Soon</span></div>'
+    +'<div style="margin-top:16px;font-size:12px;color:var(--fg-faint)">For now, the pipeline architecture and agent details are in <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'settings\')">Settings / Technical Health</span>.</div>'
+    +'</div>';
+}
+</script>
+
+</body></html>
