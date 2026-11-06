@@ -92,7 +92,7 @@ tr{cursor:pointer}
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sb-logo" style="text-align:center">
-    <img src="/_blob/b9bb80a24e3a92df56d3fa73118f37e1" alt="NETS International" style="width:180px;margin-bottom:8px">
+    <img src="/assets/nets-logo.png" alt="NETS International" style="width:180px;margin-bottom:8px" onerror="this.parentElement.innerHTML='<span class=nets-word>NETS</span>'">
     <span class="tagline">Empowering The Future</span>
   </div>
   <div class="sb-hdr">
@@ -162,31 +162,22 @@ function parsePortalDate(s){
 
 function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMinutes()).padStart(2,"0");return h+":"+m}
 
-/* ===== INIT: connect to artifact db ===== */
-(async function init(){
-  var loadTimer=setTimeout(function(){
-    document.getElementById("loadMsg").textContent="Database not available. Showing empty state.";
-    _dbReady=false;
-    showEmptyState();
-  },10000);
+/* ===== INIT: fetch from backend API ===== */
+var API_BASE = window.location.origin;
 
-  DB=await claude.use("db");
-  if(!DB){
-    clearTimeout(loadTimer);
-    document.getElementById("loadMsg").textContent="Database not connected. Data will appear after the first agent scan.";
-    showEmptyState();
-    return;
-  }
+async function fetchData(){
+  document.getElementById("loadMsg").textContent="Loading data from server...";
+  try {
+    var r1=await fetch(API_BASE+"/api/tenders");
+    var r2=await fetch(API_BASE+"/api/scans");
+    var r3=await fetch(API_BASE+"/api/proposals");
+    var r4=await fetch(API_BASE+"/api/health");
+    var tenders=await r1.json();
+    var scans=await r2.json();
+    var proposals=await r3.json();
+    var health=await r4.json();
 
-  clearTimeout(loadTimer);
-  document.getElementById("dbStatusFooter").className="db-status db-live";
-  document.getElementById("dbStatusFooter").textContent="Live";
-
-  /* Subscribe to tenders collection: one snapshot, live updates */
-  _tenderUnsub=DB.collection("tenders").onSnapshot(function(snap){
-    T=snap.docs.filter(function(d){return d.exists}).map(function(d){
-      var r=d.data();
-      /* Rebuild solMatch from SOLUTIONS if stored as ids */
+    T=tenders.map(function(r){
       var solMatch=r.solMatch||[];
       if(solMatch.length&&typeof solMatch[0]==="string"){
         solMatch=solMatch.map(function(sid){return SOLUTIONS.find(function(s){return s.id===sid})||{id:sid,name:sid,group:""}});
@@ -194,43 +185,32 @@ function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMin
       var cl=parsePortalDate(r.cl);
       var days=cl?Math.ceil((cl-NOW)/864e5):null;
       var isOpen=cl?cl>=NOW:false;
-      return{
-        id:r.id||d.id, ti:r.ti||"", dept:r.dept||"", ad:r.ad||"", cl:r.cl||"",
-        doc:r.doc||"", score:r.score||0, verdict:r.verdict||"SKIP",
-        solMatch:solMatch, matched:r.matched||[],
-        open:isOpen, days:days
-      };
+      return{id:r.id,ti:r.ti||"",dept:r.dept||"",ad:r.ad||"",cl:r.cl||"",
+        doc:r.doc||"",score:r.score||0,verdict:r.verdict||"SKIP",
+        solMatch:solMatch,matched:r.matched||[],open:isOpen,days:days};
     });
     T.sort(function(a,b){return b.score-a.score});
-    onDataReady();
-  }, function(err){
-    console.error("Tender subscription error:", err.code, err.message);
-  });
 
-  /* Subscribe to scans collection for activity log */
-  _scanUnsub=DB.collection("scans").orderBy("date","desc").limit(30).onSnapshot(function(snap){
-    SCANS=snap.docs.filter(function(d){return d.exists}).map(function(d){return d.data()});
+    SCANS=scans;
     LOG=SCANS.map(function(s){
-      var ts=s.timestamp?s.timestamp.substring(11,16):"05:47";
-      return{time:ts,text:"Scan: "+s.total_on_portal+" total, "+s.qualified_count+" qualified, "+s.open_qualified_count+" open"};
+      return{time:s.date?s.date.substring(11,16):"05:47",
+        text:"Scan: "+s.total_on_portal+" total, "+s.qualified_count+" qualified, "+s.open_qualified_count+" open"};
     });
-    if(LOG.length===0){
-      LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
-    }
-    /* Subscribe to proposals */
-    DB.collection("proposals").onSnapshot(function(snap){
-      PROPOSALS=snap.docs.filter(function(d){return d.exists}).map(function(d){return Object.assign({_id:d.id},d.data())});
-      if(_dbReady)render();
-    },function(){});
-    /* Also read config */
-    DB.doc("config/settings").get().then(function(snap){
-      if(snap.exists)CONFIG=snap.data();
-    }).catch(function(){});
-    if(_dbReady)render();
-  }, function(err){
-    console.error("Scan subscription error:", err.code, err.message);
-  });
-})();
+    if(LOG.length===0) LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
+
+    PROPOSALS=proposals;
+    DB=health.database==="connected";
+    document.getElementById("dbStatusFooter").className="db-status "+(DB?"db-live":"db-off");
+    document.getElementById("dbStatusFooter").textContent=DB?"Live":"Offline";
+    onDataReady();
+  } catch(err){
+    console.error("Failed to load:",err);
+    document.getElementById("loadMsg").textContent="Could not reach server. Check backend is running.";
+    DB=false;showEmptyState();
+  }
+}
+setInterval(function(){fetchData().catch(function(){})},60000);
+fetchData();
 
 var _firstRender=true;
 function onDataReady(){
@@ -750,7 +730,7 @@ function vProposalDetail(){
 
 /* Download helpers */
 var DL=null;
-(async function(){try{DL=await claude.use("downloads")}catch(e){DL=null}})();
+DL=null; /* no Claude sandbox needed */
 
 function triggerDownload(filename, blob){
   if(DL){
