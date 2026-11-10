@@ -110,7 +110,14 @@ def parse_html_table(html, base_url, source_name):
                         m_tn = re.search(r'tender-details/([^/?]+)', href)
                         if m_tn:
                             tender_number = m_tn.group(1)
-                    tender_number = tender_number or tender_no_cell.get_text(strip=True)
+                    if not tender_number:
+                        # Get ID from the <strong> tag, not the full cell text
+                        strong = tender_no_cell.find("strong")
+                        tender_number = strong.get_text(strip=True) if strong else tender_no_cell.get_text(strip=True)
+                    # Clean trailing text: "TS0000016912EProcurement" -> "TS0000016912E"
+                    m_clean = re.match(r'(TS\d+E)', tender_number)
+                    if m_clean:
+                        tender_number = m_clean.group(1)
 
                 # Extract doc/invoice links from Actions column
                 doc_url_val = ""
