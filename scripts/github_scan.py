@@ -1,13 +1,16 @@
 """
 Lightweight scraper for GitHub Actions.
-Uses 4 fallback strategies to reach sindhbank.com.pk from cloud servers.
+Scrapes BOTH Sindh Bank and PPRA EPMS portals.
+Uses fallback strategies for cloud servers that get blocked.
 Writes directly to Supabase PostgreSQL. No Playwright needed.
 """
 import os
 import sys
 import re
 import json
+import time
 from datetime import datetime
+from urllib.parse import quote, urljoin
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 from scorer import score_tender
@@ -17,12 +20,160 @@ if not DATABASE_URL:
     print("ERROR: DATABASE_URL not set.")
     sys.exit(1)
 
-PORTAL_URL = "https://sindhbank.com.pk/tenders"
+SINDH_PORTAL_URL = "https://sindhbank.com.pk/tenders"
+PPRA_BASE = "https://epms.ppra.gov.pk"
+PPRA_ACTIVE_URL = f"{PPRA_BASE}/public/tenders/active-tenders"
 
 
-def scrape_tenders():
+def fetch_with_strategies(url, headers):
+    """Try multiple strategies to fetch a URL from cloud servers."""
     import requests
+
+    strategies = [
+        ("Direct", url),
+        ("allorigins", f"https://api.allorigins.win/raw?url={quote(url)}"),
+        ("corsproxy", f"https://corsproxy.io/?{quote(url)}"),
+        ("Google cache", f"https://webcache.googleusercontent.com/search?q=cache:{url}"),
+    ]
+
+    for name, fetch_url in strategies:
+        try:
+            print(f"  {name}: {fetch_url[:80]}...")
+            resp = requests.get(fetch_url, headers=headers, timeout=60)
+            if resp.status_code == 200 and len(resp.text) > 500:
+                print(f"    Success: {len(resp.text)} bytes")
+                return resp.text
+        except Exception as e:
+            print(f"    Failed: {e}")
+
+    return None
+
+
+def parse_html_table(html, base_url, source_name):
+    """Parse tender rows from an HTML page with tables."""
     from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "html.parser")
+    tenders = []
+
+    for table in soup.find_all("table"):
+        for row in table.find_all("tr"):
+            cells = row.find_all("td")
+            if len(cells) < 3:
+                continue
+            texts = [cell.get_text(strip=True) for cell in cells]
+
+            doc_url = None
+            detail_url = None
+            for link in row.find_all("a", href=True):
+                href = link["href"]
+                if not href.startswith("http"):
+                    href = urljoin(base_url, href)
+                if ".pdf" in href.lower() or "download" in href.lower() or "/pdf?" in href:
+                    doc_url = href
+                if "tender-details" in href or "tender_details" in href:
+                    detail_url = href
+
+            tender = {
+                "id": texts[0] if texts else "",
+                "title": texts[1] if len(texts) > 1 else texts[0],
+                "department": texts[2] if len(texts) > 2 else "",
+                "advertised": texts[3] if len(texts) > 3 else "",
+                "closing": texts[4] if len(texts) > 4 else "",
+                "doc_url": doc_url,
+                "source": source_name,
+            }
+            if tender["title"] and len(tender["title"]) > 3:
+                tenders.append(tender)
+
+    # PPRA specific: table has columns [checkbox, Sr, Tender No, Tender Details, Status, Advertised, Closing, Actions]
+    # The tender number and detail link live in column 2 (index 2)
+    if not tenders and "ppra" in base_url.lower():
+        for table in soup.find_all("table"):
+            for row in table.find_all("tr"):
+                cells = row.find_all("td")
+                if len(cells) < 6:
+                    continue
+                texts = [c.get_text(strip=True) for c in cells]
+
+                # Extract tender number and detail URL from column 2
+                tender_no_cell = cells[2] if len(cells) > 2 else None
+                detail_url = ""
+                tender_number = ""
+                if tender_no_cell:
+                    link = tender_no_cell.find("a", href=True)
+                    if link:
+                        href = link["href"]
+                        if not href.startswith("http"):
+                            href = urljoin(base_url, href)
+                        detail_url = href
+                        m_tn = re.search(r'tender-details/([^/?]+)', href)
+                        if m_tn:
+                            tender_number = m_tn.group(1)
+                    tender_number = tender_number or tender_no_cell.get_text(strip=True)
+
+                # Extract doc/invoice links from Actions column
+                doc_url_val = ""
+                actions_cell = cells[-1] if cells else None
+                if actions_cell:
+                    for link in actions_cell.find_all("a", href=True):
+                        href = link["href"]
+                        if not href.startswith("http"):
+                            href = urljoin(base_url, href)
+                        if "/pdf?" in href or ".pdf" in href.lower():
+                            doc_url_val = href
+                            break
+
+                # Column mapping: [checkbox, Sr, TenderNo, Details, Status, Advertised, Closing, Actions]
+                title = texts[3] if len(texts) > 3 else ""
+                status = texts[4] if len(texts) > 4 else ""
+                advertised = texts[5] if len(texts) > 5 else ""
+                closing = texts[6] if len(texts) > 6 else ""
+
+                # Clean closing date (may have time appended like "Dec 22, 202611:00 AM")
+                closing = re.sub(r'(\d{4})\d{1,2}:\d{2}\s*(AM|PM)', r'\1', closing)
+
+                if title and len(title) > 3:
+                    tenders.append({
+                        "id": tender_number or f"PPRA-{re.sub(r'[^A-Za-z0-9]+', '-', title)[:80]}",
+                        "title": title,
+                        "department": "",
+                        "advertised": advertised,
+                        "closing": closing,
+                        "doc_url": doc_url_val,
+                        "source": source_name,
+                        "detail_url": detail_url,
+                        "status": status,
+                    })
+
+    return tenders
+
+
+def scrape_sindh_bank():
+    """Scrape Sindh Bank tenders."""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+
+    print(f"\n{'='*50}")
+    print(f"SINDH BANK SCRAPER")
+    print(f"{'='*50}")
+
+    html = fetch_with_strategies(SINDH_PORTAL_URL, headers)
+    if not html:
+        print("Sindh Bank: all strategies failed.")
+        return []
+
+    tenders = parse_html_table(html, "https://sindhbank.com.pk", "Sindh Bank")
+    print(f"Sindh Bank: parsed {len(tenders)} tenders")
+    return tenders
+
+
+def scrape_ppra(max_pages=10):
+    """Scrape PPRA EPMS active tenders, paginated."""
+    import requests
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -30,102 +181,103 @@ def scrape_tenders():
         "Accept-Language": "en-US,en;q=0.5",
     }
 
-    html = None
+    print(f"\n{'='*50}")
+    print(f"PPRA EPMS SCRAPER")
+    print(f"{'='*50}")
 
-    # Strategy 1: direct request
-    try:
-        print(f"Strategy 1: Direct request to {PORTAL_URL}")
-        resp = requests.get(PORTAL_URL, headers=headers, timeout=60)
-        resp.raise_for_status()
-        html = resp.text
-        print(f"  Success: {len(html)} bytes")
-    except Exception as e:
-        print(f"  Failed: {e}")
+    all_tenders = []
 
-    # Strategy 2: allorigins.win free CORS proxy (no API key needed)
-    if not html:
-        try:
-            proxy_url = f"https://api.allorigins.win/raw?url={PORTAL_URL}"
-            print(f"Strategy 2: allorigins proxy")
-            resp = requests.get(proxy_url, timeout=60)
-            if resp.status_code == 200 and len(resp.text) > 500:
-                html = resp.text
-                print(f"  Success: {len(html)} bytes")
-        except Exception as e:
-            print(f"  Failed: {e}")
+    for page_num in range(1, max_pages + 1):
+        page_url = f"{PPRA_ACTIVE_URL}?page={page_num}"
+        print(f"\nPage {page_num}: {page_url}")
 
-    # Strategy 3: corsproxy.io (free, no key)
-    if not html:
-        try:
-            proxy_url = f"https://corsproxy.io/?{PORTAL_URL}"
-            print(f"Strategy 3: corsproxy.io")
-            resp = requests.get(proxy_url, timeout=60)
-            if resp.status_code == 200 and len(resp.text) > 500:
-                html = resp.text
-                print(f"  Success: {len(html)} bytes")
-        except Exception as e:
-            print(f"  Failed: {e}")
+        html = fetch_with_strategies(page_url, headers)
+        if not html:
+            print(f"  Page {page_num}: all strategies failed, stopping.")
+            break
 
-    # Strategy 4: Google cache
-    if not html:
-        try:
-            cache_url = f"https://webcache.googleusercontent.com/search?q=cache:{PORTAL_URL}"
-            print(f"Strategy 4: Google cache")
-            resp = requests.get(cache_url, headers=headers, timeout=30)
-            if resp.status_code == 200 and len(resp.text) > 500:
-                html = resp.text
-                print(f"  Success: {len(html)} bytes (cached)")
-        except Exception as e:
-            print(f"  Failed: {e}")
+        page_tenders = parse_html_table(html, PPRA_BASE, "PPRA")
 
-    if not html:
-        print("All strategies failed.")
-        return []
+        if not page_tenders:
+            print(f"  Page {page_num}: no tenders found, may be end of results.")
+            break
 
-    # Parse
-    soup = BeautifulSoup(html, "html.parser")
-    tenders = []
-    for table in soup.find_all("table"):
-        for row in table.find_all("tr"):
-            cells = row.find_all("td")
-            if len(cells) < 4:
-                continue
-            texts = [cell.get_text(strip=True) for cell in cells]
-            doc_url = None
-            for link in row.find_all("a", href=True):
-                href = link["href"]
-                if ".pdf" in href.lower() or "download" in href.lower():
-                    if not href.startswith("http"):
-                        href = f"https://sindhbank.com.pk{href}"
-                    doc_url = href
-                    break
-            tender = {
-                "id": texts[0] if texts else "",
-                "title": texts[1] if len(texts) > 1 else "",
-                "department": texts[2] if len(texts) > 2 else "",
-                "advertised": texts[3] if len(texts) > 3 else "",
-                "closing": texts[4] if len(texts) > 4 else "",
-                "doc_url": doc_url,
-            }
-            if tender["title"] and len(tender["title"]) > 3:
-                tenders.append(tender)
+        # Generate proper IDs for PPRA tenders
+        for t in page_tenders:
+            if not t["id"] or t["id"].startswith("PPRA-"):
+                pass  # already has an ID
+            else:
+                # Prefix PPRA IDs to avoid collision with Sindh Bank
+                if not t["id"].startswith("PPRA"):
+                    t["id"] = f"PPRA-{t['id']}"
 
-    print(f"Parsed {len(tenders)} tenders")
-    return tenders
+        all_tenders.extend(page_tenders)
+        print(f"  Page {page_num}: {len(page_tenders)} tenders")
+
+        # Polite delay between pages
+        time.sleep(2)
+
+    # Deduplicate
+    seen = set()
+    unique = []
+    for t in all_tenders:
+        key = t["id"] or t["title"]
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(t)
+
+    print(f"\nPPRA: {len(unique)} unique tenders across {min(page_num, max_pages)} pages")
+    return unique
+
+
+def scrape_tenders():
+    """Scrape BOTH Sindh Bank and PPRA, return combined list."""
+    sindh = scrape_sindh_bank()
+    ppra = scrape_ppra()
+    combined = sindh + ppra
+    print(f"\nCombined: {len(sindh)} Sindh Bank + {len(ppra)} PPRA = {len(combined)} total")
+    return combined
 
 
 def parse_date(s):
-    if not s: return None
-    m = re.match(r'(\d{1,2})-([A-Za-z]{3})-(\d{2,4})', s.strip())
+    """Parse dates from multiple portal formats."""
+    if not s:
+        return None
+    s = s.strip()
+
+    months = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,
+               "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+
+    # "5-Nov-26" or "22-Oct-2026"
+    m = re.match(r'(\d{1,2})-([A-Za-z]{3,})-(\d{2,4})', s)
     if m:
-        months = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,
-                   "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
         mon = months.get(m.group(2).lower()[:3])
         yr = int(m.group(3))
         if yr < 100: yr += 2000
         if mon:
             try: return datetime(yr, mon, int(m.group(1)))
             except ValueError: pass
+
+    # "2026-11-25" or "2026-11-25T..."
+    m = re.match(r'(\d{4})-(\d{2})-(\d{2})', s)
+    if m:
+        try: return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError: pass
+
+    # "Nov 25, 2026"
+    m = re.match(r'([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})', s)
+    if m:
+        mon = months.get(m.group(1).lower()[:3])
+        if mon:
+            try: return datetime(int(m.group(3)), mon, int(m.group(2)))
+            except ValueError: pass
+
+    # "25/11/2026"
+    m = re.match(r'(\d{1,2})/(\d{1,2})/(\d{4})', s)
+    if m:
+        try: return datetime(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        except ValueError: pass
+
     return None
 
 
@@ -167,8 +319,14 @@ def save_to_db(tenders):
                     {"id":raw["id"],"o":is_open,"d":days,"s":score,"v":verdict,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"now":now})
             else:
                 new_count += 1
+                source = raw.get("source", "Sindh Bank")
+                src_url = (
+                    "https://epms.ppra.gov.pk/public/tenders/active-tenders"
+                    if source == "PPRA"
+                    else SINDH_PORTAL_URL
+                )
                 conn.execute(text("INSERT INTO tenders (id,title,department,advertised,closing,closing_date,is_open,days_remaining,score,verdict,matched_keywords,matched_solutions,document_url,source_url) VALUES (:id,:ti,:dept,:ad,:cl,:cld,:o,:d,:s,:v,:kw,:sol,:doc,:src)"),
-                    {"id":raw["id"],"ti":raw["title"],"dept":raw.get("department",""),"ad":raw.get("advertised",""),"cl":raw.get("closing",""),"cld":cl_date,"o":is_open,"d":days,"s":score,"v":verdict,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"src":PORTAL_URL})
+                    {"id":raw["id"],"ti":raw["title"],"dept":raw.get("department",""),"ad":raw.get("advertised",""),"cl":raw.get("closing",""),"cld":cl_date,"o":is_open,"d":days,"s":score,"v":verdict,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"src":src_url})
 
         conn.execute(text("INSERT INTO scan_logs (date,total_on_portal,qualified_count,open_qualified_count,new_count,duration_seconds,status) VALUES (:d,:t,:q,:oq,:n,:dur,'success')"),
             {"d":now.strftime("%Y-%m-%d %H:%M"),"t":total,"q":qualified,"oq":open_qual,"n":new_count,"dur":(datetime.utcnow()-now).total_seconds()})

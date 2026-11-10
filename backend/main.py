@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from models import init_db, get_db, Tender, ScanLog, Proposal, Config
 from scorer import score_tender, get_solutions_list
 from scraper import scrape_with_playwright, scrape_with_requests, parse_portal_date, days_remaining
+from scraper_ppra import scrape_ppra_playwright, scrape_ppra_requests, normalize_ppra_tender, parse_ppra_date
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("tender-scout")
@@ -34,28 +35,59 @@ scheduler = AsyncIOScheduler()
 
 async def run_scan_job():
     """
-    Scheduled job: scrape portal, score tenders, save qualified ones.
+    Scheduled job: scrape BOTH portals (Sindh Bank + PPRA), score tenders, save qualified ones.
     This replaces Claude's Agent 1.
     """
     from models import SessionLocal
     db = SessionLocal()
     start = datetime.utcnow()
-    logger.info("Starting scheduled scan...")
+    logger.info("Starting scheduled scan (Sindh Bank + PPRA)...")
 
     try:
-        # Scrape
+        # ── Phase 1: Sindh Bank ──
+        sindh_raw = []
         try:
-            raw_tenders = await scrape_with_playwright()
+            sindh_raw = await scrape_with_playwright()
+            logger.info(f"Sindh Bank: {len(sindh_raw)} tenders scraped")
         except Exception as e:
-            logger.warning(f"Playwright failed ({e}), falling back to requests")
-            raw_tenders = scrape_with_requests()
+            logger.warning(f"Sindh Bank Playwright failed ({e}), trying requests")
+            try:
+                sindh_raw = scrape_with_requests()
+            except Exception as e2:
+                logger.error(f"Sindh Bank requests also failed: {e2}")
 
-        total_on_portal = len(raw_tenders)
+        # Tag each Sindh Bank tender with its source
+        for t in sindh_raw:
+            t["source"] = "Sindh Bank"
+
+        # ── Phase 2: PPRA ──
+        ppra_raw = []
+        ppra_report = None
+        try:
+            ppra_result = await scrape_ppra_playwright(max_pages=10)
+            ppra_raw = [normalize_ppra_tender(t) for t in ppra_result["tenders"]]
+            ppra_report = ppra_result["execution_report"]
+            logger.info(f"PPRA: {len(ppra_raw)} tenders scraped ({ppra_report['status']})")
+        except ImportError:
+            logger.warning("Playwright not available for PPRA, trying requests")
+            try:
+                ppra_result = scrape_ppra_requests(max_pages=5)
+                ppra_raw = [normalize_ppra_tender(t) for t in ppra_result["tenders"]]
+                ppra_report = ppra_result["execution_report"]
+                logger.info(f"PPRA (requests): {len(ppra_raw)} tenders ({ppra_report['status']})")
+            except Exception as e2:
+                logger.error(f"PPRA requests also failed: {e2}")
+        except Exception as e:
+            logger.error(f"PPRA scraping failed: {e}")
+
+        # ── Phase 3: Combine and process ──
+        all_raw = sindh_raw + ppra_raw
+        total_on_portal = len(all_raw)
         new_count = 0
         qualified_count = 0
         open_qualified_count = 0
 
-        for raw in raw_tenders:
+        for raw in all_raw:
             score, verdict, matched_solutions, matched_keywords = score_tender(raw["title"])
 
             # Only store qualified tenders (score >= 70)
@@ -63,7 +95,14 @@ async def run_scan_job():
                 continue
 
             qualified_count += 1
-            closing_date = parse_portal_date(raw.get("closing", ""))
+
+            # Parse closing date: use the right parser per source
+            source = raw.get("source", "Sindh Bank")
+            if source == "PPRA":
+                closing_date = parse_ppra_date(raw.get("closing", ""))
+            else:
+                closing_date = parse_portal_date(raw.get("closing", ""))
+
             days_left = days_remaining(closing_date)
             is_open = days_left is not None and days_left >= 0
 
@@ -83,6 +122,11 @@ async def run_scan_job():
                 existing.updated_at = datetime.utcnow()
             else:
                 new_count += 1
+                source_url = (
+                    "https://epms.ppra.gov.pk/public/tenders/active-tenders"
+                    if source == "PPRA"
+                    else "https://sindhbank.com.pk/tenders"
+                )
                 tender = Tender(
                     id=raw["id"],
                     title=raw["title"],
@@ -97,12 +141,13 @@ async def run_scan_job():
                     matched_keywords=matched_keywords,
                     matched_solutions=matched_solutions,
                     document_url=raw.get("doc_url"),
-                    source_url="https://sindhbank.com.pk/tenders",
+                    source_url=source_url,
                 )
                 db.add(tender)
 
-        # Log the scan
+        # Log the scan (combined)
         duration = (datetime.utcnow() - start).total_seconds()
+        ppra_status = ppra_report["status"] if ppra_report else "skipped"
         scan_log = ScanLog(
             date=datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
             total_on_portal=total_on_portal,
@@ -111,13 +156,14 @@ async def run_scan_job():
             new_count=new_count,
             duration_seconds=duration,
             status="success",
+            error_message=f"Sindh Bank: {len(sindh_raw)}, PPRA: {len(ppra_raw)} ({ppra_status})",
         )
         db.add(scan_log)
         db.commit()
 
         logger.info(
-            f"Scan complete: {total_on_portal} total, {qualified_count} qualified, "
-            f"{new_count} new, {duration:.1f}s"
+            f"Scan complete: {total_on_portal} total ({len(sindh_raw)} Sindh + {len(ppra_raw)} PPRA), "
+            f"{qualified_count} qualified, {new_count} new, {duration:.1f}s"
         )
 
     except Exception as e:
