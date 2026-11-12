@@ -4,14 +4,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--sidebar:#1a1f25;--sidebar-text:#c8cdd4;--sidebar-active:#2d3339;--sidebar-accent:#4CAF50;--bg:#f5f5f0;--card:#fff;--border:#e5e5e0;--fg:#1a1a1a;--fg-muted:#6b7280;--fg-faint:#9ca3af;--green:#16a34a;--green-soft:#f0fdf4;--green-border:#bbf7d0;--amber:#d97706;--amber-soft:#fffbeb;--amber-border:#fde68a;--red:#dc2626;--red-soft:#fef2f2;--red-border:#fecaca;--blue:#2563eb;--blue-soft:#eff6ff;font-family:'Inter',system-ui,sans-serif;color-scheme:light}
+:root{--sidebar:#15191e;--sidebar-text:#aeb6c0;--sidebar-active:#242a31;--sidebar-accent:#4CAF50;--bg:#f4f5f3;--card:#fff;--border:#e4e6e2;--r:12px;--r-sm:8px;--sh-1:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);--sh-2:0 4px 14px rgba(16,24,40,.08);--fg:#1a1a1a;--fg-muted:#6b7280;--fg-faint:#9ca3af;--green:#16a34a;--green-soft:#f0fdf4;--green-border:#bbf7d0;--amber:#d97706;--amber-soft:#fffbeb;--amber-border:#fde68a;--red:#dc2626;--red-soft:#fef2f2;--red-border:#fecaca;--blue:#2563eb;--blue-soft:#eff6ff;font-family:'Inter',system-ui,sans-serif;color-scheme:light}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111318;--card:#1a1f27;--border:#2a2f38;--fg:#e5e7eb;--fg-muted:#9ca3af;--fg-faint:#6b7280;--green-soft:#052e16;--green-border:#14532d;--amber-soft:#451a03;--amber-border:#78350f;--red-soft:#450a0a;--red-border:#7f1d1d;--blue-soft:#1e1b4b;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#111318;--card:#1a1f27;--border:#2a2f38;--fg:#e5e7eb;--fg-muted:#9ca3af;--fg-faint:#6b7280;--green-soft:#052e16;--green-border:#14532d;--amber-soft:#451a03;--amber-border:#78350f;--red-soft:#450a0a;--red-border:#7f1d1d;--blue-soft:#1e1b4b;color-scheme:dark}
 *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh}
 .shell{display:flex;flex:1;min-height:0}
 
 /* ===== SIDEBAR ===== */
-.sidebar{width:216px;background:var(--sidebar);color:var(--sidebar-text);padding:0;flex:none;display:flex;flex-direction:column;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sidebar{width:236px;background:var(--sidebar);color:var(--sidebar-text);padding:0;flex:none;display:flex;flex-direction:column;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
 .sb-logo{padding:24px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-logo .nets-word{display:block;font-size:42px;font-weight:900;color:#555;letter-spacing:-.03em;line-height:.9;font-family:'Inter',sans-serif}
 @media(prefers-color-scheme:dark){.sb-logo .nets-word{color:#bbb}}
@@ -21,10 +21,15 @@
 .sb-hdr{padding:20px 24px 6px}
 .sb-hdr .title{font-size:16px;font-weight:700;color:#fff;line-height:1.2}
 .sb-hdr .sub{font-size:12px;color:var(--sidebar-accent);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-top:2px}
-.sb-nav{padding:16px 14px 8px;display:flex;flex-direction:column;gap:1px;flex:1}
-.sb-item{padding:9px 14px;border-radius:6px;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--sidebar-text);transition:all .15s;font-weight:500}
+.sb-nav{padding:18px 12px 8px;display:flex;flex-direction:column;gap:2px;flex:1}
+.sb-sect{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:14px 12px 6px;font-weight:700}
+.sb-ico{width:16px;height:16px;flex:none;opacity:.8;margin-right:10px}
+.sb-item .sb-l{display:flex;align-items:center;min-width:0}
+.sb-item .sb-r{display:flex;align-items:center;gap:6px;flex:none}
+.sb-item{padding:9px 12px;border-radius:8px;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--sidebar-text);transition:all .15s;font-weight:500;gap:8px}
 .sb-item:hover{background:rgba(255,255,255,.06)}
-.sb-item.active{background:var(--sidebar-active);color:#fff;font-weight:600;border-left:3px solid var(--sidebar-accent);padding-left:11px}
+.sb-item.active{background:var(--sidebar-active);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--sidebar-accent)}
+.sb-item.active .sb-ico{opacity:1;color:var(--sidebar-accent)}
 .sb-badge{background:var(--sidebar-accent);color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:10px;min-width:20px;text-align:center}
 .sb-live{background:var(--sidebar-accent);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
 .sb-entity{padding:20px 24px;border-top:1px solid rgba(255,255,255,.08);margin-top:auto}
@@ -42,7 +47,7 @@
 .kpi-card .label{font-size:12.5px;color:var(--fg-muted);margin-bottom:6px}
 .kpi-card .num{font-size:32px;font-weight:800;color:var(--green);line-height:1}
 .kpi-card .sub{font-size:12.5px;color:var(--fg-faint);margin-top:6px}
-.sec-head{font-size:17px;font-weight:700;color:var(--fg);margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+.sec-head{font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--fg);margin:4px 0 14px;display:flex;align-items:baseline;gap:12px}
 .sec-head .hint{font-size:12.5px;font-weight:400;color:var(--fg-faint)}
 .action-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s}
 .action-card:hover{border-color:var(--green);box-shadow:0 1px 6px rgba(0,0,0,.04)}
@@ -64,7 +69,7 @@
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .filter-bar select{background:var(--card);border:1px solid var(--border);color:var(--fg);padding:7px 12px;border-radius:6px;font-size:12.5px;font-family:inherit}
 .filter-bar .clear{font-size:13px;color:var(--green);cursor:pointer;font-weight:600;padding:7px 12px}
-.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-1)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:11px 16px;font-size:11.5px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg)}
 td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
@@ -89,12 +94,13 @@ tr{cursor:pointer}
 .sb-role{font-size:12px;font-weight:600;padding:6px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);text-align:center;cursor:pointer}
 .sb-role.on{background:var(--sidebar-accent);color:#fff;border-color:var(--sidebar-accent)}
 .sb-badge.warn{background:var(--red)}
-.role-banner{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:8px;padding:10px 16px;margin-bottom:14px;display:grid;grid-template-columns:140px 1fr 1fr;gap:14px;align-items:start}
-.rb-who{font-size:12.5px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
-.rb-ans,.rb-can{font-size:12.5px;color:var(--fg-muted);line-height:1.5}
+.role-banner{display:flex;flex-direction:column;gap:4px;padding:6px 2px 18px;margin-bottom:6px}
+.rb-who{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.12em}
+.rb-title{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--fg)}
+.rb-ans{font-size:14px;color:var(--fg-muted);line-height:1.55;max-width:880px}.rb-can{font-size:12.5px;color:var(--fg-faint);line-height:1.5;max-width:880px}
 .rb-ans strong,.rb-can strong{color:var(--fg)}
 @media(max-width:900px){.role-banner{grid-template-columns:1fr}}
-.drawer{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:16px}
+.drawer{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:var(--sh-1)}
 .drawer h2{font-size:18px;font-weight:700;margin-bottom:4px}
 .drawer .meta{font-size:13px;color:var(--fg-muted);margin-bottom:16px}
 .drawer .row{display:flex;gap:24px;margin-bottom:12px}
@@ -217,12 +223,49 @@ tr{cursor:pointer}
 .wb-ck-item input{width:16px;height:16px;accent-color:var(--green)}
 .wb-ck-when{margin-left:auto;font-size:12.5px;color:var(--fg-faint)}
 /* ===== KPI TILES: identical anatomy so numbers line up across a row ===== */
-.ktile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;min-height:118px}
+.ktile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;min-height:122px;box-shadow:var(--sh-1);transition:box-shadow .15s,border-color .15s}
 .ktile .kl{font-size:13px;font-weight:600;color:var(--fg-muted);letter-spacing:.02em;min-height:16px}
 .ktile .kb{font-size:28px;font-weight:800;line-height:1.1;margin-top:8px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .ktile .ks{font-size:13px;color:var(--fg-faint);margin-top:auto;padding-top:8px;line-height:1.45}
-.ktile[onclick]{cursor:pointer}.ktile[onclick]:hover{border-color:var(--green)}
+.ktile[onclick]{cursor:pointer}.ktile[onclick]:hover{border-color:var(--green);box-shadow:var(--sh-2)}
 @media(max-width:1000px){.wb-grid4{grid-template-columns:repeat(2,1fr)}.wb-grid3{grid-template-columns:1fr}.wb-s1{grid-template-columns:1fr}.wb-ana-grid{grid-template-columns:1fr}.wb-ck{grid-template-columns:1fr}}
+/* ===== MULTI-SELECT DROPDOWN ===== */
+.msel{position:relative}
+.msel-btn{width:100%;display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--fg);font:inherit;font-size:13px;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s}
+.msel-btn:hover{border-color:var(--fg-faint)}
+.msel.open .msel-btn{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.msel-btn.empty .msel-val{color:var(--fg-faint)}
+.msel-val{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msel-n{font-size:11px;font-weight:700;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border);border-radius:10px;padding:0 7px}
+.msel-btn svg{color:var(--fg-faint);flex:none}
+.msel-pop{position:absolute;z-index:50;top:calc(100% + 6px);left:0;right:0;min-width:320px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-2);padding:8px;animation:pop .12s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.msel-search{width:100%;box-sizing:border-box;font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--fg);outline:none;margin-bottom:6px}
+.msel-search:focus{border-color:var(--green)}
+.msel-list{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.msel-opt{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500!important;color:var(--fg)!important;margin:0!important}
+.msel-opt:hover{background:var(--bg)}
+.msel-opt.on{background:var(--green-soft);color:var(--green)!important}
+.msel-opt input{width:15px;height:15px;accent-color:var(--green);margin:0}
+.msel-foot{display:flex;justify-content:space-between;padding:8px 6px 2px;border-top:1px solid var(--border);margin-top:6px}
+.wb-sec .msel-opt{display:flex;align-items:center;gap:10px;margin:0;font-size:13px;font-weight:500;color:var(--fg)}
+/* ===== WORKBENCH STEPPER ===== */
+.wb-stepper{display:flex;align-items:center;gap:10px;margin:4px 0 18px}
+.wb-stp{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--fg-muted);text-decoration:none}
+.wb-stp.done{color:var(--fg)}
+.wb-stp-n{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--card);color:var(--fg-muted)}
+.wb-stp.done .wb-stp-n{background:var(--green);border-color:var(--green);color:#fff}
+.wb-stp-line{flex:1;max-width:80px;height:2px;background:var(--border);border-radius:1px}
+.wb-stp-line.done{background:var(--green)}
+.wb-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.wb-step-no{display:inline-flex;align-items:center;gap:8px}
+.wb-sec select,.wb-sec input[type=text],.wb-sec input[type=number],.wb-sec input[type=date],.wb-sec textarea{border-radius:var(--r-sm);transition:border-color .15s,box-shadow .15s}
+.wb-sec select:focus,.wb-sec input:focus,.wb-sec textarea:focus{box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.fbar{border-radius:var(--r);box-shadow:var(--sh-1)}
+.fbar input,.fbar select{border-radius:var(--r-sm)}
+.wb-ana{border-radius:var(--r);box-shadow:var(--sh-1)}
+.sd .sd-card{box-shadow:var(--sh-1)}
+@media(max-width:1000px){.wb-grid2{grid-template-columns:1fr}}
 </style>
 
 <!-- TOP BAR -->
@@ -441,15 +484,23 @@ function buildNav(){
   var cur=window._role||localStorage.getItem("ts_role")||"cto";
   var tb=document.getElementById("tbroles");if(tb)tb.innerHTML='<span class="lbl">I am</span>'+roles.map(function(r){return'<div class="sb-role'+(r.v===cur?" on":"")+'" onclick="setRole(\''+r.v+'\')" title="'+r.q+'">'+r.who+'</div>'}).join("");
   var ts=document.getElementById("tbscan");if(ts)ts.textContent="Last scan: "+(SCANS.length?SCANS[0].date:"pending");
-  var h=[
-    {v:"cto",      l:"1 · Where we stand",         badge:null,live:true},
-    {v:"sales",    l:"2 · Sales team",          badge:qc,live:true},
-    {v:"presales", l:"3 · Presales head",       badge:qc,live:false},
-    {v:"workbench",l:"4 · Architect workbench", badge:wbCount,live:true},
-    {v:"system",   l:"System and trust",             badge:failing||null,live:false,warn:!!failing}
+  var ICO={cto:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+    sales:'<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+    presales:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
+    workbench:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+    system:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>'};
+  var ico=function(k){return'<svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+ICO[k]+'</svg>'};
+  var h='<div class="sb-sect">Dashboards</div>'+[
+    {v:"cto",      l:"Where we stand",      badge:null,live:true},
+    {v:"sales",    l:"Sales pipeline",      badge:qc,live:false},
+    {v:"presales", l:"Bid board",           badge:qc,live:false},
+    {v:"workbench",l:"Architect workbench", badge:wbCount,live:false},
+    {sect:"Operations"},
+    {v:"system",   l:"System and trust",    badge:failing||null,live:false,warn:!!failing}
   ].map(function(n){
-    var badgeHtml=n.badge!==null?' <span class="sb-badge'+(n.warn?" warn":"")+'">'+n.badge+'</span>':"";
-    return'<div class="sb-item'+(n.v===cur?" active":"")+'" data-v="'+n.v+'" onclick="showView(\''+n.v+'\')">'+n.l+(n.live?' <span class="sb-live">LIVE</span>':"")+badgeHtml+'</div>';
+    if(n.sect)return'<div class="sb-sect">'+n.sect+'</div>';
+    var badgeHtml=n.badge!==null?'<span class="sb-badge'+(n.warn?" warn":"")+'">'+n.badge+'</span>':"";
+    return'<div class="sb-item'+(n.v===cur?" active":"")+'" data-v="'+n.v+'" onclick="showView(\''+n.v+'\')"><span class="sb-l">'+ico(n.v)+n.l+'</span><span class="sb-r">'+(n.live?'<span class="sb-live">LIVE</span>':"")+badgeHtml+'</span></div>';
   }).join("");
   navEl.innerHTML=h;
 }
@@ -1140,7 +1191,8 @@ function roleBanner(v){
     system:{who:"Whoever maintains the system",ans:"Is every number on the dashboard confirmed, are the portals being scanned, is the database healthy.",can:"Re-score with the current taxonomy, read scan history, see the agent and portal status."}
   }[v];
   if(!b)return"";
-  return'<div class="role-banner"><div class="rb-who">For: '+b.who+'</div><div class="rb-ans"><strong>This page answers:</strong> '+b.ans+'</div><div class="rb-can"><strong>You can:</strong> '+b.can+'</div></div>';
+  var titles={cto:"Where we stand",sales:"Sales pipeline",presales:"Bid board",workbench:"Architect workbench",system:"System and trust"};
+  return'<div class="role-banner"><div class="rb-who">For '+b.who+'</div><div class="rb-title">'+titles[v]+'</div><div class="rb-ans">'+b.ans+'</div><div class="rb-can">'+b.can+'</div></div>';
 }
 
 /* ── System page: Trust Audit, Activity, Settings as tabs (one place, no duplication) ── */
@@ -1380,9 +1432,31 @@ function wbSetDecision(id,field,val){
   wbSave(id,patch);
   if(field==="bid_decision"&&DB)DB.doc("tenders/"+id).update({goNogo:val==="BID"?"GO":val==="NO-BID"?"NOGO":val}).catch(function(){});
 }
+
+/* ═══ Multi-select dropdown: a button that reads like a value, a panel with search and checkboxes ═══ */
+var MSEL_OPEN=null;
+function msel(id,field,options,selected,placeholder,hint){
+  selected=selected||[];var key=wbEsc(id)+"|"+field;var open=MSEL_OPEN===key;
+  var label=selected.length?(selected.length<=2?selected.join(", "):selected.slice(0,2).join(", ")+" +"+(selected.length-2)+" more"):placeholder;
+  var h='<div class="msel'+(open?' open':'')+'" data-msel="'+wbEsc(key)+'">'
+    +'<button type="button" class="msel-btn'+(selected.length?'':' empty')+'" onclick="mselToggle(\''+wbEsc(key)+'\')"><span class="msel-val">'+wbEsc(label)+'</span>'+(selected.length?'<span class="msel-n">'+selected.length+'</span>':'')+'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>';
+  if(open){
+    h+='<div class="msel-pop" onclick="event.stopPropagation()"><input class="msel-search" placeholder="Type to filter" oninput="mselFilter(this)" autofocus>'
+      +'<div class="msel-list">'+options.map(function(o){var on=selected.indexOf(o)>=0;return'<label class="msel-opt'+(on?' on':'')+'" data-t="'+wbEsc(o.toLowerCase())+'"><input type="checkbox" '+(on?'checked':'')+' onchange="wbToggleMulti(\''+wbEsc(id)+'\',\''+field+'\',\''+wbEsc(o)+'\')"><span>'+wbEsc(o)+'</span></label>'}).join("")+'</div>'
+      +'<div class="msel-foot"><span class="wb-link" onclick="mselSetAll(\''+wbEsc(id)+'\',\''+field+'\',[])">Clear</span><span class="wb-link" onclick="MSEL_OPEN=null;showView(\'workbench\')">Done</span></div></div>';
+  }
+  h+='</div>'+(hint?'<div class="wb-help" style="margin-top:4px">'+hint+'</div>':'');
+  return h;
+}
+function mselToggle(key){MSEL_OPEN=MSEL_OPEN===key?null:key;showView("workbench");setTimeout(function(){var i=document.querySelector(".msel.open .msel-search");if(i)i.focus()},0)}
+function mselFilter(inp){var q=inp.value.toLowerCase();inp.parentNode.querySelectorAll(".msel-opt").forEach(function(l){l.style.display=l.getAttribute("data-t").indexOf(q)>=0?"":"none"})}
+function mselSetAll(id,field,arr){var a=wbEnsure(id);a.decision=a.decision||{};a.decision[field]=arr;wbSave(id,{decision:a.decision});showView("workbench")}
+document.addEventListener("click",function(e){if(MSEL_OPEN&&!e.target.closest(".msel")){MSEL_OPEN=null;showView("workbench")}});
 function wbAutoOn(){try{return localStorage.getItem("ts_auto")!=="0"}catch(e){return true}}
 function wbSetAuto(on){try{localStorage.setItem("ts_auto",on?"1":"0")}catch(e){}wbLog(on?"Automatic analysis on":"Automatic analysis off")}
-function wbToggleMulti(id,field,val){var a=wbEnsure(id);a.decision=a.decision||{};var arr=(a.decision[field]||[]).slice();var k=arr.indexOf(val);if(k>=0)arr.splice(k,1);else arr.push(val);a.decision[field]=arr;wbSave(id,{decision:a.decision});showView("workbench")}
+function wbToggleMulti(id,field,val){var a=wbEnsure(id);a.decision=a.decision||{};var arr=(a.decision[field]||[]).slice();
+  if(field==="solutions"&&!arr.length){var tt=T.find(function(x){return x.id===id});arr=((tt&&tt.solMatch)||[]).map(function(x){return x.name})} /* start from the pre-filled match, not from nothing */var k=arr.indexOf(val);if(k>=0)arr.splice(k,1);else arr.push(val);a.decision[field]=arr;wbSave(id,{decision:a.decision});
+  if(MSEL_OPEN){var q=(document.querySelector(".msel.open .msel-search")||{}).value||"";showView("workbench");var i=document.querySelector(".msel.open .msel-search");if(i){i.value=q;mselFilter(i);i.focus()}}else showView("workbench")}
 function wbCheck(id,key,done){var a=wbEnsure(id);a.decision=a.decision||{};a.decision.checklist=a.decision.checklist||{};a.decision.checklist[key]={done:!!done,at:done?new Date().toISOString():null};
   if(key==="submitted"&&done)a.decision.stage="Submitted";
   wbSave(id,{decision:a.decision});wbLog((done?"Done: ":"Undone: ")+key);showView("workbench")}
@@ -1458,7 +1532,7 @@ function vWorkbench(){
     +'<span style="font-size:13px;color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'overview\')">\u2190 Back to Overview</span>'
     +'<span style="font-size:12.5px;color:var(--fg-faint)">'+(SAMPLE?'<span class="dot dot-g"></span> Claude connected':'<span class="dot dot-r"></span> Claude not allowed yet (Permissions menu)')+'</span></div>';
 
-  html+='<div class="sec-head">Architect workbench <span class="hint">'+live.length+' qualified live tenders. One RFP at a time: document, analysis, bid plan.</span></div>';
+  html+='<div class="sec-head" style="font-size:14px;font-weight:600;color:var(--fg-muted)">'+live.length+' qualified live tenders. One RFP at a time: document, analysis, bid plan.</div>';
 
   /* Pipeline strip */
   var stages=[["RFP in hand",cRfp,"var(--fg)"],["Summarised",cSum,"#2E7D32"],["Graded",cGrd,"#388E3C"],["Compliance",cCmp,"#43A047"],["BOQ",cBoq,"#4CAF50"],["BID decided",cBid,"var(--green)"]];
@@ -1480,6 +1554,10 @@ function vWorkbench(){
     +'<span style="font-size:12.5px;color:var(--fg-faint);cursor:pointer" onclick="FLT._detail=\''+wbEsc(t.id)+'\';showView(\'detail\')">tender detail \u2192</span>'
     +'</div>';
 
+  /* ── Stepper: where this tender is in the three steps ── */
+  var st1=!!a.rfpText,st2=!!(a.summary||a.grading||a.compliance||a.boq),st3=!!(d.bid_decision&&d.bid_decision!=="Pending");
+  html+='<div class="wb-stepper">'+[["Document",st1,"wb-s1"],["Analysis",st2,"wb-s2"],["Bid plan",st3,"wb-s3"]].map(function(x,i){return'<a class="wb-stp'+(x[1]?' done':'')+'" href="#'+x[2]+'" onclick="document.getElementById(\''+x[2]+'\').scrollIntoView({behavior:\'smooth\'});return false"><span class="wb-stp-n">'+(x[1]?'\u2713':(i+1))+'</span><span>'+x[0]+'</span></a>'+(i<2?'<span class="wb-stp-line'+(x[1]?' done':'')+'"></span>':'')}).join("")+'</div>';
+
   /* ── STEP 1: RFP document ── */
   var acq=t.acqStatus||"PENDING";var hasText=!!a.rfpText;
   var folder=(t.localFolder||a.local_folder)||("D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH  BANK TENDER SCOUT\\"+t.id);
@@ -1487,7 +1565,7 @@ function vWorkbench(){
     :acq==="AUTO_DOWNLOADED"?{cls:"chip-a",txt:"PDF saved on your PC, text not yet loaded here"}
     :acq==="MANUAL_DOWNLOAD_REQUIRED"?{cls:"chip-a",txt:"Portal needs a login: download by hand"}
     :{cls:"chip-grey",txt:"No document yet"};
-  html+='<div class="drawer wb-step">'
+  html+='<div class="drawer wb-step" id="wb-s1">'
     +'<div class="wb-step-head"><div><div class="wb-step-no">Step 1</div><div class="wb-step-title">RFP document</div></div><span class="chip '+s1status.cls+'">'+wbEsc(s1status.txt)+'</span></div>'
     +'<div class="wb-s1">'
     +'<div class="wb-s1-main">'
@@ -1517,7 +1595,7 @@ function vWorkbench(){
     return'<div class="wb-ana'+(done?' done':'')+'"><div class="wb-ana-head"><div><div class="wb-ana-title">'+name+'</div><div class="wb-ana-desc">'+desc+'</div></div>'+btn+'</div><div class="wb-ana-state">'+state+(done?' <span class="wb-link" onclick="wbDownload(\''+wbEsc(t.id)+'\',\''+key+'\')">Export</span>':'')+'</div>'
       +(busy?'<pre id="wb-out-'+key+'" class="wb-stream">Thinking...</pre>':'')+(done&&!busy?'<div class="wb-ana-body">'+body+'</div>':'')+'</div>';
   }
-  html+='<div class="drawer wb-step">'
+  html+='<div class="drawer wb-step" id="wb-s2">'
     +'<div class="wb-step-head"><div><div class="wb-step-no">Step 2</div><div class="wb-step-title">Analysis of this RFP</div><div class="wb-help">Four separate reads of the document. Every claim carries a quote from the RFP; anything without one is marked unverified.</div></div>'
     +'<div class="wb-actions"><label class="wb-toggle"><input type="checkbox" '+(autoOn?'checked':'')+' onchange="wbSetAuto(this.checked)"> Start automatically when the RFP arrives</label>'
     +'<button class="btn btn-primary" onclick="wbRunAll(\''+wbEsc(t.id)+'\')" '+(canRun&&hasText?'':'disabled title="'+(canRun?'Needs the RFP document':'Allow Claude first')+'"')+'>\u25b6 Run all four</button></div></div>'
@@ -1543,7 +1621,7 @@ function vWorkbench(){
   var subDeadline=d.date_submission||(s&&s.timeline&&/^\d{4}-\d{2}-\d{2}$/.test(s.timeline.submission_deadline||"")?s.timeline.submission_deadline:"");
   var CK=[["prebid","Pre-bid meeting attended"],["clarif","Clarifications submitted to buyer"],["maf","OEM authorisation (MAF) requested"],["oemprice","OEM pricing received"],["refs","Reference projects selected"],["bidsec","Bid security arranged"],["approval","Internal approval obtained"],["submitted","Bid submitted"]];
   var ck=d.checklist||{};var ckDone=CK.filter(function(x){return ck[x[0]]&&ck[x[0]].done}).length;
-  html+='<div class="drawer wb-step">'
+  html+='<div class="drawer wb-step" id="wb-s3">'
     +'<div class="wb-step-head"><div><div class="wb-step-no">Step 3</div><div class="wb-step-title">Bid plan</div><div class="wb-help">Your decision, who does what, the solution shape, and the eight things that must happen before submission. Every change saves itself.</div></div>'
     +'<div style="text-align:right"><span class="chip '+decCls+'" style="font-size:13px">'+wbEsc(dec)+'</span><div class="wb-help" style="margin-top:4px">'+(d.decided_at?'Decided '+wbEsc(String(d.decided_at).slice(0,10))+(d.decided_by?' by '+wbEsc(d.decided_by):''):'No decision recorded')+'</div></div></div>'
 
@@ -1573,9 +1651,11 @@ function vWorkbench(){
 
     /* 3c Solution approach */
     +'<div class="wb-sec"><div class="wb-sec-title">3. Solution approach</div>'
-    +'<label>NETS solution areas in scope</label>'+multi("solutions",SCORER_SOLUTIONS.map(function(x){return x.name}),d.solutions&&d.solutions.length?d.solutions:(t.solMatch||[]).map(function(x){return x.name}))
-    +'<label style="margin-top:10px">OEMs we will propose'+(g&&g.recommended_oem&&g.recommended_oem.length?' <span class="wb-help">(assessment suggests '+wbEsc(g.recommended_oem.join(", "))+')</span>':'')+'</label>'+multi("oems",["Cisco","Huawei","Dell","Fortinet","Palo Alto","HPE","H3C","Lenovo","Sophos","IBM","Kaspersky","CrowdStrike","Microsoft","AWS","Other"],d.oems)
-    +'<div class="wb-grid4" style="margin-top:10px">'
+    +'<div class="wb-grid2">'
+    +'<div><label>NETS solution areas in scope</label>'+msel(t.id,"solutions",SCORER_SOLUTIONS.map(function(x){return x.name}),d.solutions&&d.solutions.length?d.solutions:(t.solMatch||[]).map(function(x){return x.name}),"Choose solution areas",d.solutions&&d.solutions.length?"":"Pre-filled from the title match; open to change")+'</div>'
+    +'<div><label>OEMs we will propose</label>'+msel(t.id,"oems",["Cisco","Huawei","Dell","Fortinet","Palo Alto","HPE","H3C","Lenovo","Sophos","IBM","Kaspersky","CrowdStrike","Microsoft","AWS","Other"],d.oems,"Choose OEMs",(g&&g.recommended_oem&&g.recommended_oem.length?"Assessment suggests "+wbEsc(g.recommended_oem.join(", ")):""))+'</div>'
+    +'</div>'
+    +'<div class="wb-grid4" style="margin-top:14px">'
     +'<div><label>Delivery model</label>'+sel("delivery_model",["Not set","Supply only","Supply and install","Turnkey (design, supply, install, support)","Managed service","Resource outsourcing","Consulting"],d.delivery_model||"Not set")+'</div>'
     +'<div><label>Partner or subcontractor</label>'+sel("partner_needed",["Not needed","Needed, not yet identified","Identified"],d.partner_needed||"Not needed")+(d.partner_needed&&d.partner_needed!=="Not needed"?textIn("partner_name",d.partner_name,"Partner name"):'')+'</div>'
     +'<div><label>Sites / locations</label>'+numIn("sites",d.sites,"e.g. 12")+'</div>'
@@ -2834,7 +2914,7 @@ function vSalesDash(){
 
   /* Header */
   html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px">'
-    +'<div><div style="font-size:20px;font-weight:700;letter-spacing:-.02em">Sales pipeline</div><div style="font-size:12.5px;color:var(--fg-muted);margin-top:2px">Every live tender that matches NETS, who owns it on the sales side, and how many days are left.</div></div>'
+    +'<div style="font-size:13px;color:var(--fg-muted)">'+bids.length+' live tenders match NETS and passed the gates.</div>'
     +'<div style="display:flex;gap:8px">'
     +'<button class="btn" onclick="exportSalesCSV()" title="Download the filtered feed as a spreadsheet">\u2b07 Export CSV</button>'
     +'</div></div>';
