@@ -25,6 +25,8 @@ from models import init_db, get_db, Tender, ScanLog, Proposal, Config
 from scorer import score_tender, get_solutions_list
 from scraper import scrape_with_playwright, scrape_with_requests, parse_portal_date, days_remaining
 from scraper_ppra import scrape_ppra_playwright, scrape_ppra_requests, normalize_ppra_tender, parse_ppra_date
+from scraper_epads import scrape_epads
+from downloader import parse_closing_date, is_open_tender
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("tender-scout")
@@ -80,45 +82,78 @@ async def run_scan_job():
         except Exception as e:
             logger.error(f"PPRA scraping failed: {e}")
 
+        # ── Phase 2b: Scrape EPADS ──
+        epads_raw = []
+        try:
+            epads_tenders = scrape_epads(max_pages=5)
+            for t in epads_tenders:
+                epads_raw.append({
+                    "id": t["id"],
+                    "title": t["title"],
+                    "department": t.get("department", ""),
+                    "advertised": t.get("advertised", ""),
+                    "closing": t.get("closing", ""),
+                    "doc_url": t.get("doc_url", ""),
+                    "source": "EPADS",
+                    "detail_url": t.get("detail_url", ""),
+                })
+            logger.info(f"EPADS: {len(epads_raw)} tenders scraped")
+        except Exception as e:
+            logger.error(f"EPADS scraping failed: {e}")
+
         # ── Phase 3: Combine and process ──
-        all_raw = sindh_raw + ppra_raw
+        all_raw = sindh_raw + ppra_raw + epads_raw
         total_on_portal = len(all_raw)
         new_count = 0
         qualified_count = 0
         open_qualified_count = 0
 
-        for raw in all_raw:
-            score, verdict, matched_solutions, matched_keywords = score_tender(raw["title"])
+        dropped_count = 0
 
-            # Only store qualified tenders (score >= 70)
+        for raw in all_raw:
+            score, verdict, matched_solutions, matched_keywords, qualification = score_tender(raw["title"])
+
+            # Only store tenders that match at least one NETS domain (score >= 70)
             if score < 70:
                 continue
 
             qualified_count += 1
 
-            # Parse closing date: use the right parser per source
+            # ── QUALIFICATION GATE CHECK ──
+            # Even if score >= 70, a NOGO verdict from hard gates means disqualified
+            qual_verdict = qualification.get("overall_verdict", "GO")
+            dq_reason = qualification.get("disqualification_reason")
+
+            # Parse closing date using the universal parser from downloader
+            closing_date = parse_closing_date(raw.get("closing", ""))
             source = raw.get("source", "Sindh Bank")
-            if source == "PPRA":
-                closing_date = parse_ppra_date(raw.get("closing", ""))
-            else:
-                closing_date = parse_portal_date(raw.get("closing", ""))
 
-            days_left = days_remaining(closing_date)
-            is_open = days_left is not None and days_left >= 0
+            # ── STRICT OPEN-STATUS GATE ──
+            # Evaluate closing date against NOW. Drop expired tenders.
+            tender_dict_for_check = {"closing": raw.get("closing", ""), "closing_date_obj": closing_date}
+            is_open, days_left = is_open_tender(tender_dict_for_check)
 
-            if is_open:
-                open_qualified_count += 1
+            if not is_open:
+                dropped_count += 1
+                continue  # STRICT: do not save closed tenders to active view
+
+            open_qualified_count += 1
 
             # Upsert: update if exists, create if new
             existing = db.query(Tender).filter(Tender.id == raw["id"]).first()
+            qual_gates_json = {k: v for k, v in qualification.get("gates", {}).items()}
             if existing:
                 existing.is_open = is_open
                 existing.days_remaining = days_left
                 existing.score = score
                 existing.verdict = verdict
+                existing.qual_verdict = qual_verdict
+                existing.qual_gates = qual_gates_json
+                existing.disqualification_reason = dq_reason
                 existing.matched_keywords = matched_keywords
                 existing.matched_solutions = matched_solutions
                 existing.document_url = raw.get("doc_url") or existing.document_url
+                existing.source_portal = source
                 existing.updated_at = datetime.utcnow()
             else:
                 new_count += 1
@@ -138,10 +173,15 @@ async def run_scan_job():
                     days_remaining=days_left,
                     score=score,
                     verdict=verdict,
+                    qual_verdict=qual_verdict,
+                    qual_gates=qual_gates_json,
+                    disqualification_reason=dq_reason,
                     matched_keywords=matched_keywords,
                     matched_solutions=matched_solutions,
                     document_url=raw.get("doc_url"),
                     source_url=source_url,
+                    source_portal=source,
+                    acquisition_status="PENDING",
                 )
                 db.add(tender)
 
@@ -156,14 +196,15 @@ async def run_scan_job():
             new_count=new_count,
             duration_seconds=duration,
             status="success",
-            error_message=f"Sindh Bank: {len(sindh_raw)}, PPRA: {len(ppra_raw)} ({ppra_status})",
+            error_message=f"Sindh Bank: {len(sindh_raw)}, PPRA: {len(ppra_raw)} ({ppra_status}), dropped: {dropped_count} expired",
         )
         db.add(scan_log)
         db.commit()
 
         logger.info(
             f"Scan complete: {total_on_portal} total ({len(sindh_raw)} Sindh + {len(ppra_raw)} PPRA), "
-            f"{qualified_count} qualified, {new_count} new, {duration:.1f}s"
+            f"{qualified_count} qualified, {open_qualified_count} open, "
+            f"{dropped_count} dropped (expired), {new_count} new, {duration:.1f}s"
         )
 
     except Exception as e:
@@ -251,6 +292,9 @@ def list_tenders(
             "matched": t.matched_keywords or [],
             "solMatch": t.matched_solutions or [],
             "doc": t.document_url,
+            "qualVerdict": t.qual_verdict or "GO",
+            "qualGates": t.qual_gates or {},
+            "dqReason": t.disqualification_reason,
         }
         for t in tenders
     ]

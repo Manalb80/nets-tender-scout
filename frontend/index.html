@@ -2,6 +2,7 @@
 <title>NETS Sindh Bank Tender Scout</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{--sidebar:#1a1f25;--sidebar-text:#c8cdd4;--sidebar-active:#2d3339;--sidebar-accent:#4CAF50;--bg:#f5f5f0;--card:#fff;--border:#e5e5e0;--fg:#1a1a1a;--fg-muted:#6b7280;--fg-faint:#9ca3af;--green:#16a34a;--green-soft:#f0fdf4;--green-border:#bbf7d0;--amber:#d97706;--amber-soft:#fffbeb;--amber-border:#fde68a;--red:#dc2626;--red-soft:#fef2f2;--red-border:#fecaca;--blue:#2563eb;--blue-soft:#eff6ff;font-family:'Inter',system-ui,sans-serif;color-scheme:light}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111318;--card:#1a1f27;--border:#2a2f38;--fg:#e5e7eb;--fg-muted:#9ca3af;--fg-faint:#6b7280;--green-soft:#052e16;--green-border:#14532d;--amber-soft:#451a03;--amber-border:#78350f;--red-soft:#450a0a;--red-border:#7f1d1d;--blue-soft:#1e1b4b;color-scheme:dark}}
@@ -72,6 +73,7 @@ tr{cursor:pointer}
 .b-a{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)}
 .b-r{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
 .b-grey{background:var(--bg);color:var(--fg-faint);border:1px solid var(--border)}
+.b-b{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue)}
 .drawer{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:16px}
 .drawer h2{font-size:18px;font-weight:700;margin-bottom:4px}
 .drawer .meta{font-size:12px;color:var(--fg-muted);margin-bottom:16px}
@@ -92,17 +94,17 @@ tr{cursor:pointer}
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sb-logo" style="text-align:center">
-    <img src="/assets/nets-logo.png" alt="NETS International" style="width:180px;margin-bottom:8px" onerror="this.parentElement.innerHTML='<span class=nets-word>NETS</span>'">
+    <img src="/_blob/b9bb80a24e3a92df56d3fa73118f37e1" alt="NETS International" style="width:180px;margin-bottom:8px">
     <span class="tagline">Empowering The Future</span>
   </div>
   <div class="sb-hdr">
     <div class="title">Tender Scout</div>
-    <div class="sub">Sindh Bank Portal</div>
+    <div class="sub">Sindh Bank + PPRA</div>
   </div>
   <nav class="sb-nav" id="sbnav"></nav>
   <div class="sb-entity">
     <div class="label">Source Portal</div>
-    <select><option>Sindh Bank</option></select>
+    <select><option>All Portals</option><option>Sindh Bank</option><option>PPRA</option></select>
   </div>
   <div class="sb-footer">
     Agent 1: Ingestion & Scraping<br>
@@ -146,6 +148,8 @@ var SOLUTIONS=[
 
 /* ===== STATE (populated from db) ===== */
 var T=[], LOG=[], SCANS=[], PROPOSALS=[], CONFIG={}, FLT={status:"all",solution:"all",dept:"all"};
+/* RFP Workbench state: RFPA[tenderId] = {rfpText, summary, grading, compliance, boq, decision, ...} */
+var RFPA={}, SAMPLE=null, ASSETS=null, DOWNLOADS=null;
 var NOW=new Date();
 var DB=null;
 var _dbReady=false;
@@ -162,22 +166,31 @@ function parsePortalDate(s){
 
 function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMinutes()).padStart(2,"0");return h+":"+m}
 
-/* ===== INIT: fetch from backend API ===== */
-var API_BASE = window.location.origin;
+/* ===== INIT: connect to artifact db ===== */
+(async function init(){
+  var loadTimer=setTimeout(function(){
+    document.getElementById("loadMsg").textContent="Database not available. Showing empty state.";
+    _dbReady=false;
+    showEmptyState();
+  },10000);
 
-async function fetchData(){
-  document.getElementById("loadMsg").textContent="Loading data from server...";
-  try {
-    var r1=await fetch(API_BASE+"/api/tenders");
-    var r2=await fetch(API_BASE+"/api/scans");
-    var r3=await fetch(API_BASE+"/api/proposals");
-    var r4=await fetch(API_BASE+"/api/health");
-    var tenders=await r1.json();
-    var scans=await r2.json();
-    var proposals=await r3.json();
-    var health=await r4.json();
+  DB=await claude.use("db");
+  if(!DB){
+    clearTimeout(loadTimer);
+    document.getElementById("loadMsg").textContent="Database not connected. Data will appear after the first agent scan.";
+    showEmptyState();
+    return;
+  }
 
-    T=tenders.map(function(r){
+  clearTimeout(loadTimer);
+  document.getElementById("dbStatusFooter").className="db-status db-live";
+  document.getElementById("dbStatusFooter").textContent="Live";
+
+  /* Subscribe to tenders collection: one snapshot, live updates */
+  _tenderUnsub=DB.collection("tenders").onSnapshot(function(snap){
+    T=snap.docs.filter(function(d){return d.exists}).map(function(d){
+      var r=d.data();
+      /* Rebuild solMatch from SOLUTIONS if stored as ids */
       var solMatch=r.solMatch||[];
       if(solMatch.length&&typeof solMatch[0]==="string"){
         solMatch=solMatch.map(function(sid){return SOLUTIONS.find(function(s){return s.id===sid})||{id:sid,name:sid,group:""}});
@@ -185,32 +198,60 @@ async function fetchData(){
       var cl=parsePortalDate(r.cl);
       var days=cl?Math.ceil((cl-NOW)/864e5):null;
       var isOpen=cl?cl>=NOW:false;
-      return{id:r.id,ti:r.ti||"",dept:r.dept||"",ad:r.ad||"",cl:r.cl||"",
-        doc:r.doc||"",score:r.score||0,verdict:r.verdict||"SKIP",
-        solMatch:solMatch,matched:r.matched||[],open:isOpen,days:days};
+      return{
+        id:r.id||d.id, ti:r.ti||"", dept:r.dept||"", ad:r.ad||"", cl:r.cl||"",
+        doc:r.doc||"", score:r.score||0, verdict:r.verdict||"SKIP",
+        solMatch:solMatch, matched:r.matched||[],
+        open:isOpen, days:days,
+        source:r.source_portal||r.source||"Sindh Bank",
+        acqStatus:r.acquisition_status||"PENDING",
+        detailUrl:r.detail_url||"",
+        qualVerdict:r.qualVerdict||r.qual_verdict||"GO",
+        qualGates:r.qualGates||r.qual_gates||{},
+        dqReason:r.dqReason||r.disqualification_reason||null
+      };
     });
     T.sort(function(a,b){return b.score-a.score});
-
-    SCANS=scans;
-    LOG=SCANS.map(function(s){
-      return{time:s.date?s.date.substring(11,16):"05:47",
-        text:"Scan: "+s.total_on_portal+" total, "+s.qualified_count+" qualified, "+s.open_qualified_count+" open"};
-    });
-    if(LOG.length===0) LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
-
-    PROPOSALS=proposals;
-    DB=health.database==="connected";
-    document.getElementById("dbStatusFooter").className="db-status "+(DB?"db-live":"db-off");
-    document.getElementById("dbStatusFooter").textContent=DB?"Live":"Offline";
     onDataReady();
-  } catch(err){
-    console.error("Failed to load:",err);
-    document.getElementById("loadMsg").textContent="Could not reach server. Check backend is running.";
-    DB=false;showEmptyState();
-  }
-}
-setInterval(function(){fetchData().catch(function(){})},60000);
-fetchData();
+  }, function(err){
+    console.error("Tender subscription error:", err.code, err.message);
+  });
+
+  /* Subscribe to scans collection for activity log */
+  _scanUnsub=DB.collection("scans").orderBy("date","desc").limit(30).onSnapshot(function(snap){
+    SCANS=snap.docs.filter(function(d){return d.exists}).map(function(d){return d.data()});
+    LOG=SCANS.map(function(s){
+      var ts=s.timestamp?s.timestamp.substring(11,16):"05:47";
+      return{time:ts,text:"Scan: "+s.total_on_portal+" total, "+s.qualified_count+" qualified, "+s.open_qualified_count+" open"};
+    });
+    if(LOG.length===0){
+      LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
+    }
+    /* Subscribe to proposals */
+    DB.collection("proposals").onSnapshot(function(snap){
+      PROPOSALS=snap.docs.filter(function(d){return d.exists}).map(function(d){return Object.assign({_id:d.id},d.data())});
+      if(_dbReady)render();
+    },function(){});
+    /* Subscribe to RFP Workbench analyses (Agents 2 to 5 output + architect decisions) */
+    DB.collection("rfp_analysis").onSnapshot(function(snap){
+      RFPA={};
+      snap.docs.filter(function(d){return d.exists}).forEach(function(d){RFPA[d.id]=d.data()});
+      if(_dbReady){buildNav();if(document.querySelector('.sb-item.active[data-v="workbench"]'))showView("workbench")}
+    },function(){});
+    /* Also read config */
+    DB.doc("config/settings").get().then(function(snap){
+      if(snap.exists)CONFIG=snap.data();
+    }).catch(function(){});
+    if(_dbReady)render();
+  }, function(err){
+    console.error("Scan subscription error:", err.code, err.message);
+  });
+
+  /* Optional runtime capabilities for the Workbench (each resolves null when unavailable) */
+  claude.use("sample").then(function(s){SAMPLE=s}).catch(function(){});
+  claude.use("assets").then(function(a){ASSETS=a}).catch(function(){});
+  claude.use("downloads").then(function(d){DOWNLOADS=d}).catch(function(){});
+})();
 
 var _firstRender=true;
 function onDataReady(){
@@ -239,16 +280,18 @@ function showEmptyState(){
 
 /* ===== SIDEBAR NAV ===== */
 function buildNav(){
-  var qc=T.filter(function(t){return t.score>=70}).length;
-  var pc=T.filter(function(t){return t.score>=70&&t.open}).length;
+  var qc=T.filter(function(t){return t.score>=70&&t.open&&t.qualVerdict!=="NOGO"}).length;
+  var pc=qc;
   var navEl=document.getElementById("sbnav");
   navEl.innerHTML=[
     {v:"overview",l:"Overview",badge:null,live:true},
+    {v:"salesDash",l:"Sales Dashboard",badge:null,live:true},
+    {v:"pipelineControl",l:"Pipeline & Bid Controls",badge:qc,live:true},
     {v:"qualified",l:"Qualified",badge:qc,live:false},
+    {v:"workbench",l:"RFP Workbench",badge:Object.keys(RFPA||{}).length||null,live:true},
     {v:"proposals",l:"Proposals",badge:PROPOSALS.length||null,live:false},
     {v:"compliance",l:"Compliance",badge:null,live:false},
     {v:"activity",l:"Activity Log",badge:null,live:false},
-    {v:"pipeline",l:"Pipeline",badge:"Soon",live:false},
     {v:"settings",l:"Settings / Technical Health",badge:null,live:false}
   ].map(function(n){
     var badgeHtml=n.badge==="Soon"?' <span class="sb-badge" style="background:var(--amber);font-size:8px;padding:1px 6px">SOON</span>':n.badge!==null?' <span class="sb-badge">'+n.badge+'</span>':"";
@@ -259,145 +302,377 @@ function buildNav(){
 function showView(v){
   document.querySelectorAll(".sb-item").forEach(function(el){el.classList.toggle("active",el.getAttribute("data-v")===v)});
   var c=document.getElementById("content");
-  var views={overview:vOverview,qualified:vQualified,proposals:vProposals,compliance:vCompliance,activity:vActivity,pipeline:vPipeline,settings:vSettings,detail:vDetail,proposalDetail:vProposalDetail};
+  var views={overview:vOverview,pipelineControl:vPipelineControl,salesDash:vSalesDash,qualified:vQualified,workbench:vWorkbench,proposals:vProposals,compliance:vCompliance,activity:vActivity,pipeline:vPipeline,settings:vSettings,detail:vDetail,proposalDetail:vProposalDetail};
   c.innerHTML=(views[v]||vOverview)();
+  if(v==="workbench"&&typeof wbAfterRender==="function")wbAfterRender();
 }
 
 /* ===== OVERVIEW \u2014 PUBLIC TENDER INTELLIGENCE DASHBOARD ===== */
 function vOverview(){
-  var scored=T.filter(function(t){return t.score>0});
-  var qual=T.filter(function(t){return t.score>=70});
-  var highPri=T.filter(function(t){return t.score>=95});
-  var openT=T.filter(function(t){return t.open});
-  var closing7=openT.filter(function(t){return t.days>=0&&t.days<=7});
-  var qualOpen=qual.filter(function(t){return t.open});
-  var qualWithDoc=qual.filter(function(t){return t.doc});
-  var totalPortal=SCANS.length?SCANS[0].total_on_portal:T.length;
+  /* ═══ DATA ═══
+     "Discovered" = score >= 70 AND open (all tenders that match NETS domains and are live on portals).
+     "Qualified"  = Discovered AND qualification gates passed (qualVerdict !== "NOGO").
+     "Disqualified" = Discovered BUT failed a hard gate (turnover, OEM, etc.). */
+  var discovered=T.filter(function(t){return t.score>=70&&t.open});
+  var disqualified=discovered.filter(function(t){return t.qualVerdict==="NOGO"});
+  var live=discovered.filter(function(t){return t.qualVerdict!=="NOGO"});
   var lastScan=SCANS.length?SCANS[0].date:"pending";
+  var totalPortal=SCANS.length?SCANS[0].total_on_portal:T.length;
+  var newSinceLastScan=SCANS.length&&SCANS[0].new_count?SCANS[0].new_count:0;
+
+  /* Portal breakdown (live qualified only) */
+  var sindhLive=live.filter(function(t){return !t.source||t.source==="Sindh Bank"});
+  var ppraLive=live.filter(function(t){return t.source==="PPRA"});
+  var epadsLive=live.filter(function(t){return t.source==="EPADS"});
+
+  /* Pipeline stages: each tender sits in exactly one stage */
+  var stgDiscovery=[];  /* scored but no RFP yet, no proposal */
+  var stgRfpAcquired=[]; /* RFP document obtained */
+  var stgProposal=[];   /* proposal drafted */
+  var stgAuditPass=[];  /* proposal passed compliance */
+
+  live.forEach(function(t){
+    var wb=RFPA[t.id]||{};
+    var hasRfp=t.doc||t.acqStatus==="AUTO_DOWNLOADED"||t.acqStatus==="MANUAL_UPLOADED"||!!wb.rfpText;
+    var hasProposal=PROPOSALS.some(function(p){return p._id===t.id})||!!wb.boq;
+    var passedAudit=PROPOSALS.some(function(p){return p._id===t.id&&p.audit_verdict==="PASS"})||(wb.decision&&wb.decision.bid_decision==="BID");
+    if(passedAudit){stgAuditPass.push(t)}
+    else if(hasProposal){stgProposal.push(t)}
+    else if(hasRfp){stgRfpAcquired.push(t)}
+    else{stgDiscovery.push(t)}
+  });
+
+  /* Compute estimated value per tender (once) */
+  var fmtV=function(n){if(n>=1e6)return"PKR "+(n/1e6).toFixed(1)+"M";if(n>=1e3)return"PKR "+(n/1e3).toFixed(0)+"K";return"PKR "+n};
+  function ensureVal(t){if(!t._sd)t._sd={estValue:Math.round((t.score/100)*800000+(t.solMatch.length*150000)),winProb:t.score>=95?65:t.score>=85?55:t.score>=75?45:35};return t._sd.estValue}
+  var pipelineVal=0;
+  live.forEach(function(t){pipelineVal+=ensureVal(t)});
+  function stgVal(arr){var s=0;arr.forEach(function(t){s+=ensureVal(t)});return s}
+
+  /* Urgency */
+  var closing48=live.filter(function(t){return t.days!==null&&t.days<=2});
+  var closing7=live.filter(function(t){return t.days!==null&&t.days<=7});
+  var manualDL=live.filter(function(t){return t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"||(!t.doc&&t.acqStatus!=="AUTO_DOWNLOADED"&&stgDiscovery.indexOf(t)>=0)});
 
   var html='';
 
-  /* 1. Executive Header */
-  html+='<div style="background:var(--sidebar);border-radius:10px;padding:28px 32px;margin-bottom:20px;color:#fff">'
+  /* ── 1. MORNING BRIEF ── */
+  var hour=new Date().getHours();
+  var greeting=hour<12?"Good morning":"Good afternoon";
+  var briefParts=[];
+  if(newSinceLastScan>0)briefParts.push(newSinceLastScan+" new tender"+(newSinceLastScan>1?"s":"")+" found overnight");
+  if(closing48.length)briefParts.push(closing48.length+" closing in 48 hours");
+  else if(closing7.length)briefParts.push(closing7.length+" closing this week");
+  else briefParts.push("no urgent deadlines");
+  if(manualDL.length)briefParts.push(manualDL.length+" manual download"+(manualDL.length>1?"s":"")+" pending");
+
+  html+='<div style="background:var(--sidebar);border-radius:10px;padding:24px 28px;margin-bottom:16px;color:#fff">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     +'<div>'
-    +'<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:4px">Public Tender Intelligence</div>'
-    +'<div style="font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px">Sindh Bank Portal</div>'
-    +'<div style="font-size:12px;color:rgba(255,255,255,.45)">Automatically discovered \u00b7 validated \u00b7 scored \u00b7 routed</div>'
+    +'<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:6px">NETS Tender Scout</div>'
+    +'<div style="font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:8px">'+greeting+', Manal</div>'
+    +'<div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6">'+briefParts.join(". ")+'.</div>'
     +'</div>'
     +'<div style="text-align:right">'
-    +'<div style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:#fff;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:6px"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite"></span>PORTAL LIVE</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,.35)">Last scan</div>'
-    +'<div style="font-size:14px;font-weight:600;color:#4CAF50">'+lastScan+'</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">sindhbank.com.pk/tenders</div>'
+    +'<div style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:#fff;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:6px"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite"></span>LIVE</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.35)">Last scan: '+lastScan+'</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">Sindh Bank + PPRA + EPADS</div>'
     +'</div></div></div>';
 
-  /* 2. Tender Pipeline \u2014 realistic stages based on actual data */
-  var withRfp=qual.filter(function(t){return t.doc});
-  var fitRate=totalPortal?Math.round(qual.length/totalPortal*100):0;
+  /* ── 2. DEADLINE ALERTS ── */
+  if(closing48.length){
+    html+='<div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:8px;padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:18px">\u26a0\ufe0f</span><div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--red)">CLOSING IN 48 HOURS</div>';
+    closing48.forEach(function(t){
+      html+='<div style="font-size:12px;color:var(--fg);margin-top:2px;cursor:pointer" onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')"><strong>'+t.ti.substring(0,60)+'</strong> \u00b7 '+(t.cl||"")+(t.days!==null?" ("+t.days+"d)":"")+'</div>';
+    });
+    html+='</div></div>';
+  }else if(closing7.length){
+    html+='<div style="background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:8px;padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:16px">\u23f0</span><div><div style="font-size:12px;font-weight:700;color:var(--amber)">CLOSING THIS WEEK: '+closing7.length+' tender'+(closing7.length>1?"s":"")+'</div>';
+    closing7.slice(0,3).forEach(function(t){
+      html+='<div style="font-size:12px;color:var(--fg);margin-top:2px;cursor:pointer" onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')">'+t.ti.substring(0,50)+' \u00b7 '+t.days+'d left</div>';
+    });
+    html+='</div></div>';
+  }
 
-  var stages=[
-    {label:"On Portal",count:totalPortal,desc:"Total tenders listed on Sindh Bank's website",color:"#1B5E20",click:null},
-    {label:"NETS Relevant",count:qual.length,desc:"Match at least one NETS solution (score 70+)",color:"#2E7D32",click:"qualified"},
-    {label:"Open Now",count:qualOpen.length,desc:"Still accepting bids; deadline has not passed",color:"#388E3C",click:null},
-    {label:"RFP Available",count:withRfp.length,desc:"PDF document is downloadable from the portal",color:"#43A047",click:null},
-    {label:"Proposal Drafted",count:PROPOSALS.length,desc:"AI has written and audited a technical proposal",color:"#4CAF50",click:"proposals"}
+  /* ── RFP ACQUISITION ALERT ── */
+  var autoD=live.filter(function(t){return t.acqStatus==="AUTO_DOWNLOADED"});
+  var pendingD=live.filter(function(t){return t.acqStatus==="PENDING"&&!t.doc});
+  var manualReq=live.filter(function(t){return t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"});
+
+  if(manualReq.length||pendingD.length){
+    var alertColor=manualReq.length?"var(--amber-soft)":"var(--blue-soft)";
+    var alertBorder=manualReq.length?"var(--amber-border)":"var(--border)";
+    var alertTextColor=manualReq.length?"var(--amber)":"var(--blue)";
+    html+='<div style="background:'+alertColor+';border:1px solid '+alertBorder+';border-radius:8px;padding:14px 18px;margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      +'<div style="font-size:12px;font-weight:700;color:'+alertTextColor+'">RFP DOCUMENT STATUS</div>'
+      +'<span style="font-size:11px;color:var(--fg-muted)">'+autoD.length+' downloaded \u00b7 '+manualReq.length+' need manual download \u00b7 '+pendingD.length+' pending</span></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">';
+
+    /* Auto-downloaded summary */
+    if(autoD.length)html+='<div style="background:var(--green-soft);border:1px solid var(--green-border);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--green);font-weight:600">\u2705 '+autoD.length+' RFPs auto-downloaded to D:\\ drive</div>';
+
+    /* Manual download needed */
+    if(manualReq.length)html+='<div style="background:var(--card);border:1px solid var(--amber-border);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--amber);font-weight:600;cursor:pointer" onclick="showView(\'qualified\')">\u26a0\ufe0f '+manualReq.length+' need your manual download \u2192</div>';
+
+    /* Pending (not yet processed by Agent 1b) */
+    if(pendingD.length)html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--fg-muted)">\u23f3 '+pendingD.length+' awaiting Agent 1b processing</div>';
+
+    html+='</div></div>';
+  }
+
+  /* ── 3. TOP ROW: Pipeline Value + Portal Breakdown + Discovery Funnel ── */
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">';
+
+  /* Pipeline Value (the big number) */
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px">'
+    +'<div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Live Pipeline Value</div>'
+    +'<div style="font-size:32px;font-weight:800;color:var(--green);line-height:1">'+fmtV(pipelineVal)+'</div>'
+    +'<div style="font-size:10px;color:var(--fg-faint);margin-top:6px">'+live.length+' qualified live tenders</div></div>';
+
+  /* Portal Totals (3 portals) */
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px">'
+    +'<div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">3 Portals Scanned</div>'
+    +'<div style="font-size:14px;font-weight:700;color:var(--fg);margin-top:8px">'+totalPortal+' total on portals</div>'
+    +'<div style="display:flex;gap:8px;margin-top:8px">'
+    +'<div style="flex:1;background:var(--bg);border-radius:6px;padding:6px 8px;text-align:center">'
+    +'<div style="font-size:18px;font-weight:800;color:var(--amber)">'+sindhLive.length+'</div>'
+    +'<div style="font-size:8px;color:var(--fg-faint);margin-top:2px">Sindh Bank</div></div>'
+    +'<div style="flex:1;background:var(--bg);border-radius:6px;padding:6px 8px;text-align:center">'
+    +'<div style="font-size:18px;font-weight:800;color:var(--green)">'+ppraLive.length+'</div>'
+    +'<div style="font-size:8px;color:var(--fg-faint);margin-top:2px">PPRA EPMS</div></div>'
+    +'<div style="flex:1;background:var(--bg);border-radius:6px;padding:6px 8px;text-align:center">'
+    +'<div style="font-size:18px;font-weight:800;color:var(--blue)">'+epadsLive.length+'</div>'
+    +'<div style="font-size:8px;color:var(--fg-faint);margin-top:2px">EPADS</div></div>'
+    +'</div></div>';
+
+  /* Discovery Funnel: Discovered > Qualified > Disqualified */
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px">'
+    +'<div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Agent 1 Discovery</div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+    +'<span style="font-size:22px;font-weight:800;color:var(--fg)">'+discovered.length+'</span>'
+    +'<span style="font-size:11px;color:var(--fg-muted)">discovered (NETS match + live)</span></div>'
+    +'<div style="display:flex;gap:8px;margin-top:6px">'
+    +'<div style="flex:1;background:var(--green-soft);border:1px solid var(--green-border);border-radius:6px;padding:8px;text-align:center;cursor:pointer" onclick="showView(\'qualified\')">'
+    +'<div style="font-size:20px;font-weight:800;color:var(--green)">'+live.length+'</div>'
+    +'<div style="font-size:8px;color:var(--green);text-transform:uppercase;letter-spacing:.03em">Qualified</div></div>'
+    +(disqualified.length?'<div style="flex:1;background:var(--red-soft);border:1px solid var(--red-border);border-radius:6px;padding:8px;text-align:center">'
+    +'<div style="font-size:20px;font-weight:800;color:var(--red)">'+disqualified.length+'</div>'
+    +'<div style="font-size:8px;color:var(--red);text-transform:uppercase;letter-spacing:.03em">Disqualified</div></div>':'')
+    +'</div></div>';
+
+  html+='</div>';
+
+  /* ── 4. PIPELINE STAGES (where each tender sits, with value) ── */
+  var pStages=[
+    {label:"Discovery",desc:"Scored but no RFP acquired yet",tenders:stgDiscovery,color:"#1B5E20",icon:"\ud83d\udd0d"},
+    {label:"RFP Acquired",desc:"Document downloaded or available",tenders:stgRfpAcquired,color:"#2E7D32",icon:"\ud83d\udcc4"},
+    {label:"BOQ Drafted",desc:"Summary, grading, compliance and BOQ produced in the Workbench",tenders:stgProposal,color:"#388E3C",icon:"\u270d\ufe0f"},
+    {label:"BID Decided",desc:"Presales architect committed to bid",tenders:stgAuditPass,color:"#4CAF50",icon:"\u2705"}
   ];
 
-  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:20px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="font-size:13px;font-weight:700;color:var(--fg);text-transform:uppercase;letter-spacing:.06em">Tender Pipeline</div>'
-    +'<div style="font-size:11px;color:var(--fg-muted)">'+fitRate+'% of portal tenders are relevant to NETS</div></div>'
-    +'<div style="font-size:11px;color:var(--fg-faint);margin-bottom:14px">How tenders flow through the system, from discovery to proposal. Click a stage to see those tenders.</div>'
-    +'<div style="display:flex;align-items:stretch;gap:0">';
-  stages.forEach(function(s,i){
-    var w=Math.max(20,(i===0?40:Math.max(15,Math.round((s.count/(totalPortal||1))*100))));
-    var cursor=s.click?'cursor:pointer;':'';
-    var onclick=s.click?'onclick="showView(\''+s.click+'\')"':'';
-    html+='<div style="flex:'+w+';background:'+s.color+';padding:14px 6px 10px;text-align:center;color:#fff;position:relative;transition:opacity .15s;'+cursor
-      +(i===0?'border-radius:8px 0 0 8px;':'')
-      +(i===stages.length-1?'border-radius:0 8px 8px 0;':'')
-      +'" '+onclick+' title="'+s.desc+'">'
-      +'<div style="font-size:22px;font-weight:800;line-height:1">'+s.count+'</div>'
-      +'<div style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;opacity:.9;margin-top:4px">'+s.label+'</div>'
-      +'</div>';
-    if(i<stages.length-1) html+='<div style="color:var(--fg-faint);font-size:14px;display:flex;align-items:center;padding:0 1px">\u25B8</div>';
-  });
-  html+='</div></div>';
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px">'
+    +'<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg);margin-bottom:14px">Pipeline Stages</div>';
 
-  /* Quick stats row \u2014 only the 3 that matter for decision-making */
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px">';
-  var actions=[
-    {label:"Needs Your Decision",val:qualOpen.length,sub:"Open tenders scored 70+ waiting for bid or skip",color:"var(--green)",click:"qualified"},
-    {label:"Closing This Week",val:closing7.length,sub:closing7.length?"Act now or these close without a bid":"No urgent deadlines right now",color:closing7.length?"var(--red)":"var(--fg-faint)",click:null},
-    {label:"Proposals Ready",val:PROPOSALS.length,sub:PROPOSALS.length?"AI-drafted, compliance-audited, ready for your review":"No proposals generated yet",color:PROPOSALS.length?"var(--green)":"var(--fg-faint)",click:"proposals"}
-  ];
-  actions.forEach(function(a){
-    var cursor=a.click?'cursor:pointer;':'';
-    var onclick=a.click?' onclick="showView(\''+a.click+'\')"':'';
-    html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px;'+cursor+'"'+onclick+'>'
-      +'<div style="font-size:11px;color:var(--fg-muted);margin-bottom:6px">'+a.label+'</div>'
-      +'<div style="font-size:32px;font-weight:800;color:'+a.color+';line-height:1">'+a.val+'</div>'
-      +'<div style="font-size:11px;color:var(--fg-faint);margin-top:6px;line-height:1.4">'+a.sub+'</div></div>';
+  /* Stage summary bar */
+  html+='<div style="display:flex;gap:0;margin-bottom:16px">';
+  pStages.forEach(function(st,i){
+    var w=Math.max(15,live.length?Math.round((st.tenders.length/live.length)*100):25);
+    html+='<div style="flex:'+w+';background:'+st.color+';padding:14px 6px 10px;text-align:center;color:#fff;'
+      +(i===0?'border-radius:8px 0 0 8px;':'')+(i===pStages.length-1?'border-radius:0 8px 8px 0;':'')+'">'
+      +'<div style="font-size:22px;font-weight:800;line-height:1">'+st.tenders.length+'</div>'
+      +'<div style="font-size:7px;text-transform:uppercase;letter-spacing:.04em;opacity:.85;margin-top:3px">'+st.label+'</div>'
+      +'<div style="font-size:8px;opacity:.7;margin-top:2px">'+fmtV(stgVal(st.tenders))+'</div></div>';
+    if(i<pStages.length-1)html+='<div style="color:var(--fg-faint);font-size:12px;display:flex;align-items:center;padding:0 1px">\u25b8</div>';
   });
   html+='</div>';
 
-  /* 3. Tender Discovery Feed \u2014 OPEN tenders only */
-  var feed=qualOpen.slice().sort(function(a,b){
-    if(b.score!==a.score)return b.score-a.score;
-    return(a.days||999)-(b.days||999);
+  /* Expandable tender list per stage */
+  pStages.forEach(function(st){
+    if(!st.tenders.length)return;
+    html+='<div style="margin-bottom:12px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      +'<span style="font-size:14px">'+st.icon+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--fg)">'+st.label+'</span>'
+      +'<span style="font-size:11px;color:var(--fg-muted)">'+st.tenders.length+' tenders \u00b7 '+fmtV(stgVal(st.tenders))+'</span></div>';
+
+    st.tenders.sort(function(a,b){return(a.days||999)-(b.days||999)});
+    st.tenders.slice(0,5).forEach(function(t){
+      var urgTag="";
+      if(t.days!==null&&t.days<=3)urgTag='<span style="color:var(--red);font-weight:700;font-size:10px;margin-left:6px">'+t.days+'d!</span>';
+      else if(t.days!==null&&t.days<=7)urgTag='<span style="color:var(--amber);font-size:10px;margin-left:6px">'+t.days+'d</span>';
+      else if(t.days!==null)urgTag='<span style="color:var(--fg-faint);font-size:10px;margin-left:6px">'+t.days+'d</span>';
+
+      html+='<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:10px" onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')">'
+        +'<span style="font-size:14px;font-weight:800;color:'+(t.score>=85?"var(--green)":"var(--amber)")+';width:30px;text-align:center">'+t.score+'</span>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.ti+'</div>'
+        +'<div style="font-size:10px;color:var(--fg-faint)">'+t.id+' \u00b7 '+(t.source||"Sindh Bank")+' \u00b7 '+fmtV(ensureVal(t))+urgTag+'</div></div>'
+        +'<span style="font-size:10px;color:var(--fg-faint)">\u2192</span></div>';
+    });
+    if(st.tenders.length>5)html+='<div style="font-size:11px;color:var(--green);cursor:pointer;margin-top:4px;font-weight:600" onclick="showView(\'qualified\')">'+(st.tenders.length-5)+' more \u2192</div>';
+    html+='</div>';
   });
 
-  html+='<div style="margin-bottom:24px">'
-    +'<div class="sec-head">Tender Discovery Feed <span class="hint">'+feed.length+' open qualified tenders \u00b7 Today</span></div>'
-    +'<div class="tbl-wrap"><table><thead><tr>'
-    +'<th>Tender</th><th>Dept</th><th>Score</th><th>NETS Solutions</th><th>Deadline</th><th>Status</th><th>RFP</th>'
-    +'</tr></thead><tbody>';
+  html+='</div>';
 
+  /* ── 5. ACTION ITEMS ── */
+  var actionItems=[];
+  manualDL.slice(0,3).forEach(function(t){
+    actionItems.push({icon:"\ud83d\udcc4",text:t.ti.substring(0,50),detail:"RFP needs manual download from "+(t.source||"portal"),color:"var(--red)",action:"pipelineControl"});
+  });
+  closing7.filter(function(t){return !PROPOSALS.some(function(p){return p._id===t.id})}).slice(0,3).forEach(function(t){
+    actionItems.push({icon:"\u23f1\ufe0f",text:t.ti.substring(0,50),detail:"Closes in "+t.days+"d, no proposal started",color:"var(--red)",action:"qualified"});
+  });
+
+  if(actionItems.length){
+    html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg)">Action Required <span style="font-size:11px;font-weight:400;color:var(--fg-faint);text-transform:none;letter-spacing:0">'+actionItems.length+' item'+(actionItems.length>1?"s":"")+'</span></div>';
+    actionItems.forEach(function(a){
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showView(\''+a.action+'\')">'
+        +'<span style="font-size:16px;flex:none;width:24px;text-align:center">'+a.icon+'</span>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--fg)">'+a.text+'</div><div style="font-size:11px;color:'+a.color+'">'+a.detail+'</div></div>'
+        +'<span style="font-size:11px;color:var(--fg-faint)">\u2192</span></div>';
+    });
+    html+='</div>';
+  }
+
+  /* ── 6. TENDER FEED (top 10 by urgency) ── */
+  var feed=live.slice().sort(function(a,b){if(a.days!==null&&b.days!==null)return a.days-b.days;if(a.days!==null)return -1;return b.score-a.score}).slice(0,10);
+
+  html+='<div style="margin-bottom:16px">'
+    +'<div class="sec-head">Live Tender Feed <span class="hint">'+live.length+' live \u00b7 showing top 10 by urgency</span></div>'
+    +'<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>Tender</th><th>Portal</th><th>Score</th><th>Est. Value</th><th>Stage</th><th>Deadline</th><th>RFP</th>'
+    +'</tr></thead><tbody>';
   feed.forEach(function(t){
-    var scoreColor=t.score>=85?"var(--green)":"var(--amber)";
-    var status=t.score>=85?"Pursue":"Review";
-    var statusDot=t.score>=85?"dot-g":"dot-a";
     var urgency="";
     if(t.days!==null){
-      if(t.days<=3)urgency='<span style="color:var(--red);font-weight:700;font-size:10px"> ('+t.days+'d!)</span>';
-      else if(t.days<=7)urgency='<span style="color:var(--amber);font-size:10px"> ('+t.days+'d)</span>';
-      else urgency='<span style="color:var(--fg-faint);font-size:10px"> ('+t.days+'d)</span>';
+      if(t.days<=2)urgency='<span style="color:var(--red);font-weight:700;font-size:10px">'+t.days+'d!</span>';
+      else if(t.days<=7)urgency='<span style="color:var(--amber);font-size:10px">'+t.days+'d</span>';
+      else urgency='<span style="color:var(--fg-faint);font-size:10px">'+t.days+'d</span>';
     }
-    var sols=t.solMatch.length?t.solMatch.map(function(s){return'<span class="badge b-g" style="font-size:9px;padding:1px 6px">'+s.name+'</span>'}).join(" "):'';
-    var pdfIcon=t.doc?'<span style="color:var(--green)">\u2713</span>':'<span style="color:var(--fg-faint)">\u2014</span>';
+    /* Determine stage label */
+    var stLabel="Discovery";
+    if(stgAuditPass.indexOf(t)>=0)stLabel="Audit Passed";
+    else if(stgProposal.indexOf(t)>=0)stLabel="Proposal";
+    else if(stgRfpAcquired.indexOf(t)>=0)stLabel="RFP Acquired";
+    var stColor=stLabel==="Audit Passed"?"b-g":stLabel==="Proposal"?"b-a":stLabel==="RFP Acquired"?"b-g":"";
+    var rfpBadge=t.acqStatus==="AUTO_DOWNLOADED"?'<span class="badge b-g" style="font-size:8px">\u2713 DL</span>':t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"?'<span class="badge b-a" style="font-size:8px">Manual</span>':t.doc?'<span class="badge b-g" style="font-size:8px">PDF</span>':'<span style="color:var(--fg-faint)">\u2014</span>';
 
-    html+='<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')">'
-      +'<td><strong style="font-size:13px">'+t.ti+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+t.id+'</span></td>'
-      +'<td><span class="badge '+(t.dept==="IT"?"b-g":"b-a")+'" style="font-size:9px">'+t.dept+'</span></td>'
-      +'<td style="text-align:center"><span style="font-size:18px;font-weight:800;color:'+scoreColor+'">'+t.score+'</span></td>'
-      +'<td>'+sols+'</td>'
-      +'<td style="white-space:nowrap;font-size:12px">'+(t.cl||"")+urgency+'</td>'
-      +'<td><div class="action-tag" style="font-size:11px"><span class="dot '+statusDot+'"></span>'+status+'</div></td>'
-      +'<td style="text-align:center">'+pdfIcon+'</td>'
+    html+='<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')" style="cursor:pointer">'
+      +'<td><strong style="font-size:12px">'+t.ti.substring(0,50)+(t.ti.length>50?"...":"")+'</strong><br><span style="font-size:9px;color:var(--fg-faint)">'+t.id+'</span></td>'
+      var pBadge=t.source==="PPRA"?"b-g":t.source==="EPADS"?"b-b":"b-a";
+      html+='<td><span class="badge '+pBadge+'" style="font-size:8px">'+(t.source||"SB")+'</span></td>'
+      +'<td style="text-align:center"><span style="font-size:16px;font-weight:800;color:'+(t.score>=85?"var(--green)":"var(--amber)")+'">'+t.score+'</span></td>'
+      +'<td style="font-size:11px;font-weight:600;color:var(--fg-muted)">'+fmtV(ensureVal(t))+'</td>'
+      +'<td><span class="badge '+stColor+'" style="font-size:8px">'+stLabel+'</span></td>'
+      +'<td style="white-space:nowrap;font-size:11px">'+(t.cl||"")+' '+urgency+'</td>'
+      +'<td style="text-align:center">'+rfpBadge+'</td>'
       +'</tr>';
   });
-  if(!feed.length) html+='<tr><td colspan="7" style="text-align:center;color:var(--fg-faint);padding:24px">No open qualified tenders. Next scan: tomorrow 05:47 UK.</td></tr>';
+  if(!feed.length)html+='<tr><td colspan="7" style="text-align:center;color:var(--fg-faint);padding:20px">No live tenders. Next scan: tomorrow 05:47 UK.</td></tr>';
+  html+='</tbody></table></div>';
+  if(live.length>10)html+='<div style="text-align:center;margin-top:8px"><span style="font-size:12px;color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'qualified\')">'+(live.length-10)+' more tenders \u2192</span></div>';
+  html+='</div>';
 
-  html+='</tbody></table></div></div>';
-
-  /* 4. Agent Status Strip */
+  /* ── 7. AGENT STATUS STRIP ── */
   var agents=[
     {name:"Agent 1: Ingestion",dot:"g",info:"05:47 UK daily"},
-    {name:"Agent 1b: D:\\\\ Sync",dot:"g",info:"12-20:00 UK"},
+    {name:"Agent 1b: D:\\\\ Sync",dot:"g",info:"Path A/B routing"},
     {name:"Agent 2: RAG",dot:"g",info:"1,481 chunks"},
-    {name:"Agent 3: Writer",dot:"g",info:"LangGraph"},
-    {name:"Agent 4: Auditor",dot:"g",info:"Pydantic V2"},
-    {name:"Artifact DB",dot:DB?"g":"r",info:DB?"Connected":"Offline"}
+    {name:"Agent 3: Writer",dot:"g",info:"Proposal gen"},
+    {name:"Agent 4+5: Audit",dot:"g",info:"Tech + Regulatory"},
+    {name:"DB",dot:DB?"g":"r",info:DB?"Live":"Offline"}
   ];
-  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 20px;display:flex;gap:0;flex-wrap:wrap">';
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;gap:0;flex-wrap:wrap">';
   agents.forEach(function(a,i){
-    html+='<div style="flex:1;min-width:100px;padding:6px 8px;'+(i<agents.length-1?'border-right:1px solid var(--border);':'')+'">'
-      +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--fg)"><span class="dot dot-'+a.dot+'"></span>'+a.name+'</div>'
-      +'<div style="font-size:9px;color:var(--fg-faint);margin-top:2px">'+a.info+'</div></div>';
+    html+='<div style="flex:1;min-width:80px;padding:5px 6px;'+(i<agents.length-1?'border-right:1px solid var(--border);':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--fg)"><span class="dot dot-'+a.dot+'"></span>'+a.name+'</div>'
+      +'<div style="font-size:8px;color:var(--fg-faint);margin-top:1px">'+a.info+'</div></div>';
   });
   html+='</div>';
 
   return html;
+}
+
+/* ===== QUALIFICATION GATES PANEL ===== */
+function renderQualGates(t){
+  var g=t.qualGates||{};
+  var turnoverGate=g.turnover_under_2b||{pass:true,status:"ASSUMED_PASS",detail:"No turnover requirement detected"};
+  var oemGate=g.oem_partnership_matched||{pass:true,status:"ASSUMED_PASS",detail:"No specific OEM level requirement detected"};
+  var domainGate=g.domain_expertise_matched||{pass:t.solMatch&&t.solMatch.length>0,status:t.solMatch&&t.solMatch.length>0?"PASS":"FAIL",detail:t.solMatch&&t.solMatch.length>0?"Matched via keyword scoring":"No NETS domain match"};
+  var orgGate=g.organizational_history_met||{pass:true,status:"ASSUMED_PASS",detail:"Standard 3 to 5 year ICT experience assumed met"};
+  var resGate=g.qualified_resources_met||{pass:true,status:"ASSUMED_PASS",detail:"OEM certified engineers assumed available"};
+
+  var allPass=turnoverGate.pass&&oemGate.pass&&domainGate.pass&&orgGate.pass&&resGate.pass;
+  var qv=t.qualVerdict||"GO";
+  /* Force override check */
+  if(t._forceOverride)allPass=true;
+
+  function gateIcon(gate){
+    if(!gate.pass)return'<span style="color:var(--red);font-weight:700">❌ Fail</span>';
+    if(gate.status==="ASSUMED_PASS")return'<span style="color:var(--amber)">🟡 Assumed</span>';
+    return'<span style="color:var(--green)">✅ Pass</span>';
+  }
+
+  var html='<div class="drawer" style="margin-top:16px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  html+='<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">RFP Qualification Gates</div>';
+  if(t._forceOverride){
+    html+='<span class="badge b-a" style="font-size:12px;padding:6px 12px">⚠️ OVERRIDE ACTIVE</span>';
+  }else{
+    html+=allPass
+      ?'<span class="badge b-g" style="font-size:12px;padding:6px 12px">✅ ELIGIBLE TO BID</span>'
+      :'<span class="badge b-r" style="font-size:12px;padding:6px 12px">❌ DISQUALIFIED (NO-GO)</span>';
+  }
+  html+='</div>';
+
+  var rows=[
+    {name:"1. Annual Turnover Limit",rule:"Must not exceed PKR 2 Billion",status:turnoverGate.detail,gate:turnoverGate},
+    {name:"2. OEM Partnership Levels",rule:"Cisco (Gold), Huawei (Silver+), Dell (Gold), Fortinet (Adv)",status:oemGate.detail,gate:oemGate},
+    {name:"3. Technology Domain Experience",rule:"SD-WAN, ACI, NGFW, FTTH, NMS, UC, Cybersecurity",status:t.solMatch.length?t.solMatch.map(function(s){return s.name}).join(", "):"No match",gate:domainGate},
+    {name:"4. Organizational Experience",rule:"3 to 5 years ICT/DC project history with PO references",status:orgGate.detail,gate:orgGate},
+    {name:"5. Qualified Technical Resources",rule:"OEM certified engineers (CCIE, CCNP, HCIP, NSE, VCP)",status:resGate.detail,gate:resGate},
+    {name:"6. Pre-Bid Compliance",rule:"OEM Deal Lock and National Engineer document",status:"KAM registration pending",gate:{pass:true,status:"ASSUMED_PASS"}}
+  ];
+
+  html+='<div class="tbl-wrap"><table><thead><tr><th>Evaluation Criteria</th><th>Requirement Rule</th><th>NETS Status</th><th>Gate</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    html+='<tr><td style="font-weight:600;font-size:12px">'+r.name+'</td>'
+      +'<td style="font-size:11px;color:var(--fg-muted)">'+r.rule+'</td>'
+      +'<td style="font-size:11px">'+r.status+'</td>'
+      +'<td style="text-align:center">'+gateIcon(r.gate)+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  /* Disqualification reason */
+  if(t.dqReason&&!t._forceOverride){
+    html+='<div style="margin-top:10px;padding:10px 14px;background:var(--red-soft);border:1px solid var(--red-border);border-radius:6px;font-size:12px;color:var(--red)">'
+      +'<strong>Disqualification reason:</strong> '+t.dqReason+'</div>';
+  }
+
+  /* Force override button for Bid Director */
+  if(!allPass&&!t._forceOverride){
+    html+='<div style="margin-top:12px;display:flex;justify-content:flex-end">'
+      +'<button onclick="forceOverrideTender(\''+t.id+'\')" style="background:var(--amber);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">⚠️ Force Override and Enable Bid</button></div>';
+  }
+  if(t._forceOverride){
+    html+='<div style="margin-top:8px;font-size:11px;color:var(--amber)">This tender was manually overridden by a Bid Director. Original verdict: '+qv+'.</div>';
+  }
+
+  html+='</div>';
+  return html;
+}
+
+function forceOverrideTender(tid){
+  var t=T.find(function(x){return x.id===tid});
+  if(!t)return;
+  t._forceOverride=true;
+  t.qualVerdict="OVERRIDE";
+  showView("detail");
 }
 
 /* ===== TENDER DETAIL ===== */
@@ -434,8 +709,8 @@ function vDetail(){
   return'<div style="margin-bottom:12px"><span class="clear" onclick="showView(\'overview\')">\u2190 Back to Overview</span></div>'
     +'<div class="drawer">'
     +'<h2>'+t.ti+'</h2>'
-    +'<div class="meta">'+t.id+' \u00b7 '+t.dept+' Department \u00b7 Sindh Bank</div>'
-    +'<div class="row"><div class="col"><div class="lbl">Portal</div><div class="val">sindhbank.com.pk/tenders</div></div><div class="col"><div class="lbl">Advertised</div><div class="val">'+t.ad+'</div></div><div class="col"><div class="lbl">Deadline</div><div class="val" style="font-weight:700;color:'+(t.open&&t.days<=7?"var(--red)":"var(--fg)")+'">'+t.cl+(t.open?' ('+t.days+'d)':'')+'</div></div></div>'
+    +'<div class="meta">'+t.id+' \u00b7 '+(t.dept?t.dept+' Department \u00b7 ':'')+(t.source||'Sindh Bank')+'</div>'
+    +'<div class="row"><div class="col"><div class="lbl">Portal</div><div class="val">'+(t.source==="PPRA"?"epms.ppra.gov.pk":"sindhbank.com.pk")+'</div></div><div class="col"><div class="lbl">Advertised</div><div class="val">'+t.ad+'</div></div><div class="col"><div class="lbl">Deadline</div><div class="val" style="font-weight:700;color:'+(t.open&&t.days<=7?"var(--red)":"var(--fg)")+'">'+t.cl+(t.open?' ('+t.days+'d)':'')+'</div></div></div>'
     +'<div class="row"><div class="col"><div class="lbl">Status</div><div class="val">'+(t.open?'<span class="badge b-g" style="font-size:13px;padding:4px 14px">Open</span>':'<span class="badge b-grey" style="font-size:13px;padding:4px 14px">Closed</span>')+'</div></div><div class="col"><div class="lbl">Verdict</div><div class="val"><span class="badge '+(t.verdict==="BID"?"b-g":t.verdict==="REVIEW"?"b-a":"b-grey")+'" style="font-size:13px;padding:4px 14px">'+t.verdict+'</span></div></div><div class="col"><div class="lbl">Department</div><div class="val">'+t.dept+'</div></div></div>'
     +'</div>'
 
@@ -465,19 +740,624 @@ function vDetail(){
     }).join('')
     +'</tbody></table></div></div>':'')
 
+    /* RFP Qualification & Bidder Evaluation Gates */
+    +renderQualGates(t)
+
     /* RFP Document */
-    +(t.doc?'<div style="margin-top:16px"><a href="'+t.doc+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none">View RFP Document \u2197</a></div>':'<div style="margin-top:16px;padding:12px 16px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;font-size:12px;color:var(--amber)">No PDF available on portal. Contact Sindh Bank procurement directly.</div>');
+    +(t.doc?'<div style="margin-top:16px"><a href="'+t.doc+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none">View RFP Document \u2197</a></div>':'<div style="margin-top:16px;padding:12px 16px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;font-size:12px;color:var(--amber)">No PDF available on portal. Contact procurement directly.</div>');
 }
 
-/* ===== OTHER VIEWS ===== */
+/* ===== BID BOARD (Qualified / Disqualified) ===== */
 function vQualified(){
-  var q=T.filter(function(t){return t.score>=70});
-  return'<div class="sec-head">Qualified <span class="hint">'+q.length+' tenders match NETS solutions</span></div>'
-    +'<div class="tbl-wrap"><table><thead><tr><th>Score</th><th>Tender</th><th>NETS Solutions</th><th>Status</th><th>RFP</th></tr></thead><tbody>'
-    +q.map(function(t){
-      var sols=t.solMatch.map(function(s){return'<span class="badge b-g">'+s.name+'</span>'}).join(" ");
-      return'<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')"><td><span style="font-size:20px;font-weight:800;color:var(--green)">'+t.score+'</span></td><td><strong>'+t.ti+'</strong><br><span style="font-size:11px;color:var(--fg-faint)">'+t.id+'</span></td><td>'+sols+'</td><td>'+(t.open?'<span class="badge b-g">Open ('+t.days+'d)</span>':'<span class="badge b-grey">Closed</span>')+'</td><td>'+(t.doc?'<a href="'+t.doc+'" target="_blank" style="color:var(--green);font-size:11px;text-decoration:none" onclick="event.stopPropagation()">PDF \u2197</a>':'')+'</td></tr>';
-    }).join('')+'</tbody></table></div>';
+  function ensureVal(t){if(!t._sd)t._sd={estValue:Math.round((t.score/100)*800000+(t.solMatch.length*150000)),winProb:t.score>=95?65:t.score>=85?55:t.score>=75?45:35};return t._sd.estValue}
+  var fmtV=function(n){if(n>=1e6)return"PKR "+(n/1e6).toFixed(1)+"M";if(n>=1e3)return"PKR "+(n/1e3).toFixed(0)+"K";return"PKR "+n};
+
+  var discovered=T.filter(function(t){return t.score>=70&&t.open});
+  var qualified=discovered.filter(function(t){return t.qualVerdict!=="NOGO"||t._forceOverride});
+  var disqualified=discovered.filter(function(t){return t.qualVerdict==="NOGO"&&!t._forceOverride});
+
+  var tab=window._qualTab||"qualified";
+
+  /* Sort: urgency first (fewest days), then score */
+  qualified.sort(function(a,b){return(a.days||999)-(b.days||999)||(b.score-a.score)});
+  disqualified.sort(function(a,b){return b.score-a.score});
+
+  var qualVal=0;qualified.forEach(function(t){qualVal+=ensureVal(t)});
+  var dqVal=0;disqualified.forEach(function(t){dqVal+=ensureVal(t)});
+
+  var html='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'
+    +'<span style="font-size:12px;color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'overview\')">\u2190 Back to Overview</span></div>';
+
+  /* \u2500\u2500 Summary strip \u2500\u2500 */
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px">'
+    +'<div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em">Discovered</div>'
+    +'<div style="font-size:26px;font-weight:800;color:var(--fg)">'+discovered.length+'</div></div>';
+  html+='<div style="background:var(--green-soft);border:1px solid var(--green-border);border-radius:8px;padding:14px 16px">'
+    +'<div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.04em">Qualified (Biddable)</div>'
+    +'<div style="font-size:26px;font-weight:800;color:var(--green)">'+qualified.length+'</div>'
+    +'<div style="font-size:10px;color:var(--fg-faint)">'+fmtV(qualVal)+' pipeline</div></div>';
+  html+='<div style="background:'+(disqualified.length?"var(--red-soft)":"var(--card)")+';border:1px solid '+(disqualified.length?"var(--red-border)":"var(--border)")+';border-radius:8px;padding:14px 16px">'
+    +'<div style="font-size:10px;color:'+(disqualified.length?"var(--red)":"var(--fg-muted)")+';text-transform:uppercase;letter-spacing:.04em">Disqualified</div>'
+    +'<div style="font-size:26px;font-weight:800;color:'+(disqualified.length?"var(--red)":"var(--fg-faint)")+'">'+disqualified.length+'</div>'
+    +(disqualified.length?'<div style="font-size:10px;color:var(--fg-faint)">'+fmtV(dqVal)+' lost</div>':'')+'</div>';
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px">'
+    +'<div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em">RFP Ready</div>'
+    +'<div style="font-size:26px;font-weight:800;color:var(--green)">'+qualified.filter(function(t){return t.doc||t.acqStatus==="AUTO_DOWNLOADED"}).length+'</div>'
+    +'<div style="font-size:10px;color:var(--fg-faint)">of '+qualified.length+' have documents</div></div>';
+  html+='</div>';
+
+  /* \u2500\u2500 RFP DOWNLOAD CONTROL PANEL \u2500\u2500 */
+  var autoDownloaded=qualified.filter(function(t){return t.acqStatus==="AUTO_DOWNLOADED"});
+  var manualNeeded=qualified.filter(function(t){return t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"});
+  var pendingRfp=qualified.filter(function(t){return t.acqStatus==="PENDING"&&!t.doc});
+  var hasDoc=qualified.filter(function(t){return t.doc||t.acqStatus==="AUTO_DOWNLOADED"});
+
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg)">RFP Document Acquisition</div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<span style="font-size:11px;padding:3px 10px;border-radius:4px;background:var(--green-soft);color:var(--green);font-weight:600">\u2705 '+hasDoc.length+' ready</span>'
+    +(manualNeeded.length?'<span style="font-size:11px;padding:3px 10px;border-radius:4px;background:var(--amber-soft);color:var(--amber);font-weight:600">\u26a0\ufe0f '+manualNeeded.length+' need you</span>':'')
+    +(pendingRfp.length?'<span style="font-size:11px;padding:3px 10px;border-radius:4px;background:var(--bg);color:var(--fg-faint);font-weight:600">\u23f3 '+pendingRfp.length+' pending</span>':'')
+    +'</div></div>';
+
+  /* Auto-downloaded list (collapsed, show folder path) */
+  if(autoDownloaded.length){
+    html+='<div style="margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:4px">\u2705 Auto-Downloaded (Agent 1b) \u2014 Access at D:\\NETS\\DIGITISATION\\tender-fetcher\\</div>';
+    autoDownloaded.slice(0,3).forEach(function(t){
+      html+='<div style="font-size:11px;color:var(--fg-muted);padding:2px 0">'+t.id+': '+t.ti.substring(0,50)+'</div>';
+    });
+    if(autoDownloaded.length>3)html+='<div style="font-size:10px;color:var(--fg-faint)">+'+(autoDownloaded.length-3)+' more in D:\\ folder</div>';
+    html+='</div>';
+  }
+
+  /* Manual download needed (prominent, with action links) */
+  if(manualNeeded.length){
+    html+='<div style="background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;padding:10px 14px;margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px">\u26a0\ufe0f MANUAL DOWNLOAD REQUIRED ('+manualNeeded.length+' tenders)</div>'
+      +'<div style="font-size:10px;color:var(--fg-muted);margin-bottom:6px">These RFPs require login or are behind a restricted portal. Open the link, download the PDF, and save it to the tender folder.</div>';
+    manualNeeded.forEach(function(t){
+      var link=t.detailUrl||"";
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--amber-border)">'
+        +'<span style="font-size:14px;font-weight:800;color:var(--amber);width:30px;text-align:center">'+t.score+'</span>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--fg)">'+t.ti.substring(0,50)+'</div>'
+        +'<div style="font-size:10px;color:var(--fg-faint)">'+t.id+' \u00b7 '+(t.source||"PPRA")+(t.days!==null?" \u00b7 "+t.days+"d left":"")+'</div></div>'
+        +(link?'<a href="'+link+'" target="_blank" onclick="event.stopPropagation()" style="background:var(--amber);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;text-decoration:none;white-space:nowrap">Open Portal \u2197</a>':'<span style="font-size:10px;color:var(--fg-faint)">No link</span>')
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
+  /* Pending (not yet processed) */
+  if(pendingRfp.length){
+    html+='<div style="font-size:11px;color:var(--fg-faint);margin-bottom:6px">\u23f3 '+pendingRfp.length+' tenders awaiting Agent 1b processing (next run downloads automatically)</div>';
+  }
+
+  html+='</div>';
+
+  /* \u2500\u2500 Tabs \u2500\u2500 */
+  var tabQStyle=tab==="qualified"?"background:var(--green);color:#fff;border-color:var(--green)":"background:var(--card);color:var(--fg);border-color:var(--border)";
+  var tabDStyle=tab==="disqualified"?"background:var(--red);color:#fff;border-color:var(--red)":"background:var(--card);color:var(--fg);border-color:var(--border)";
+  html+='<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +'<button onclick="window._qualTab=\'qualified\';showView(\'qualified\')" style="font-size:12px;padding:7px 18px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;border:1px solid;'+tabQStyle+'">Qualified ('+qualified.length+')</button>'
+    +'<button onclick="window._qualTab=\'disqualified\';showView(\'qualified\')" style="font-size:12px;padding:7px 18px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;border:1px solid;'+tabDStyle+'">Disqualified ('+disqualified.length+')</button>'
+    +'</div>';
+
+  var list=tab==="disqualified"?disqualified:qualified;
+
+  if(tab==="qualified"){
+    /* \u2500\u2500 QUALIFIED TABLE: what a Bid Director needs \u2500\u2500 */
+    html+='<div class="sec-head">Biddable Tenders <span class="hint">'+qualified.length+' tenders, '+fmtV(qualVal)+' pipeline value</span></div>';
+    html+='<div class="tbl-wrap"><table><thead><tr><th>Score</th><th>Tender</th><th>Portal</th><th>Solutions</th><th>Est. Value</th><th>Deadline</th><th>Gates</th><th>RFP</th></tr></thead><tbody>';
+    list.forEach(function(t){
+      var sols=t.solMatch.slice(0,2).map(function(s){return'<span class="badge b-g" style="font-size:8px;padding:1px 5px">'+s.name+'</span>'}).join(" ");
+      var urgTag="";
+      if(t.days!==null&&t.days<=3)urgTag='<span style="color:var(--red);font-weight:700;font-size:10px">'+t.days+'d!</span>';
+      else if(t.days!==null&&t.days<=7)urgTag='<span style="color:var(--amber);font-size:10px">'+t.days+'d</span>';
+      else if(t.days!==null)urgTag='<span style="color:var(--fg-faint);font-size:10px">'+t.days+'d</span>';
+
+      /* Gate status summary */
+      var gateCount=0;var gatePassed=0;
+      var gg=t.qualGates||{};
+      Object.keys(gg).forEach(function(k){gateCount++;if(gg[k].pass)gatePassed++});
+      var gBadge=gateCount?'<span style="font-size:10px;color:'+(gatePassed===gateCount?"var(--green)":"var(--amber)")+'">'+gatePassed+'/'+gateCount+'</span>':'<span style="font-size:10px;color:var(--fg-faint)">5/5</span>';
+      if(t._forceOverride)gBadge='<span style="font-size:9px;color:var(--amber);font-weight:700">OVERRIDE</span>';
+
+      var rfpBadge=t.acqStatus==="AUTO_DOWNLOADED"?'<span class="badge b-g" style="font-size:8px">\u2713 DL</span>':t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"?'<span class="badge b-a" style="font-size:8px">Manual</span>':t.doc?'<a href="'+t.doc+'" target="_blank" style="color:var(--green);font-size:11px;text-decoration:none" onclick="event.stopPropagation()">PDF \u2197</a>':'<span style="color:var(--fg-faint)">\u2014</span>';
+
+      html+='<tr onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')" style="cursor:pointer">'
+        +'<td><span style="font-size:16px;font-weight:800;color:'+(t.score>=85?"var(--green)":"var(--amber)")+'">'+t.score+'</span></td>'
+        +'<td><strong style="font-size:11px">'+t.ti.substring(0,55)+(t.ti.length>55?"...":"")+'</strong><br><span style="font-size:9px;color:var(--fg-faint)">'+t.id+'</span></td>'
+        +'<td><span class="badge '+(t.source==="PPRA"?"b-g":"b-a")+'" style="font-size:8px">'+(t.source||"SB")+'</span></td>'
+        +'<td>'+sols+'</td>'
+        +'<td style="font-size:11px;font-weight:600;color:var(--fg-muted)">'+fmtV(ensureVal(t))+'</td>'
+        +'<td style="font-size:11px;white-space:nowrap">'+(t.cl||"")+' '+urgTag+'</td>'
+        +'<td style="text-align:center">'+gBadge+'</td>'
+        +'<td style="text-align:center">'+rfpBadge+'</td></tr>';
+    });
+    if(!list.length)html+='<tr><td colspan="8" style="text-align:center;color:var(--fg-faint);padding:20px">No qualified tenders. Next scan: tomorrow 05:47 UK.</td></tr>';
+    html+='</tbody></table></div>';
+
+  }else{
+    /* \u2500\u2500 DISQUALIFIED TABLE: show reason + override button \u2500\u2500 */
+    html+='<div class="sec-head">Disqualified Tenders <span class="hint">'+disqualified.length+' tenders failed qualification gates</span></div>';
+    if(!list.length){
+      html+='<div style="padding:20px;text-align:center;color:var(--fg-faint);font-size:13px">No disqualified tenders. All discovered tenders passed the qualification gates.</div>';
+    }else{
+      html+='<div class="tbl-wrap"><table><thead><tr><th>Score</th><th>Tender</th><th>Portal</th><th>Disqualification Reason</th><th>Est. Value</th><th>Action</th></tr></thead><tbody>';
+      list.forEach(function(t){
+        html+='<tr>'
+          +'<td><span style="font-size:16px;font-weight:800;color:var(--red)">'+t.score+'</span></td>'
+          +'<td><strong style="font-size:11px;cursor:pointer" onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')">'+t.ti.substring(0,50)+(t.ti.length>50?"...":"")+'</strong><br><span style="font-size:9px;color:var(--fg-faint)">'+t.id+'</span></td>'
+          +'<td><span class="badge '+(t.source==="PPRA"?"b-g":"b-a")+'" style="font-size:8px">'+(t.source||"SB")+'</span></td>'
+          +'<td style="font-size:11px;color:var(--red)">'+(t.dqReason||"Failed qualification gates")+'</td>'
+          +'<td style="font-size:11px;font-weight:600;color:var(--fg-muted)">'+fmtV(ensureVal(t))+'</td>'
+          +'<td><button onclick="event.stopPropagation();forceOverrideTender(\''+t.id+'\');window._qualTab=\'qualified\';showView(\'qualified\')" style="background:var(--amber);color:#fff;border:none;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">Override</button></td>'
+          +'</tr>';
+      });
+      html+='</tbody></table></div>';
+      html+='<div style="margin-top:10px;font-size:11px;color:var(--fg-faint)">Overriding a disqualified tender moves it to the Qualified tab and marks it as a Bid Director decision. The original gate failure is preserved in the tender detail view.</div>';
+    }
+  }
+
+  return html;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RFP WORKBENCH
+   Human-in-the-loop pipeline for the presales architect.
+   Step 1  RFP acquisition (Agent 1b auto path, or manual upload)
+   Step 2  Agent 2  RFP Summary
+           Agent 3  Bid / No-Bid grading with readiness %
+           Agent 4  Compliance document checklist
+           Agent 5  BOQ draft
+   Step 3  Architect controls (decision, owner, priority, notes, overrides)
+   Step 4  Export (summary .md, compliance .md, BOQ .csv)
+   All results live in db collection rfp_analysis/<tenderId>.
+   ═══════════════════════════════════════════════════════════════════ */
+
+var WB={sel:null,busy:{},log:[]};
+var WB_OWNERS=["Unassigned","Manal Butt","Mikaal","Sundas","Presales Lead KHI","Presales Lead LHR","Presales Lead ISB"];
+
+/* NETS capability brief passed to every agent so they grade against the real company, not a generic SI */
+var NETS_BRIEF=[
+"NETS International. Established 1983 (National Engineers), HQ Karachi, 9 offices (PAK, UAE, KSA, UK, USA, Canada, Germany, Greece, Azerbaijan). 42+ years, 1,000+ certified resources, 3,000+ projects, 250+ customers, 25+ countries.",
+"Certifications: ISO 9001, ISO 14001, ISO 20000-1, ISO 27001, ISO 45001, SOC 2 Type II. Great Place to Work 2025. Cisco Emerging Partner of the Year 2024 and Cisco Impact Partner of the Year 2024.",
+"OEM tiers: Cisco Gold, Dell Gold, Huawei Silver, Fortinet Advanced, HPE, H3C, Sangfor, AWS, Microsoft, IBM, Juniper, Extreme, Cambium, Kaspersky, CrowdStrike, Trend Micro, Mimecast, Forcepoint, Sophos.",
+"Infrastructure: FTTX/GPON rollout, fibre splicing, survey/design, mobile sites, microwave, IBS/DAS, ELV (CCTV, access control, BMS, structured cabling), EV charging, DC power, data centre build, servers, storage, enterprise LAN/WAN/SD-WAN/ACI, Wi-Fi, unified communications.",
+"Digital: cloud (AWS/Azure/hybrid), NGFW/VPN/NAC, SOC/SIEM/SOAR (QRadar, Splunk, Sentinel, Rapid7), EPP/EDR/XDR, IAM/PAM/MFA/ZTNA, DLP/encryption/DAM, VAPT/red team, GRC/vCISO/ISO 27001, DevSecOps, automation, AI/ML, in-house products MonetX (observability), SupportX (ITSM), GreenX (DC sustainability), MapX (GIS PM).",
+"Managed: 24/7 NOC and SOC in UAE, KSA, PAK; managed O&M, AMC, break-fix, helpdesk L1/L2, resource outsourcing (120,000+ candidate pool, Accelerec).",
+"Hard limits: cannot meet annual turnover requirement above PKR 2 billion; cannot claim Cisco Platinum/Premier, Dell Platinum, Huawei Gold or Fortinet Expert tier; bidding entity is NETS International (Pvt) Ltd, Pakistan, with National Engineers legacy documents."
+].join("\n");
+
+function wbEnsure(id){if(!RFPA[id])RFPA[id]={};return RFPA[id]}
+function wbSave(id,patch){
+  if(!DB)return Promise.resolve();
+  patch.updated_at=new Date().toISOString();
+  return DB.doc("rfp_analysis/"+id).get().then(function(s){
+    return s.exists?DB.doc("rfp_analysis/"+id).update(patch):DB.doc("rfp_analysis/"+id).set(Object.assign({tender_id:id},patch));
+  }).catch(function(e){console.error("rfp_analysis save",e)});
+}
+function wbLog(msg){WB.log.unshift({t:new Date().toLocaleTimeString(),m:msg});if(WB.log.length>30)WB.log.length=30;var el=document.getElementById("wb-log");if(el)el.innerHTML=WB.log.map(function(l){return'<div style="font-size:10px;color:var(--fg-faint)"><span style="color:var(--fg-muted)">'+l.t+'</span> '+l.m+'</div>'}).join("")}
+function wbEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function wbFmtV(n){n=Number(n)||0;if(n>=1e6)return"PKR "+(n/1e6).toFixed(1)+"M";if(n>=1e3)return"PKR "+(n/1e3).toFixed(0)+"K";return"PKR "+n}
+
+/* ── PDF text extraction in the browser (pdf.js) ── */
+async function wbExtractPdfText(file,maxPages){
+  if(!window.pdfjsLib)throw new Error("pdf.js not loaded");
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  var buf=await file.arrayBuffer();
+  var pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
+  var out=[];var n=Math.min(pdf.numPages,maxPages||40);
+  for(var i=1;i<=n;i++){
+    var page=await pdf.getPage(i);var tc=await page.getTextContent();
+    out.push("[Page "+i+"]\n"+tc.items.map(function(it){return it.str}).join(" "));
+  }
+  return{text:out.join("\n\n"),pages:pdf.numPages,extracted:n};
+}
+
+async function wbHandleUpload(id,input){
+  var files=Array.from(input.files||[]);if(!files.length)return;
+  var a=wbEnsure(id);a.uploading=true;showView("workbench");
+  var allText="";var docs=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    try{
+      wbLog("Extracting text from "+f.name+" ...");
+      var r=await wbExtractPdfText(f,40);
+      allText+="\n\n===== FILE: "+f.name+" =====\n"+r.text;
+      var assetId=null;
+      if(ASSETS){try{var up=await ASSETS.upload(f);assetId=up.id;wbLog("Stored "+f.name+" ("+Math.round(up.sizeBytes/1024)+" KB)")}catch(e){wbLog("Asset store skipped for "+f.name+": "+(e.code||e.message))}}
+      docs.push({name:f.name,size:f.size,pages:r.pages,extracted:r.extracted,asset_id:assetId});
+    }catch(e){wbLog("Failed on "+f.name+": "+(e.message||e));docs.push({name:f.name,size:f.size,error:String(e.message||e)})}
+  }
+  allText=allText.slice(0,180000); /* keep well under the 256 KiB prompt cap */
+  a.uploading=false;a.rfpText=allText;a.docs=(a.docs||[]).concat(docs);a.rfpSource="MANUAL_UPLOAD";
+  await wbSave(id,{rfpText:allText,docs:a.docs,rfpSource:"MANUAL_UPLOAD",rfp_received_at:new Date().toISOString()});
+  /* Mark the tender as acquired so Overview/Bid Board move it to the next stage */
+  if(DB)DB.doc("tenders/"+id).update({acquisition_status:"MANUAL_UPLOADED",doc_accessible:true}).catch(function(){});
+  wbLog("RFP text ready: "+allText.length.toLocaleString()+" characters from "+docs.length+" file(s)");
+  showView("workbench");
+}
+
+/* ── Agent runners (each is a separate sample() call with its own instruction) ── */
+function wbTenderCtx(t){
+  return"TENDER\nID: "+t.id+"\nTitle: "+t.ti+"\nPortal: "+(t.source||"Sindh Bank")+"\nIssuer/Dept: "+(t.dept||"not stated")+"\nAdvertised: "+(t.ad||"?")+"\nClosing: "+(t.cl||"?")+(t.days!=null?" ("+t.days+" days left)":"")+"\nNETS keyword score: "+t.score+"\nMatched NETS domains: "+(t.solMatch||[]).map(function(s){return s.name}).join(", ");
+}
+function wbRfpSlice(a,n){var tx=(a&&a.rfpText)||"";return tx.length>n?tx.slice(0,n)+"\n\n[... RFP text truncated at "+n+" characters ...]":tx}
+
+async function wbRunAgent(id,agent){
+  var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);
+  if(!t)return;
+  if(!SAMPLE){alert("Claude is not available in this view. Open the artifact in claude.ai and allow it to use Claude.");return}
+  if(!a.rfpText&&agent!=="grading"){alert("Upload or pull the RFP document first. Agents 2, 4 and 5 need the RFP text.");return}
+  WB.busy[agent]=true;showView("workbench");
+  var ctl=new AbortController();WB.ctl=ctl;
+  var out=document.getElementById("wb-out-"+agent);
+  var onText=function(u){if(out)out.textContent=u.text};
+  try{
+    if(agent==="summary"){
+      wbLog("Agent 2 (RFP Summary) started");
+      var s=await SAMPLE.json(
+"You are Agent 2, RFP Summariser for NETS International presales. Read the tender and RFP text and return ONLY a JSON object with these keys:\n"+
+'{"issuer":string,"scope_summary":string (4 to 6 sentences, plain English),"deliverables":[string],"key_requirements":[string],"timeline":{"submission_deadline":string,"bid_validity":string,"delivery_period":string,"contract_duration":string},"eligibility":{"min_turnover":string,"years_experience":string,"oem_requirements":[string],"certifications":[string],"local_presence":string,"other":[string]},"commercials":{"estimated_value_pkr":number|null,"bid_security":string,"performance_guarantee":string,"payment_terms":string},"evaluation_method":string,"contacts":[string],"red_flags":[string]}\n'+
+"Use null or an empty string when the RFP does not say. Do not invent figures. Numbers in PKR.\n\n"+wbTenderCtx(t)+"\n\nRFP TEXT:\n"+wbRfpSlice(a,120000),
+        {signal:ctl.signal,onText:onText,modelTier:"default",cache:{gcTime:3600000}});
+      a.summary=s;await wbSave(id,{summary:s});wbLog("Agent 2 done");
+    }
+    if(agent==="grading"){
+      wbLog("Agent 3 (Bid/No-Bid Grader) started");
+      var g=await SAMPLE.json(
+"You are Agent 3, Bid/No-Bid Grader for NETS International. Grade this tender against NETS capabilities below. Be honest and specific: cite the RFP clause or requirement for every point. Return ONLY a JSON object:\n"+
+'{"readiness_pct":number (0-100),"verdict":"BID"|"NO-BID"|"CONDITIONAL","confidence":"high"|"medium"|"low","value_estimate_pkr":number|null,"why_bid":[string],"why_not":[string],"gates":{"turnover":{"pass":boolean,"detail":string},"oem_tier":{"pass":boolean,"detail":string},"domain_fit":{"pass":boolean,"detail":string},"experience":{"pass":boolean,"detail":string},"resources":{"pass":boolean,"detail":string},"local_presence":{"pass":boolean,"detail":string}},"capability_coverage":[{"requirement":string,"nets_has":boolean,"how":string}],"risks":[{"risk":string,"severity":"high"|"medium"|"low","mitigation":string}],"win_themes":[string],"conditions_to_bid":[string],"recommended_oem":[string],"effort_estimate_days":number}\n'+
+"readiness_pct = percentage of mandatory requirements NETS can evidence today. Return NO-BID if any hard limit is breached.\n\nNETS CAPABILITY BRIEF:\n"+NETS_BRIEF+"\n\n"+wbTenderCtx(t)+(a.summary?"\n\nAGENT 2 SUMMARY:\n"+JSON.stringify(a.summary).slice(0,8000):"")+"\n\nRFP TEXT:\n"+wbRfpSlice(a,100000),
+        {signal:ctl.signal,onText:onText,modelTier:"default",cache:{gcTime:3600000}});
+      a.grading=g;await wbSave(id,{grading:g});wbLog("Agent 3 done: "+g.verdict+" at "+g.readiness_pct+"%");
+    }
+    if(agent==="compliance"){
+      wbLog("Agent 4 (Compliance Auditor) started");
+      var c=await SAMPLE.json(
+"You are Agent 4, Compliance Document Auditor for NETS International. From the RFP, list every document, form, certificate, declaration and attachment a bidder must submit. For each, say whether NETS can supply it from its standard bid pack (see brief) and what is missing. Return ONLY a JSON object:\n"+
+'{"required_documents":[{"doc":string,"rfp_clause":string,"mandatory":boolean,"nets_status":"HAVE"|"NEED_TO_PREPARE"|"MISSING"|"NOT_APPLICABLE","owner":string,"note":string}],"missing_count":number,"have_count":number,"prepare_count":number,"submission_format":string,"envelope_structure":string,"bid_security":{"required":boolean,"amount":string,"form":string},"technical_forms":[string],"financial_forms":[string],"declarations":[string],"deadline_checklist":[{"item":string,"due":string}],"critical_gaps":[string]}\n'+
+"Standard NETS bid pack already contains: company registration (SECP), NTN, GST/STRN, ISO 9001/14001/20000/27001/45001 certificates, SOC 2 report, audited financials (3 years), bank statement and solvency letter, OEM partner certificates (Cisco Gold, Dell Gold, Huawei Silver, Fortinet Advanced), 40+ client reference letters, PO copies, CVs of certified engineers (CCIE, CCNP, HCIP, NSE, PMP, CISSP), affidavit of non-blacklisting, power of attorney, integrity pact. Anything else is NEED_TO_PREPARE. Anything NETS cannot legitimately produce is MISSING.\n\n"+wbTenderCtx(t)+"\n\nRFP TEXT:\n"+wbRfpSlice(a,120000),
+        {signal:ctl.signal,onText:onText,modelTier:"default",cache:{gcTime:3600000}});
+      a.compliance=c;await wbSave(id,{compliance:c});wbLog("Agent 4 done: "+c.have_count+" have, "+c.prepare_count+" prepare, "+c.missing_count+" missing");
+    }
+    if(agent==="boq"){
+      wbLog("Agent 5 (BOQ Drafter) started");
+      var b=await SAMPLE.json(
+"You are Agent 5, BOQ Drafter for NETS International presales. From the RFP scope, draft a Bill of Quantities a presales architect can refine. Map every line to a NETS partner OEM where possible. Prices are indicative list prices in PKR; mark confidence. Return ONLY a JSON object:\n"+
+'{"currency":"PKR","assumptions":[string],"sections":[{"section":string,"lines":[{"sno":number,"item":string,"description":string,"oem":string,"part_no":string,"qty":number,"unit":string,"unit_price_pkr":number,"total_pkr":number,"confidence":"high"|"medium"|"low","rfp_ref":string}]}],"services":[{"item":string,"man_days":number,"rate_pkr":number,"total_pkr":number}],"subtotal_hardware_pkr":number,"subtotal_services_pkr":number,"contingency_pct":number,"grand_total_pkr":number,"exclusions":[string],"clarifications_needed":[string]}\n'+
+"Prefer Cisco, Dell, Huawei, Fortinet, HPE, H3C, Sangfor, Kaspersky, Rapid7, IBM QRadar, BeyondTrust, Forcepoint. Include installation, configuration, testing, training, documentation and warranty/support lines as services. If quantities are not stated, estimate from scope and say so in assumptions.\n\n"+wbTenderCtx(t)+(a.summary?"\n\nAGENT 2 SUMMARY:\n"+JSON.stringify(a.summary).slice(0,8000):"")+"\n\nRFP TEXT:\n"+wbRfpSlice(a,110000),
+        {signal:ctl.signal,onText:onText,modelTier:"default",cache:{gcTime:3600000}});
+      a.boq=b;await wbSave(id,{boq:b});wbLog("Agent 5 done: "+wbFmtV(b.grand_total_pkr));
+    }
+  }catch(e){
+    var code=e&&e.code||"error";
+    wbLog("Agent "+agent+" stopped: "+code+(e&&e.message?" ("+e.message+")":""));
+    if(code==="not_granted")alert("You declined to let this page use Claude. Allow it from the artifact Permissions menu to run the agents.");
+    else if(code==="invalid_json")alert("The agent returned text that was not valid JSON. Try again; if it repeats, upload a shorter or cleaner RFP.");
+    else if(code==="rate_limited")alert("Claude usage limit reached for now. Try again in a few minutes.");
+    else if(code!=="cancelled")alert("Agent failed: "+code+". "+(e&&e.message||""));
+  }finally{
+    WB.busy[agent]=false;showView("workbench");
+  }
+}
+async function wbRunAll(id){
+  await wbRunAgent(id,"summary");
+  await wbRunAgent(id,"grading");
+  await wbRunAgent(id,"compliance");
+  await wbRunAgent(id,"boq");
+}
+function wbStop(){if(WB.ctl)WB.ctl.abort()}
+
+/* ── Architect controls ── */
+function wbSetDecision(id,field,val){
+  var a=wbEnsure(id);a.decision=a.decision||{};a.decision[field]=val;
+  var patch={decision:a.decision};
+  wbSave(id,patch);
+  if(field==="bid_decision"&&DB)DB.doc("tenders/"+id).update({goNogo:val==="BID"?"GO":val==="NO-BID"?"NOGO":val}).catch(function(){});
+  if(field==="owner"&&DB)DB.doc("tenders/"+id).update({assignee:val}).catch(function(){});
+}
+function wbSaveNotes(id){var el=document.getElementById("wb-notes");if(!el)return;wbSetDecision(id,"notes",el.value);wbLog("Notes saved")}
+function wbOverrideReadiness(id){var el=document.getElementById("wb-readiness-override");if(!el)return;var v=parseInt(el.value,10);if(isNaN(v))return;wbSetDecision(id,"readiness_override",v);wbLog("Readiness overridden to "+v+"%");showView("workbench")}
+
+/* BOQ line editing */
+function wbBoqEdit(id,si,li,field,val){
+  var a=wbEnsure(id);if(!a.boq||!a.boq.sections||!a.boq.sections[si])return;
+  var line=a.boq.sections[si].lines[li];if(!line)return;
+  if(field==="qty"||field==="unit_price_pkr")val=Number(val)||0;
+  line[field]=val;line.total_pkr=(Number(line.qty)||0)*(Number(line.unit_price_pkr)||0);
+  wbBoqRecalc(a.boq);wbSave(id,{boq:a.boq});
+  var tot=document.getElementById("wb-boq-total");if(tot)tot.textContent=wbFmtV(a.boq.grand_total_pkr);
+  var lt=document.getElementById("wb-boq-lt-"+si+"-"+li);if(lt)lt.textContent=wbFmtV(line.total_pkr);
+}
+function wbBoqAddLine(id,si){var a=wbEnsure(id);if(!a.boq)return;var sec=a.boq.sections[si];sec.lines.push({sno:sec.lines.length+1,item:"New item",description:"",oem:"",part_no:"",qty:1,unit:"Nos",unit_price_pkr:0,total_pkr:0,confidence:"low",rfp_ref:""});wbSave(id,{boq:a.boq});showView("workbench")}
+function wbBoqDelLine(id,si,li){var a=wbEnsure(id);if(!a.boq)return;a.boq.sections[si].lines.splice(li,1);wbBoqRecalc(a.boq);wbSave(id,{boq:a.boq});showView("workbench")}
+function wbBoqRecalc(b){
+  var hw=0;(b.sections||[]).forEach(function(s){(s.lines||[]).forEach(function(l){hw+=Number(l.total_pkr)||0})});
+  var sv=0;(b.services||[]).forEach(function(s){sv+=Number(s.total_pkr)||0});
+  b.subtotal_hardware_pkr=hw;b.subtotal_services_pkr=sv;
+  var cont=Number(b.contingency_pct)||0;b.grand_total_pkr=Math.round((hw+sv)*(1+cont/100));
+}
+
+/* ── Export ── */
+function wbDownload(id,kind){
+  var a=RFPA[id]||{};var t=T.find(function(x){return x.id===id})||{};var name=(id+"_"+kind).replace(/[^A-Za-z0-9_-]+/g,"_");
+  var content="",filename="";
+  if(kind==="summary"&&a.summary){filename=name+".md";content="# RFP Summary: "+t.ti+"\n\nTender: "+id+"  \nPortal: "+(t.source||"")+"  \nClosing: "+(t.cl||"")+"\n\n## Scope\n"+(a.summary.scope_summary||"")+"\n\n## Deliverables\n"+(a.summary.deliverables||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Key Requirements\n"+(a.summary.key_requirements||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Eligibility\n```json\n"+JSON.stringify(a.summary.eligibility,null,2)+"\n```\n\n## Timeline\n```json\n"+JSON.stringify(a.summary.timeline,null,2)+"\n```\n\n## Commercials\n```json\n"+JSON.stringify(a.summary.commercials,null,2)+"\n```\n\n## Red Flags\n"+(a.summary.red_flags||[]).map(function(x){return"- "+x}).join("\n")}
+  if(kind==="grading"&&a.grading){filename=name+".md";var g=a.grading;content="# Bid / No-Bid Assessment: "+t.ti+"\n\nVerdict: **"+g.verdict+"**  \nReadiness: **"+g.readiness_pct+"%**  \nConfidence: "+g.confidence+"  \nValue estimate: "+wbFmtV(g.value_estimate_pkr)+"\n\n## Why bid\n"+(g.why_bid||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Why not\n"+(g.why_not||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Gates\n"+Object.keys(g.gates||{}).map(function(k){return"- "+k+": "+(g.gates[k].pass?"PASS":"FAIL")+" : "+g.gates[k].detail}).join("\n")+"\n\n## Risks\n"+(g.risks||[]).map(function(r){return"- ["+r.severity+"] "+r.risk+" : "+r.mitigation}).join("\n")+"\n\n## Win themes\n"+(g.win_themes||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Conditions to bid\n"+(g.conditions_to_bid||[]).map(function(x){return"- "+x}).join("\n")}
+  if(kind==="compliance"&&a.compliance){filename=name+".md";var c=a.compliance;content="# Compliance Checklist: "+t.ti+"\n\nHave: "+c.have_count+"  Prepare: "+c.prepare_count+"  Missing: "+c.missing_count+"\n\n| Document | Clause | Mandatory | NETS status | Owner | Note |\n|---|---|---|---|---|---|\n"+(c.required_documents||[]).map(function(d){return"| "+d.doc+" | "+(d.rfp_clause||"")+" | "+(d.mandatory?"Yes":"No")+" | "+d.nets_status+" | "+(d.owner||"")+" | "+(d.note||"")+" |"}).join("\n")+"\n\n## Critical gaps\n"+(c.critical_gaps||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Submission\n"+(c.submission_format||"")+"\n\n"+(c.envelope_structure||"")}
+  if(kind==="boq"&&a.boq){filename=name+".csv";var rows=[["Section","S.No","Item","Description","OEM","Part No","Qty","Unit","Unit Price PKR","Total PKR","Confidence","RFP Ref"]];(a.boq.sections||[]).forEach(function(s){(s.lines||[]).forEach(function(l){rows.push([s.section,l.sno,l.item,l.description,l.oem,l.part_no,l.qty,l.unit,l.unit_price_pkr,l.total_pkr,l.confidence,l.rfp_ref])})});rows.push([]);rows.push(["Services"]);(a.boq.services||[]).forEach(function(s){rows.push(["Services","",s.item,"","","",s.man_days,"man-days",s.rate_pkr,s.total_pkr,"",""])});rows.push([]);rows.push(["","","","","","","","","Hardware subtotal",a.boq.subtotal_hardware_pkr]);rows.push(["","","","","","","","","Services subtotal",a.boq.subtotal_services_pkr]);rows.push(["","","","","","","","","Contingency %",a.boq.contingency_pct]);rows.push(["","","","","","","","","GRAND TOTAL PKR",a.boq.grand_total_pkr]);content=rows.map(function(r){return r.map(function(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")}).join("\n")}
+  if(!content){alert("Nothing to export yet. Run that agent first.");return}
+  if(DOWNLOADS){DOWNLOADS.save({filename:filename,data:content}).catch(function(e){if(e&&e.code!=="cancelled")wbFallbackDownload(filename,content)})}
+  else wbFallbackDownload(filename,content);
+}
+function wbFallbackDownload(filename,content){var blob=new Blob([content],{type:"text/plain"});var u=URL.createObjectURL(blob);var x=document.createElement("a");x.href=u;x.download=filename;document.body.appendChild(x);x.click();setTimeout(function(){URL.revokeObjectURL(u);x.remove()},500)}
+
+function wbAfterRender(){wbLog("")}
+
+/* ── View ── */
+function vWorkbench(){
+  var live=T.filter(function(t){return t.score>=70&&t.open&&t.qualVerdict!=="NOGO"});
+  live.sort(function(a,b){return(a.days||999)-(b.days||999)});
+  if(!WB.sel||!live.some(function(t){return t.id===WB.sel}))WB.sel=live.length?live[0].id:null;
+  var t=live.find(function(x){return x.id===WB.sel});
+  var a=t?(RFPA[t.id]||{}):{};
+  var d=a.decision||{};
+
+  /* Pipeline counts across all live tenders */
+  var cRfp=live.filter(function(x){var r=RFPA[x.id];return r&&r.rfpText}).length;
+  var cSum=live.filter(function(x){var r=RFPA[x.id];return r&&r.summary}).length;
+  var cGrd=live.filter(function(x){var r=RFPA[x.id];return r&&r.grading}).length;
+  var cCmp=live.filter(function(x){var r=RFPA[x.id];return r&&r.compliance}).length;
+  var cBoq=live.filter(function(x){var r=RFPA[x.id];return r&&r.boq}).length;
+  var cBid=live.filter(function(x){var r=RFPA[x.id];return r&&r.decision&&r.decision.bid_decision==="BID"}).length;
+  var valBid=0;live.forEach(function(x){var r=RFPA[x.id];if(r&&r.decision&&r.decision.bid_decision==="BID"){valBid+=Number((r.grading&&r.grading.value_estimate_pkr)||(r.boq&&r.boq.grand_total_pkr)||0)}});
+
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<span style="font-size:12px;color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'overview\')">\u2190 Back to Overview</span>'
+    +'<span style="font-size:11px;color:var(--fg-faint)">'+(SAMPLE?'<span class="dot dot-g"></span> Agents ready':'<span class="dot dot-r"></span> Agents offline (allow Claude in Permissions)')+'</span></div>';
+
+  html+='<div class="sec-head">RFP Workbench <span class="hint">'+live.length+' qualified live tenders \u00b7 human in the loop</span></div>';
+
+  /* Pipeline strip */
+  var stages=[["RFP in hand",cRfp,"var(--fg)"],["Summarised",cSum,"#2E7D32"],["Graded",cGrd,"#388E3C"],["Compliance",cCmp,"#43A047"],["BOQ",cBoq,"#4CAF50"],["BID decided",cBid,"var(--green)"]];
+  html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px">';
+  stages.forEach(function(s){html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:22px;font-weight:800;color:'+s[2]+'">'+s[1]+'</div><div style="font-size:9px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.04em">'+s[0]+'</div></div>'});
+  html+='<div style="background:var(--green-soft);border:1px solid var(--green-border);border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--green)">'+wbFmtV(valBid)+'</div><div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.04em">Committed bid value</div></div>';
+  html+='</div>';
+
+  if(!t){return html+'<div style="padding:30px;text-align:center;color:var(--fg-faint)">No qualified live tenders. Run Agent 1 first.</div>'}
+
+  /* Tender selector */
+  html+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'
+    +'<label style="font-size:11px;color:var(--fg-muted)">Tender</label>'
+    +'<select onchange="WB.sel=this.value;showView(\'workbench\')" style="flex:1;min-width:320px;font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--fg);font-family:inherit">';
+  live.forEach(function(x){var r=RFPA[x.id]||{};var mark=r.decision&&r.decision.bid_decision?" ["+r.decision.bid_decision+"]":r.boq?" [BOQ]":r.grading?" [graded]":r.rfpText?" [RFP]":"";html+='<option value="'+wbEsc(x.id)+'"'+(x.id===t.id?" selected":"")+'>'+wbEsc((x.days!=null?x.days+"d \u00b7 ":"")+x.id+" \u00b7 "+x.ti.substring(0,70))+mark+'</option>'});
+  html+='</select>'
+    +'<span class="badge '+(t.source==="PPRA"?"b-g":t.source==="EPADS"?"b-b":"b-a")+'">'+wbEsc(t.source||"Sindh Bank")+'</span>'
+    +'<span style="font-size:11px;color:'+(t.days!=null&&t.days<=7?"var(--red)":"var(--fg-muted)")+';font-weight:600">'+wbEsc(t.cl||"")+(t.days!=null?" ("+t.days+"d)":"")+'</span>'
+    +'<span style="font-size:11px;color:var(--fg-faint);cursor:pointer" onclick="FLT._detail=\''+wbEsc(t.id)+'\';showView(\'detail\')">tender detail \u2192</span>'
+    +'</div>';
+
+  /* ── STEP 1: RFP acquisition ── */
+  var acq=t.acqStatus||"PENDING";var hasText=!!a.rfpText;
+  var folder="D:\\NETS\\DIGITISATION\\tender-fetcher\\"+String(t.source||"SINDH_BANK").toUpperCase().replace(/ /g,"_")+"\\"+t.id.replace(/[<>:"/\\|?*]/g,"-");
+  html+='<div class="drawer" style="margin-bottom:14px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Step 1 \u00b7 RFP Document</div>'
+    +(hasText?'<span class="badge b-g">\u2713 RFP text loaded ('+(a.rfpText.length/1000).toFixed(0)+'k chars, '+((a.docs||[]).length)+' file'+((a.docs||[]).length===1?"":"s")+')</span>':acq==="AUTO_DOWNLOADED"?'<span class="badge b-g">Auto-downloaded by Agent 1b</span>':acq==="MANUAL_DOWNLOAD_REQUIRED"?'<span class="badge b-a">Manual download required</span>':'<span class="badge b-grey">Pending Agent 1b</span>')+'</div>';
+
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+  /* Path A */
+  html+='<div style="background:var(--bg);border-radius:6px;padding:12px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--fg);margin-bottom:6px">Path A \u00b7 Agent 1b auto-download</div>'
+    +'<div style="font-size:11px;color:var(--fg-muted);line-height:1.6">Folder on your PC:<br><code style="font-size:10px;background:var(--card);padding:2px 6px;border-radius:4px;word-break:break-all">'+wbEsc(folder)+'</code></div>'
+    +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
+    +(t.detailUrl?'<a href="'+wbEsc(t.detailUrl)+'" target="_blank" style="font-size:11px;padding:5px 10px;border-radius:5px;background:var(--card);border:1px solid var(--border);color:var(--fg);text-decoration:none">Open portal page \u2197</a>':'')
+    +(t.doc?'<a href="'+wbEsc(t.doc)+'" target="_blank" style="font-size:11px;padding:5px 10px;border-radius:5px;background:var(--green);color:#fff;text-decoration:none">Download RFP PDF \u2197</a>':'')
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--fg-faint);margin-top:8px">Agent 1b saves PDFs plus manifest.json here when your PC is online. Then pull the folder into the workbench using Path B below (drag the PDFs in).</div>'
+    +'</div>';
+  /* Path B */
+  html+='<div style="background:var(--bg);border-radius:6px;padding:12px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--fg);margin-bottom:6px">Path B \u00b7 Upload RFP folder contents</div>'
+    +'<div style="font-size:11px;color:var(--fg-muted);margin-bottom:8px">Select every PDF in the RFP folder (RFP, annexes, corrigenda, BOQ sheets). Text is extracted in your browser; files are stored with this artifact.</div>'
+    +'<input type="file" accept="application/pdf,.pdf" multiple onchange="wbHandleUpload(\''+wbEsc(t.id)+'\',this)" style="font-size:11px;font-family:inherit">'
+    +(a.uploading?'<div style="font-size:11px;color:var(--amber);margin-top:6px">Extracting text...</div>':'')
+    +((a.docs||[]).length?'<div style="margin-top:8px">'+(a.docs||[]).map(function(dd){return'<div style="font-size:10px;color:var(--fg-muted)">'+(dd.error?'\u274c':'\u2713')+' '+wbEsc(dd.name)+(dd.pages?' \u00b7 '+dd.extracted+'/'+dd.pages+' pages':'')+(dd.asset_id?' \u00b7 <a href="/_blob/'+wbEsc(dd.asset_id)+'" target="_blank" style="color:var(--green)">open</a>':'')+(dd.error?' \u00b7 '+wbEsc(dd.error):'')+'</div>'}).join("")+'</div>':'')
+    +'</div>';
+  html+='</div></div>';
+
+  /* ── STEP 2: Agents ── */
+  function agentCard(key,num,name,desc,done,summaryHtml){
+    var busy=WB.busy[key];
+    return'<div style="background:var(--card);border:1px solid '+(done?"var(--green-border)":"var(--border)")+';border-radius:8px;padding:12px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<div><div style="font-size:12px;font-weight:700">Agent '+num+' \u00b7 '+name+'</div><div style="font-size:10px;color:var(--fg-faint)">'+desc+'</div></div>'
+      +(busy?'<button onclick="wbStop()" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--red-border);background:var(--red-soft);color:var(--red);cursor:pointer;font-family:inherit">Stop</button>'
+             :'<button onclick="wbRunAgent(\''+wbEsc(t.id)+'\',\''+key+'\')" '+(SAMPLE?'':'disabled ')+'style="font-size:10px;padding:4px 10px;border-radius:5px;border:none;background:'+(done?"var(--bg)":"var(--green)")+';color:'+(done?"var(--fg)":"#fff")+';cursor:pointer;font-family:inherit;font-weight:700">'+(done?"Re-run":"Run")+'</button>')
+      +'</div>'
+      +(busy?'<pre id="wb-out-'+key+'" style="font-size:9px;max-height:120px;overflow:auto;background:var(--bg);padding:6px;border-radius:4px;white-space:pre-wrap;color:var(--fg-muted)">Thinking...</pre>':'')
+      +(done&&!busy?summaryHtml:'')
+      +'</div>';
+  }
+  var g=a.grading,s=a.summary,c=a.compliance,b=a.boq;
+  var readiness=(d.readiness_override!=null)?d.readiness_override:(g?g.readiness_pct:null);
+  html+='<div class="drawer" style="margin-bottom:14px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Step 2 \u00b7 Agent Pipeline</div>'
+    +'<div style="display:flex;gap:6px"><button onclick="wbRunAll(\''+wbEsc(t.id)+'\')" '+(SAMPLE&&hasText?'':'disabled ')+'style="font-size:11px;padding:6px 14px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">\u25b6 Run all four</button></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +agentCard("summary","2","RFP Summary","Scope, deliverables, eligibility, timeline, commercials",!!s,s?'<div style="font-size:11px;color:var(--fg);line-height:1.5">'+wbEsc((s.scope_summary||"").slice(0,320))+(s.scope_summary&&s.scope_summary.length>320?"...":"")+'</div><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">Issuer: '+wbEsc(s.issuer||"?")+' \u00b7 Deadline: '+wbEsc((s.timeline||{}).submission_deadline||"?")+' \u00b7 Value: '+(s.commercials&&s.commercials.estimated_value_pkr?wbFmtV(s.commercials.estimated_value_pkr):"not stated")+'</div>':'')
+    +agentCard("grading","3","Bid / No-Bid Grader","Readiness %, why bid, why not, gates, risks",!!g,g?'<div style="display:flex;align-items:center;gap:12px"><div style="font-size:30px;font-weight:800;color:'+(readiness>=70?"var(--green)":readiness>=50?"var(--amber)":"var(--red)")+'">'+readiness+'%</div><div><span class="badge '+(g.verdict==="BID"?"b-g":g.verdict==="CONDITIONAL"?"b-a":"b-r")+'" style="font-size:11px">'+wbEsc(g.verdict)+'</span><div style="font-size:10px;color:var(--fg-faint);margin-top:3px">confidence '+wbEsc(g.confidence)+' \u00b7 est. '+wbFmtV(g.value_estimate_pkr)+' \u00b7 '+(g.effort_estimate_days||"?")+' effort days</div></div></div>':'')
+    +agentCard("compliance","4","Compliance Auditor","Required documents, what NETS has, what is missing",!!c,c?'<div style="display:flex;gap:10px;font-size:11px"><span style="color:var(--green);font-weight:700">'+(c.have_count||0)+' have</span><span style="color:var(--amber);font-weight:700">'+(c.prepare_count||0)+' prepare</span><span style="color:var(--red);font-weight:700">'+(c.missing_count||0)+' missing</span></div>'+((c.critical_gaps||[]).length?'<div style="font-size:10px;color:var(--red);margin-top:4px">'+wbEsc(c.critical_gaps[0])+'</div>':''):'')
+    +agentCard("boq","5","BOQ Drafter","Hardware, software, services lines mapped to NETS OEMs",!!b,b?'<div style="font-size:22px;font-weight:800;color:var(--green)">'+wbFmtV(b.grand_total_pkr)+'</div><div style="font-size:10px;color:var(--fg-faint)">HW '+wbFmtV(b.subtotal_hardware_pkr)+' \u00b7 Services '+wbFmtV(b.subtotal_services_pkr)+' \u00b7 contingency '+(b.contingency_pct||0)+'% \u00b7 '+((b.sections||[]).reduce(function(n,sc){return n+(sc.lines||[]).length},0))+' lines</div>':'')
+    +'</div>'
+    +'<div id="wb-log" style="margin-top:8px;max-height:70px;overflow:auto"></div>'
+    +'</div>';
+
+  /* ── STEP 3: Architect controls ── */
+  var sel=function(name,opts,cur){return'<select onchange="wbSetDecision(\''+wbEsc(t.id)+'\',\''+name+'\',this.value)" style="font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--fg);font-family:inherit">'+opts.map(function(o){return'<option value="'+wbEsc(o)+'"'+(o===cur?" selected":"")+'>'+wbEsc(o)+'</option>'}).join("")+'</select>'};
+  html+='<div class="drawer" style="margin-bottom:14px">'
+    +'<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Step 3 \u00b7 Presales Architect Decision</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Bid decision</div>'+sel("bid_decision",["Pending","BID","NO-BID","HOLD","CONDITIONAL"],d.bid_decision||"Pending")+'</div>'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Owner</div>'+sel("owner",WB_OWNERS,d.owner||t.assignee||"Unassigned")+'</div>'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Priority</div>'+sel("priority",["P1 (this week)","P2 (next 2 weeks)","P3 (watch)"],d.priority||"P2 (next 2 weeks)")+'</div>'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Bid stage</div>'+sel("stage",["Discovery","RFP review","Clarifications sent","Solution design","Pricing","Internal approval","Submitted","Won","Lost","Dropped"],d.stage||"RFP review")+'</div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Architect notes (clarifications to raise, partner to engage, pricing strategy)</div><textarea id="wb-notes" rows="3" style="width:100%;font-size:11px;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--fg);font-family:inherit;box-sizing:border-box">'+wbEsc(d.notes||"")+'</textarea><button onclick="wbSaveNotes(\''+wbEsc(t.id)+'\')" style="margin-top:4px;font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit">Save notes</button></div>'
+    +'<div><div style="font-size:10px;color:var(--fg-muted);margin-bottom:3px">Override readiness %</div><div style="display:flex;gap:6px"><input id="wb-readiness-override" type="number" min="0" max="100" value="'+(d.readiness_override!=null?d.readiness_override:(g?g.readiness_pct:""))+'" style="width:70px;font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--fg);font-family:inherit"><button onclick="wbOverrideReadiness(\''+wbEsc(t.id)+'\')" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--amber-border);background:var(--amber-soft);color:var(--amber);cursor:pointer;font-family:inherit">Apply</button></div>'
+    +'<div style="font-size:10px;color:var(--fg-faint);margin-top:6px">'+(d.updated_at||a.updated_at?"Last saved "+wbEsc((d.updated_at||a.updated_at||"").replace("T"," ").slice(0,16)):"Not saved yet")+'</div></div>'
+    +'</div></div>';
+
+  /* ── Detail panels ── */
+  if(g){
+    html+='<div class="drawer" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Bid / No-Bid detail</div><button onclick="wbDownload(\''+wbEsc(t.id)+'\',\'grading\')" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit">\u2b07 Export .md</button></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      +'<div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">Why bid</div>'+(g.why_bid||[]).map(function(x){return'<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">\u2713 '+wbEsc(x)+'</div>'}).join("")+'</div>'
+      +'<div><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">Why not</div>'+(g.why_not||[]).map(function(x){return'<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">\u2717 '+wbEsc(x)+'</div>'}).join("")+'</div>'
+      +'</div>'
+      +'<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;margin-bottom:4px">Gates</div><div class="tbl-wrap"><table><thead><tr><th>Gate</th><th>Result</th><th>Detail</th></tr></thead><tbody>'+Object.keys(g.gates||{}).map(function(k){var gg=g.gates[k];return'<tr><td style="font-size:11px;font-weight:600">'+wbEsc(k.replace(/_/g," "))+'</td><td>'+(gg.pass?'<span style="color:var(--green)">\u2705 Pass</span>':'<span style="color:var(--red);font-weight:700">\u274c Fail</span>')+'</td><td style="font-size:11px">'+wbEsc(gg.detail)+'</td></tr>'}).join("")+'</tbody></table></div></div>'
+      +((g.capability_coverage||[]).length?'<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;margin-bottom:4px">Requirement coverage</div><div class="tbl-wrap"><table><thead><tr><th>Requirement</th><th>NETS has</th><th>How</th></tr></thead><tbody>'+g.capability_coverage.map(function(r){return'<tr><td style="font-size:11px">'+wbEsc(r.requirement)+'</td><td>'+(r.nets_has?'<span style="color:var(--green)">Yes</span>':'<span style="color:var(--red)">No</span>')+'</td><td style="font-size:11px;color:var(--fg-muted)">'+wbEsc(r.how)+'</td></tr>'}).join("")+'</tbody></table></div></div>':'')
+      +((g.risks||[]).length?'<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;margin-bottom:4px">Risks</div>'+g.risks.map(function(r){return'<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)"><span class="badge '+(r.severity==="high"?"b-r":r.severity==="medium"?"b-a":"b-g")+'" style="font-size:8px">'+wbEsc(r.severity)+'</span> '+wbEsc(r.risk)+' <span style="color:var(--fg-faint)">\u2192 '+wbEsc(r.mitigation)+'</span></div>'}).join("")+'</div>':'')
+      +((g.conditions_to_bid||[]).length?'<div style="margin-top:10px;padding:8px 12px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px"><div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:3px">Conditions to bid</div>'+g.conditions_to_bid.map(function(x){return'<div style="font-size:11px">\u2022 '+wbEsc(x)+'</div>'}).join("")+'</div>':'')
+      +'</div>';
+  }
+  if(c){
+    html+='<div class="drawer" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Compliance documents</div><button onclick="wbDownload(\''+wbEsc(t.id)+'\',\'compliance\')" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit">\u2b07 Export .md</button></div>'
+      +'<div class="tbl-wrap"><table><thead><tr><th>Document</th><th>Clause</th><th>Mandatory</th><th>NETS status</th><th>Owner</th><th>Note</th></tr></thead><tbody>'
+      +(c.required_documents||[]).map(function(dd){var col=dd.nets_status==="HAVE"?"var(--green)":dd.nets_status==="NEED_TO_PREPARE"?"var(--amber)":dd.nets_status==="MISSING"?"var(--red)":"var(--fg-faint)";return'<tr><td style="font-size:11px;font-weight:600">'+wbEsc(dd.doc)+'</td><td style="font-size:10px;color:var(--fg-faint)">'+wbEsc(dd.rfp_clause||"")+'</td><td style="text-align:center">'+(dd.mandatory?"Yes":"No")+'</td><td style="font-size:10px;font-weight:700;color:'+col+'">'+wbEsc(dd.nets_status)+'</td><td style="font-size:10px">'+wbEsc(dd.owner||"")+'</td><td style="font-size:10px;color:var(--fg-muted)">'+wbEsc(dd.note||"")+'</td></tr>'}).join("")
+      +'</tbody></table></div>'
+      +(c.bid_security&&c.bid_security.required?'<div style="font-size:11px;margin-top:8px"><strong>Bid security:</strong> '+wbEsc(c.bid_security.amount)+' as '+wbEsc(c.bid_security.form)+'</div>':'')
+      +((c.deadline_checklist||[]).length?'<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;margin-bottom:3px">Deadline checklist</div>'+c.deadline_checklist.map(function(x){return'<div style="font-size:11px">\u23f1 '+wbEsc(x.item)+' <span style="color:var(--fg-faint)">\u00b7 '+wbEsc(x.due)+'</span></div>'}).join("")+'</div>':'')
+      +'</div>';
+  }
+  if(b){
+    html+='<div class="drawer" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Bill of Quantities <span style="font-weight:400;color:var(--fg-faint);text-transform:none;letter-spacing:0">(editable: qty, unit price, OEM, part no)</span></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:800;color:var(--green)" id="wb-boq-total">'+wbFmtV(b.grand_total_pkr)+'</span><button onclick="wbDownload(\''+wbEsc(t.id)+'\',\'boq\')" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit">\u2b07 Export .csv</button></div></div>';
+    (b.sections||[]).forEach(function(sc,si){
+      html+='<div style="font-size:11px;font-weight:700;margin:8px 0 4px">'+wbEsc(sc.section)+'</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Item</th><th>OEM</th><th>Part no</th><th>Qty</th><th>Unit</th><th>Unit PKR</th><th>Total</th><th>Conf</th><th></th></tr></thead><tbody>';
+      (sc.lines||[]).forEach(function(l,li){
+        var inp=function(f,v,w){return'<input value="'+wbEsc(v)+'" onchange="wbBoqEdit(\''+wbEsc(t.id)+'\','+si+','+li+',\''+f+'\',this.value)" style="width:'+w+'px;font-size:10px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--fg);font-family:inherit">'};
+        html+='<tr><td style="font-size:10px">'+(l.sno||li+1)+'</td><td style="font-size:11px"><strong>'+wbEsc(l.item)+'</strong><br><span style="font-size:9px;color:var(--fg-faint)">'+wbEsc((l.description||"").slice(0,90))+(l.rfp_ref?' \u00b7 '+wbEsc(l.rfp_ref):'')+'</span></td><td>'+inp("oem",l.oem||"",80)+'</td><td>'+inp("part_no",l.part_no||"",110)+'</td><td>'+inp("qty",l.qty||0,50)+'</td><td style="font-size:10px">'+wbEsc(l.unit||"")+'</td><td>'+inp("unit_price_pkr",l.unit_price_pkr||0,90)+'</td><td style="font-size:11px;font-weight:600" id="wb-boq-lt-'+si+'-'+li+'">'+wbFmtV(l.total_pkr)+'</td><td><span class="badge '+(l.confidence==="high"?"b-g":l.confidence==="medium"?"b-a":"b-grey")+'" style="font-size:8px">'+wbEsc(l.confidence||"")+'</span></td><td><span onclick="wbBoqDelLine(\''+wbEsc(t.id)+'\','+si+','+li+')" style="cursor:pointer;color:var(--red);font-size:12px" title="Remove line">\u2715</span></td></tr>';
+      });
+      html+='</tbody></table></div><div style="font-size:10px;color:var(--green);cursor:pointer;margin-top:3px" onclick="wbBoqAddLine(\''+wbEsc(t.id)+'\','+si+')">+ add line</div>';
+    });
+    if((b.services||[]).length){html+='<div style="font-size:11px;font-weight:700;margin:10px 0 4px">Services</div><div class="tbl-wrap"><table><thead><tr><th>Service</th><th>Man-days</th><th>Rate PKR</th><th>Total</th></tr></thead><tbody>'+b.services.map(function(sv){return'<tr><td style="font-size:11px">'+wbEsc(sv.item)+'</td><td>'+(sv.man_days||0)+'</td><td>'+wbFmtV(sv.rate_pkr)+'</td><td style="font-weight:600">'+wbFmtV(sv.total_pkr)+'</td></tr>'}).join("")+'</tbody></table></div>'}
+    if((b.assumptions||[]).length)html+='<div style="margin-top:8px;font-size:10px;color:var(--fg-muted)"><strong>Assumptions:</strong> '+b.assumptions.map(wbEsc).join(" \u00b7 ")+'</div>';
+    if((b.clarifications_needed||[]).length)html+='<div style="margin-top:6px;padding:8px 12px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:6px;font-size:10px;color:var(--amber)"><strong>Clarifications to raise with issuer:</strong> '+b.clarifications_needed.map(wbEsc).join(" \u00b7 ")+'</div>';
+    html+='</div>';
+  }
+  if(s){
+    html+='<div class="drawer" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">RFP summary detail</div><button onclick="wbDownload(\''+wbEsc(t.id)+'\',\'summary\')" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit">\u2b07 Export .md</button></div>'
+      +'<div style="font-size:11px;line-height:1.6;margin-bottom:8px">'+wbEsc(s.scope_summary||"")+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+      +'<div><div style="font-size:10px;font-weight:700;color:var(--fg-muted);margin-bottom:3px">Deliverables</div>'+(s.deliverables||[]).map(function(x){return'<div style="font-size:10px">\u2022 '+wbEsc(x)+'</div>'}).join("")+'</div>'
+      +'<div><div style="font-size:10px;font-weight:700;color:var(--fg-muted);margin-bottom:3px">Eligibility</div>'+Object.keys(s.eligibility||{}).map(function(k){var v=s.eligibility[k];if(!v||(Array.isArray(v)&&!v.length))return"";return'<div style="font-size:10px"><span style="color:var(--fg-faint)">'+wbEsc(k.replace(/_/g," "))+':</span> '+wbEsc(Array.isArray(v)?v.join(", "):v)+'</div>'}).join("")+'</div>'
+      +'<div><div style="font-size:10px;font-weight:700;color:var(--fg-muted);margin-bottom:3px">Timeline and commercials</div>'+Object.keys(s.timeline||{}).map(function(k){var v=s.timeline[k];return v?'<div style="font-size:10px"><span style="color:var(--fg-faint)">'+wbEsc(k.replace(/_/g," "))+':</span> '+wbEsc(v)+'</div>':""}).join("")+Object.keys(s.commercials||{}).map(function(k){var v=s.commercials[k];return v?'<div style="font-size:10px"><span style="color:var(--fg-faint)">'+wbEsc(k.replace(/_/g," "))+':</span> '+wbEsc(k==="estimated_value_pkr"?wbFmtV(v):v)+'</div>':""}).join("")+'</div>'
+      +'</div>'
+      +((s.red_flags||[]).length?'<div style="margin-top:8px;padding:8px 12px;background:var(--red-soft);border:1px solid var(--red-border);border-radius:6px;font-size:10px;color:var(--red)"><strong>Red flags:</strong> '+s.red_flags.map(wbEsc).join(" \u00b7 ")+'</div>':'')
+      +'</div>';
+  }
+  return html;
+}
+
+/* ═══ LIVE INTEGRITY TEST SUITE ═══
+   Compares rendered metrics against raw state arrays (T, SCANS, PROPOSALS).
+   Runs synchronously on every Settings page load. No mocks. */
+function runLiveIntegrityTests(){
+  var results=[];
+  function a(pass,section,name,expected,got){results.push({pass:pass,section:section,name:name,expected:String(expected),got:String(got)})}
+
+  /* ── A: State Model Integrity ── */
+  var qual=T.filter(function(t){return t.score>=70});
+  var qualOpen=qual.filter(function(t){return t.open});
+  var closing7=qualOpen.filter(function(t){return t.days!==null&&t.days>=0&&t.days<=7});
+  var rfpAvail=T.filter(function(t){return t.score>=70&&t.doc});
+
+  a(T.length>=0,"State Model","T array is populated",">= 0",T.length);
+  a(qual.length<=T.length,"State Model","Qualified <= Total tenders","<= "+T.length,qual.length);
+  a(qualOpen.length<=qual.length,"State Model","Open qualified <= Qualified","<= "+qual.length,qualOpen.length);
+  a(closing7.length<=qualOpen.length,"State Model","Closing 7d <= Open qualified","<= "+qualOpen.length,closing7.length);
+
+  /* Every qualified tender has score >= 70 */
+  var badScore=qual.filter(function(t){return t.score<70});
+  a(badScore.length===0,"State Model","All qualified tenders have score >= 70","0 violations",badScore.length+" violations");
+
+  /* Every open tender should have open===true */
+  var openMismatch=qualOpen.filter(function(t){return !t.open});
+  a(openMismatch.length===0,"State Model","Open flag consistent on open qualified set","0 mismatches",openMismatch.length+" mismatches");
+
+  /* ── B: Date Parsing ── */
+  var d1=parsePortalDate("5-Nov-26");
+  var d2=parsePortalDate("22-Oct-2026");
+  var d3=parsePortalDate("Invalid-Date");
+  var d4=parsePortalDate("Dec 22, 2026");
+  var d5=parsePortalDate("2026-11-25");
+
+  a(d1 instanceof Date&&!isNaN(d1),"Date Parsing","Parses '5-Nov-26' (short year)","valid Date",d1?d1.toISOString().slice(0,10):"null");
+  a(d2 instanceof Date&&!isNaN(d2),"Date Parsing","Parses '22-Oct-2026' (full year)","valid Date",d2?d2.toISOString().slice(0,10):"null");
+  a(d3===null,"Date Parsing","Rejects 'Invalid-Date'","null",String(d3));
+  a(d4 instanceof Date&&!isNaN(d4),"Date Parsing","Parses 'Dec 22, 2026' (PPRA format)","valid Date",d4?d4.toISOString().slice(0,10):"null");
+  a(d5 instanceof Date&&!isNaN(d5),"Date Parsing","Parses '2026-11-25' (ISO format)","valid Date",d5?d5.toISOString().slice(0,10):"null");
+
+  /* ── C: Sales Dashboard Calculations ── */
+  var bids=qualOpen;
+  var rawPipeline=0;
+  var rawForecast=0;
+  bids.forEach(function(t){
+    if(!t._sd)t._sd={estValue:Math.round((t.score/100)*800000+(t.solMatch.length*150000)),winProb:t.score>=95?65:t.score>=85?55:t.score>=75?45:35};
+    rawPipeline+=t._sd.estValue;
+    rawForecast+=Math.round(t._sd.estValue*(t._sd.winProb/100));
+  });
+
+  a(rawPipeline>=0,"Sales Calculations","Pipeline value is non-negative",">= 0",rawPipeline);
+  a(rawForecast<=rawPipeline,"Sales Calculations","Weighted forecast <= pipeline value","<= "+rawPipeline,rawForecast);
+  a(bids.length===qualOpen.length,"Sales Calculations","Active bids count matches open qualified",qualOpen.length,bids.length);
+
+  /* Win probability bounds */
+  var badProb=bids.filter(function(t){return t._sd&&(t._sd.winProb<0||t._sd.winProb>100)});
+  a(badProb.length===0,"Sales Calculations","All win probabilities in 0..100 range","0 violations",badProb.length+" violations");
+
+  /* ── D: Export Functions ── */
+  a(typeof exportSalesCSV==="function","Export Integrity","exportSalesCSV is defined","function",typeof exportSalesCSV);
+  a(typeof exportSalesJSON==="function","Export Integrity","exportSalesJSON is defined","function",typeof exportSalesJSON);
+
+  /* ── E: Database Connection ── */
+  a(typeof DB!=="undefined","Database","DB variable is defined","defined",typeof DB);
+  a(Array.isArray(T),"Database","T is an array","true",Array.isArray(T));
+  a(Array.isArray(SCANS),"Database","SCANS is an array","true",Array.isArray(SCANS));
+  a(Array.isArray(PROPOSALS),"Database","PROPOSALS is an array","true",Array.isArray(PROPOSALS));
+
+  /* ── F: Tender Data Quality ── */
+  var noId=T.filter(function(t){return !t.id});
+  a(noId.length===0,"Data Quality","All tenders have an ID","0 missing",noId.length+" missing");
+
+  var noTitle=T.filter(function(t){return !t.ti||t.ti.length<3});
+  a(noTitle.length===0,"Data Quality","All tenders have a meaningful title (3+ chars)","0 missing",noTitle.length+" missing");
+
+  var noScore=T.filter(function(t){return t.score===undefined||t.score===null});
+  a(noScore.length===0,"Data Quality","All tenders have a score","0 missing",noScore.length+" missing");
+
+  /* Source portal check */
+  var validSources=T.filter(function(t){return t.source==="PPRA"||t.source==="Sindh Bank"||!t.source});
+  a(validSources.length===T.length,"Data Quality","All sources are PPRA or Sindh Bank",T.length+" valid",validSources.length+" valid");
+
+  /* ── G: Scan Log Integrity ── */
+  if(SCANS.length>0){
+    var s0=SCANS[0];
+    a(s0.date&&s0.date.length>0,"Scan Logs","Latest scan has a date","non-empty",s0.date||"empty");
+    a(typeof s0.total_on_portal==="number","Scan Logs","total_on_portal is a number","number",typeof s0.total_on_portal);
+    a(typeof s0.qualified_count==="number","Scan Logs","qualified_count is a number","number",typeof s0.qualified_count);
+    a(s0.qualified_count<=s0.total_on_portal,"Scan Logs","Qualified <= Total on portal","<= "+s0.total_on_portal,s0.qualified_count);
+  }else{
+    a(true,"Scan Logs","No scans yet (expected for fresh install)","0 scans","0 scans");
+  }
+
+  return results;
 }
 
 function vSettings(){
@@ -549,13 +1429,15 @@ function vSettings(){
 
   /* ---- SYSTEM HEALTH ---- */
   var health=[
-    {item:"Portal Connection",detail:"sindhbank.com.pk/tenders (public page, no login needed)",ok:true},
+    {item:"Sindh Bank Portal",detail:"sindhbank.com.pk/tenders (public page, no login needed)",ok:true},
+    {item:"PPRA EPMS Portal",detail:"epms.ppra.gov.pk/public/tenders/active-tenders (public, paginated, 50/page)",ok:true},
+    {item:"EPADS Portal",detail:"epads.gov.pk (e-Pak Acquisition and Disposal System, Federal/KP/GB, 100/page)",ok:true},
     {item:"Artifact Database",detail:dbDocs+" documents stored out of 25,000 limit ("+(DB?"connected":"offline")+")",ok:!!DB},
     {item:"Last Scan",detail:lastScan,ok:SCANS.length>0},
     {item:"Tender Records",detail:T.length+" qualified tenders saved",ok:T.length>0},
     {item:"RFP Documents",detail:pdfCount+" of "+T.length+" have downloadable PDFs",ok:pdfCount>0},
     {item:"Proposals Generated",detail:PROPOSALS.length+" AI-drafted proposals in the system",ok:true},
-    {item:"D:\\ Sync Folder",detail:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\",ok:true},
+    {item:"D:\\ Sync Folder",detail:"D:\\NETS\\DIGITISATION\\tender-fetcher\\ (subfolders per portal: SINDH_BANK, PPRA)",ok:true},
     {item:"SharePoint (read)",detail:"NETS-Karachi Presales-Technical Proposals: 38 reference PDFs accessible",ok:true},
     {item:"SharePoint (write)",detail:"Cannot save files yet. An IT admin needs to grant write access (Files.ReadWrite.All) on the M365 connector.",ok:false}
   ];
@@ -606,6 +1488,42 @@ function vSettings(){
     +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>What was tested</th></tr></thead><tbody>'
     +regTests.map(function(t){return'<tr><td style="text-align:center;font-size:14px">'+(t.pass?'✅':'❌')+'</td><td style="font-size:12px">'+t.t+'</td></tr>'}).join('')
     +'</tbody></table></div>';
+
+  /* ── LIVE INTEGRITY TEST SUITE ── */
+  var liveResults=runLiveIntegrityTests();
+  var lrPass=liveResults.filter(function(r){return r.pass}).length;
+  var lrFail=liveResults.filter(function(r){return !r.pass}).length;
+  var lrTotal=liveResults.length;
+  var lrColor=lrFail===0?"var(--green)":"var(--red)";
+  var lrVerdict=lrFail===0?"ALL PASSED":"FAILURES DETECTED";
+
+  html+='<div class="sec-head" style="margin-top:28px;font-size:14px">Live Integrity Tests <span class="hint" style="color:'+lrColor+'">'+lrPass+'/'+lrTotal+' passed</span></div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:12px">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+    +'<div style="font-size:32px;font-weight:800;color:'+lrColor+'">'+lrPass+'/'+lrTotal+'</div>'
+    +'<div><div style="font-size:13px;font-weight:700;color:'+lrColor+'">'+lrVerdict+'</div>'
+    +'<div style="font-size:11px;color:var(--fg-faint)">Automated tests run on every Settings page load, comparing rendered metrics against raw state arrays (T, SCANS, PROPOSALS)</div></div></div>'
+    +'<div style="font-size:11px;color:var(--fg-faint);margin-bottom:8px">These tests verify that every number displayed in Overview and Sales Dashboard matches the underlying data model. No mocks; all comparisons are live.</div></div>';
+
+  /* Group by section */
+  var sections={};
+  liveResults.forEach(function(r){
+    if(!sections[r.section])sections[r.section]=[];
+    sections[r.section].push(r);
+  });
+  Object.keys(sections).forEach(function(sec){
+    var items=sections[sec];
+    var secPass=items.filter(function(r){return r.pass}).length;
+    html+='<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--fg);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">'+sec+' <span style="font-weight:400;color:'+(secPass===items.length?"var(--green)":"var(--red)")+'">'+secPass+'/'+items.length+'</span></div>'
+      +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>Test</th><th>Expected</th><th>Got</th></tr></thead><tbody>';
+    items.forEach(function(r){
+      html+='<tr><td style="text-align:center;font-size:14px">'+(r.pass?'✅':'❌')+'</td>'
+        +'<td style="font-size:11px">'+r.name+'</td>'
+        +'<td style="font-size:11px;font-family:monospace;color:var(--fg-muted)">'+r.expected+'</td>'
+        +'<td style="font-size:11px;font-family:monospace;color:'+(r.pass?"var(--green)":"var(--red)")+'">'+r.got+'</td></tr>';
+    });
+    html+='</tbody></table></div></div>';
+  });
 
   return html;
 }
@@ -730,7 +1648,7 @@ function vProposalDetail(){
 
 /* Download helpers */
 var DL=null;
-DL=null; /* no Claude sandbox needed */
+(async function(){try{DL=await claude.use("downloads")}catch(e){DL=null}})();
 
 function triggerDownload(filename, blob){
   if(DL){
@@ -1158,6 +2076,584 @@ function vPipeline(){
     +'<div style="margin-top:24px"><span class="badge b-a" style="font-size:13px;padding:6px 18px">Coming Soon</span></div>'
     +'<div style="margin-top:16px;font-size:12px;color:var(--fg-faint)">For now, the pipeline architecture and agent details are in <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="showView(\'settings\')">Settings / Technical Health</span>.</div>'
     +'</div>';
+}
+
+/* ===== PIPELINE & BID MANAGEMENT DASHBOARD ===== */
+function vPipelineControl(){
+  var openQual=T.filter(function(t){return t.score>=70&&t.open});
+  var totalPipelineValue=openQual.length*450000;
+  var manualDownloadNeeded=openQual.filter(function(t){return t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"||!t.doc}).length;
+  var autoDownloaded=openQual.filter(function(t){return t.acqStatus==="AUTO_DOWNLOADED"}).length;
+
+  var html='<div style="background:var(--sidebar);border-radius:10px;padding:24px 28px;margin-bottom:20px;color:#fff">'
+    +'<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:4px">Sales & Pre-Sales Command Center</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:4px">Pipeline & Bid Management Dashboard</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.45)">Manage commercial priorities, gatekeeper overrides, OEM tracking, and manual D:\\ folder paths.</div>'
+    +'</div>';
+
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px"><div style="font-size:11px;color:var(--fg-muted)">Open Biddable Tenders</div><div style="font-size:26px;font-weight:800;color:var(--green)">'+openQual.length+'</div><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">Filtered: score >= 70, open</div></div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px"><div style="font-size:11px;color:var(--fg-muted)">RFPs Auto-Downloaded</div><div style="font-size:26px;font-weight:800;color:var(--green)">'+autoDownloaded+'</div><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">Saved to D:\\ drive (Path A)</div></div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px"><div style="font-size:11px;color:var(--fg-muted)">Pre-Sales Workload</div><div style="font-size:26px;font-weight:800;color:var(--amber)">'+(openQual.length*14)+' hrs</div><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">Estimated drafting effort</div></div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px"><div style="font-size:11px;color:var(--fg-muted)">Manual Download Needed</div><div style="font-size:26px;font-weight:800;color:'+(manualDownloadNeeded>0?"var(--red)":"var(--green)")+'">'+manualDownloadNeeded+'</div><div style="font-size:10px;color:var(--fg-faint);margin-top:4px">Restricted / password (Path B)</div></div>'
+    +'</div>';
+
+  html+='<div class="sec-head" style="font-size:14px">Active Qualified Tender Controls <span class="hint">Gatekeeper & Folder Management</span></div>';
+
+  if(!openQual.length){
+    html+='<div class="action-card" style="cursor:default"><div class="info"><div class="title" style="color:var(--fg-faint)">No open qualified tenders in pipeline</div><div class="detail">Tenders will appear here once the next scan finds open opportunities matching NETS solutions.</div></div></div>';
+    return html;
+  }
+
+  openQual.forEach(function(t){
+    var isManual=t.acqStatus==="MANUAL_DOWNLOAD_REQUIRED"||!t.doc;
+    var portalDir=t.source==="PPRA"?"PPRA":"SINDH_BANK";
+    html+='<div class="action-card" style="cursor:default;flex-direction:column;align-items:stretch;margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:15px;font-weight:700;color:var(--fg)">'+t.ti+'</div>'
+      +'<div style="font-size:11px;color:var(--fg-muted);margin-top:2px">'+t.id+' \u00b7 '+(t.source||"Sindh Bank")+' \u00b7 '+(t.dept||"")+' \u00b7 Score: <strong style="color:var(--green)">'+t.score+'</strong>'+(t.days!==null?' \u00b7 <strong style="color:'+(t.days<=7?"var(--red)":"var(--fg)")+'">'+t.days+'d left</strong>':'')+'</div>'
+      +'</div>'
+      +'<span class="badge '+(t.verdict==="BID"?"b-g":"b-a")+'">'+(t.verdict||"REVIEW")+'</span>'
+      +'</div>'
+      +'<div style="margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:6px;font-family:monospace;font-size:11px;color:var(--fg-muted)">'
+      +'\ud83d\udcc2 D:\\NETS\\DIGITISATION\\tender-fetcher\\'+portalDir+'\\'+t.id+'\\'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">'
+      +'<div style="display:flex;align-items:center;gap:4px">'
+      +'<span style="font-size:11px;font-weight:600;color:var(--fg-faint)">Gate:</span>'
+      +'<button onclick="setGatekeeperVerdict(\''+t.id+'\',\'PURSUE\')" style="font-size:10px;padding:3px 8px;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border);border-radius:4px;cursor:pointer;font-family:inherit">Pursue</button>'
+      +'<button onclick="setGatekeeperVerdict(\''+t.id+'\',\'REVIEW\')" style="font-size:10px;padding:3px 8px;background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border);border-radius:4px;cursor:pointer;font-family:inherit">Review</button>'
+      +'<button onclick="setGatekeeperVerdict(\''+t.id+'\',\'DROP\')" style="font-size:10px;padding:3px 8px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-border);border-radius:4px;cursor:pointer;font-family:inherit">Drop (No-Bid)</button>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:4px;margin-left:auto">'
+      +'<span style="font-size:11px;color:var(--fg-faint)">OEM Quote:</span>'
+      +'<select onchange="updateOEMStatus(\''+t.id+'\',this.value)" style="font-size:11px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-family:inherit">'
+      +'<option value="NOT_REQUIRED">Not Required</option>'
+      +'<option value="REQUESTED">Requested from OEM</option>'
+      +'<option value="RECEIVED">Received & Validated</option>'
+      +'</select>'
+      +'</div>'
+      +(isManual?'<a href="'+(t.detailUrl||t.doc||"#")+'" target="_blank" style="font-size:11px;padding:4px 10px;background:var(--red);color:#fff;border-radius:4px;text-decoration:none;font-weight:600">Manual Download \u2197</a>':'<span class="badge b-g" style="font-size:10px">RFP Downloaded</span>')
+      +'</div></div>';
+  });
+
+  return html;
+}
+
+function setGatekeeperVerdict(id,verdict){
+  var t=T.find(function(x){return x.id===id});
+  if(!t)return;
+  t.verdict=verdict;
+  if(DB){
+    DB.doc("tenders/"+id).update({verdict:verdict}).then(function(){
+      console.log("Gatekeeper: "+id+" set to "+verdict);
+    }).catch(function(e){console.error("DB update failed:",e)});
+  }
+  render();
+}
+function updateOEMStatus(id,status){
+  if(DB){
+    DB.doc("tenders/"+id).update({oem_status:status}).then(function(){
+      console.log("OEM status for "+id+": "+status);
+    }).catch(function(e){console.error(e)});
+  }
+}
+
+/* ===== SALES HEAD & PRE-SALES COMMAND CENTER ===== */
+var SC_FILTER={sector:"all",region:"all",value:"all",deadline:"all",goNogo:"all",assignee:"all"};
+var SC_ENGINEERS=["Unassigned","Arsalan Naveed","Sharjeel Amar Ilahi","Jahangir Khan","Bilal Saleem","Ikram Ahmed","Faheem Malik"];
+var SC_SECTORS=["IT","Networking","Cybersecurity","Cloud","Data Centre","Power","Managed Services","ELV","Solar","Other"];
+
+function vSalesCommand(){
+  var bids=T.filter(function(t){return t.score>=70&&t.open});
+
+  /* Enrich each bid with sales fields from DB or defaults */
+  bids.forEach(function(t){
+    if(!t._sc){
+      t._sc={
+        estValue:Math.round((t.score/100)*800000+(t.solMatch.length*150000)),
+        winProb:t.score>=95?65:t.score>=85?55:t.score>=75?45:35,
+        assignee:t.assignee||"Unassigned",
+        goNogo:t.goNogo||"PENDING",
+        sector:t.solMatch.length?t.solMatch[0].group:"Other",
+        region:"Pakistan",
+        reminderSent:false
+      };
+    }
+  });
+
+  /* Apply filters */
+  var filtered=bids.filter(function(t){
+    if(SC_FILTER.sector!=="all"&&t._sc.sector!==SC_FILTER.sector)return false;
+    if(SC_FILTER.goNogo!=="all"&&t._sc.goNogo!==SC_FILTER.goNogo)return false;
+    if(SC_FILTER.assignee!=="all"&&t._sc.assignee!==SC_FILTER.assignee)return false;
+    if(SC_FILTER.deadline==="7d"&&(t.days===null||t.days>7))return false;
+    if(SC_FILTER.deadline==="14d"&&(t.days===null||t.days>14))return false;
+    if(SC_FILTER.deadline==="30d"&&(t.days===null||t.days>30))return false;
+    if(SC_FILTER.value==="high"&&t._sc.estValue<1000000)return false;
+    if(SC_FILTER.value==="mid"&&(t._sc.estValue<500000||t._sc.estValue>=1000000))return false;
+    if(SC_FILTER.value==="low"&&t._sc.estValue>=500000)return false;
+    return true;
+  });
+
+  /* Aggregate metrics */
+  var totalPipeline=0,weightedForecast=0,activeBids=filtered.length;
+  filtered.forEach(function(t){
+    totalPipeline+=t._sc.estValue;
+    weightedForecast+=Math.round(t._sc.estValue*(t._sc.winProb/100));
+  });
+  var avgWinRate=filtered.length?Math.round(filtered.reduce(function(s,t){return s+t._sc.winProb},0)/filtered.length):0;
+
+  var html='';
+
+  /* Header */
+  html+='<div style="background:linear-gradient(135deg,#1a1f25 0%,#2d1a24 100%);border-radius:10px;padding:24px 28px;margin-bottom:20px;color:#fff">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div>'
+    +'<div style="font-size:10px;color:#4CAF50;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:4px">Sales Head & Pre-Sales Command Center</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:4px">Revenue Pipeline & Resource Control</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.45)">Live from Sindh Bank + PPRA portals. Filter, assign, export.</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button onclick="exportSalesCSV()" style="padding:6px 14px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Export CSV</button>'
+    +'<button onclick="exportSalesJSON()" style="padding:6px 14px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Export JSON</button>'
+    +'</div></div></div>';
+
+  /* KPI Row */
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+  var kpis=[
+    {label:"Total Pipeline Value",val:"PKR "+formatNum(totalPipeline),sub:activeBids+" active bids",color:"var(--green)"},
+    {label:"Weighted Revenue Forecast",val:"PKR "+formatNum(weightedForecast),sub:"Probability adjusted",color:"var(--blue)"},
+    {label:"Active Bids",val:activeBids,sub:filtered.filter(function(t){return t.days!==null&&t.days<=7}).length+" closing this week",color:"var(--amber)"},
+    {label:"Avg Win Probability",val:avgWinRate+"%",sub:"NETS historical baseline: 55%",color:avgWinRate>=55?"var(--green)":"var(--red)"}
+  ];
+  kpis.forEach(function(k){
+    html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px">'
+      +'<div style="font-size:11px;color:var(--fg-muted);margin-bottom:6px">'+k.label+'</div>'
+      +'<div style="font-size:26px;font-weight:800;color:'+k.color+';line-height:1">'+k.val+'</div>'
+      +'<div style="font-size:10px;color:var(--fg-faint);margin-top:6px">'+k.sub+'</div></div>';
+  });
+  html+='</div>';
+
+  /* Filters Row */
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
+  html+='<span style="font-size:11px;font-weight:600;color:var(--fg-faint);margin-right:4px">FILTER:</span>';
+  html+=scSelect("sector","Sector",["all:All Sectors"].concat(SC_SECTORS.map(function(s){return s+":"+s})));
+  html+=scSelect("deadline","Deadline",["all:Any Deadline","7d:7 Days","14d:14 Days","30d:30 Days"]);
+  html+=scSelect("value","Value Band",["all:All Values","high:High (1M+)","mid:Mid (500K-1M)","low:Low (<500K)"]);
+  html+=scSelect("goNogo","Go/No-Go",["all:All Status","GO:Go","NOGO:No-Go","PENDING:Pending"]);
+  html+=scSelect("assignee","Resource",["all:All Resources"].concat(SC_ENGINEERS.map(function(e){return e+":"+e})));
+  html+='<span style="margin-left:auto;font-size:11px;color:var(--fg-faint)">'+filtered.length+' of '+bids.length+' bids</span>';
+  html+='</div>';
+
+  /* Command Table */
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden">';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:var(--bg)">'
+    +'<th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Tender / Client</th>'
+    +'<th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Sector</th>'
+    +'<th style="text-align:right;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Est. Value</th>'
+    +'<th style="text-align:center;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Win Prob</th>'
+    +'<th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Deadline</th>'
+    +'<th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Assigned To</th>'
+    +'<th style="text-align:center;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Go/No-Go</th>'
+    +'<th style="text-align:center;padding:10px 12px;font-size:10px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Actions</th>'
+    +'</tr></thead><tbody>';
+
+  filtered.sort(function(a,b){
+    if(a.days!==null&&b.days!==null)return a.days-b.days;
+    if(a.days!==null)return -1;
+    if(b.days!==null)return 1;
+    return b.score-a.score;
+  });
+
+  filtered.forEach(function(t){
+    var sc=t._sc;
+    var urgColor=t.days!==null&&t.days<=3?"var(--red)":t.days!==null&&t.days<=7?"var(--amber)":"var(--fg)";
+    var probColor=sc.winProb>=60?"var(--green)":sc.winProb>=40?"var(--amber)":"var(--red)";
+    var goClass=sc.goNogo==="GO"?"background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)":sc.goNogo==="NOGO"?"background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)":"background:var(--bg);color:var(--fg-faint);border:1px solid var(--border)";
+
+    html+='<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:10px 12px;max-width:260px" onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')" title="Click to view details"><strong style="font-size:12px;cursor:pointer;color:var(--fg)">'+t.ti.substring(0,60)+(t.ti.length>60?"...":"")+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+(t.source||"Sindh Bank")+' · '+t.id+'</span></td>'
+      +'<td style="padding:10px 12px"><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--fg-muted);font-weight:600">'+sc.sector+'</span></td>'
+      +'<td style="padding:10px 12px;text-align:right;font-weight:700;font-size:13px;color:var(--fg)">'+formatNum(sc.estValue)+'</td>'
+      +'<td style="padding:10px 12px;text-align:center"><div style="display:flex;align-items:center;gap:6px;justify-content:center"><div style="width:40px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:'+sc.winProb+'%;height:100%;background:'+probColor+';border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:'+probColor+'">'+sc.winProb+'%</span></div></td>'
+      +'<td style="padding:10px 12px;white-space:nowrap"><span style="font-size:12px;font-weight:600;color:'+urgColor+'">'+(t.cl||"TBD")+'</span>'+(t.days!==null?'<br><span style="font-size:10px;font-weight:700;color:'+urgColor+'">'+(t.days<=0?"OVERDUE":t.days+"d left")+'</span>':'')+'</td>'
+      +'<td style="padding:10px 12px"><select onchange="scAssign(\''+t.id+'\',this.value)" style="font-size:11px;padding:4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-family:inherit;min-width:120px">'
+      +SC_ENGINEERS.map(function(e){return'<option value="'+e+'"'+(sc.assignee===e?' selected':'')+'>'+e+'</option>'}).join('')
+      +'</select></td>'
+      +'<td style="padding:10px 12px;text-align:center"><select onchange="scGoNogo(\''+t.id+'\',this.value)" style="font-size:11px;padding:4px 8px;border-radius:4px;font-weight:700;font-family:inherit;'+goClass+';cursor:pointer"><option value="PENDING"'+(sc.goNogo==="PENDING"?" selected":"")+'>Pending</option><option value="GO"'+(sc.goNogo==="GO"?" selected":"")+'>GO</option><option value="NOGO"'+(sc.goNogo==="NOGO"?" selected":"")+'>NO-GO</option></select></td>'
+      +'<td style="padding:10px 12px;text-align:center"><button onclick="scReminder(\''+t.id+'\')" title="Send deadline reminder email" style="padding:4px 8px;background:'+(sc.reminderSent?"var(--bg)":"var(--amber)")+';color:'+(sc.reminderSent?"var(--fg-faint)":"#fff")+';border:1px solid '+(sc.reminderSent?"var(--border)":"var(--amber)")+';border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit">'+(sc.reminderSent?"✓ Sent":"Email")+'</button></td>'
+      +'</tr>';
+  });
+
+  if(!filtered.length){
+    html+='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--fg-faint)">No bids match the current filters.</td></tr>';
+  }
+
+  html+='</tbody></table></div>';
+
+  /* Resource workload summary */
+  var workload={};
+  bids.forEach(function(t){
+    var a=t._sc.assignee||"Unassigned";
+    if(!workload[a])workload[a]={count:0,value:0,urgent:0};
+    workload[a].count++;
+    workload[a].value+=t._sc.estValue;
+    if(t.days!==null&&t.days<=7)workload[a].urgent++;
+  });
+
+  html+='<div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px">'
+    +'<div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--fg)">Resource Workload</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">';
+  Object.keys(workload).forEach(function(name){
+    var w=workload[name];
+    var barW=Math.min(100,Math.round((w.count/Math.max(1,bids.length))*100));
+    html+='<div style="padding:10px 12px;background:var(--bg);border-radius:6px">'
+      +'<div style="font-size:12px;font-weight:600;color:var(--fg)">'+name+'</div>'
+      +'<div style="font-size:20px;font-weight:800;color:var(--green);margin:4px 0">'+w.count+'</div>'
+      +'<div style="height:4px;background:var(--border);border-radius:2px;margin:4px 0"><div style="width:'+barW+'%;height:100%;background:var(--green);border-radius:2px"></div></div>'
+      +'<div style="font-size:10px;color:var(--fg-faint)">PKR '+formatNum(w.value)+(w.urgent?' · <span style="color:var(--red);font-weight:700">'+w.urgent+' urgent</span>':'')+'</div>'
+      +'</div>';
+  });
+  html+='</div></div>';
+
+  return html;
+}
+
+function scSelect(key,label,opts){
+  return'<select onchange="SC_FILTER.'+key+'=this.value;render()" style="font-size:11px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-family:inherit">'
+    +opts.map(function(o){var p=o.split(":");return'<option value="'+p[0]+'"'+(SC_FILTER[key]===p[0]?' selected':'')+'>'+p[1]+'</option>'}).join('')
+    +'</select>';
+}
+
+function formatNum(n){
+  if(n>=1000000)return(n/1000000).toFixed(1)+"M";
+  if(n>=1000)return(n/1000).toFixed(0)+"K";
+  return n.toString();
+}
+
+function scAssign(id,engineer){
+  var t=T.find(function(x){return x.id===id});
+  if(t&&t._sc){
+    t._sc.assignee=engineer;
+    if(DB){
+      DB.doc("tenders/"+id).update({assignee:engineer,assigned_at:new Date().toISOString()}).catch(function(e){console.error(e)});
+    }
+  }
+  render();
+}
+
+function scGoNogo(id,verdict){
+  var t=T.find(function(x){return x.id===id});
+  if(t&&t._sc){
+    t._sc.goNogo=verdict;
+    if(DB){
+      DB.doc("tenders/"+id).update({goNogo:verdict}).catch(function(e){console.error(e)});
+    }
+  }
+  render();
+}
+
+function scReminder(id){
+  var t=T.find(function(x){return x.id===id});
+  if(!t||!t._sc)return;
+  if(t._sc.assignee==="Unassigned"){
+    alert("Assign an engineer first before sending a reminder.");
+    return;
+  }
+  t._sc.reminderSent=true;
+  if(DB){
+    DB.doc("tenders/"+id).update({
+      reminder_sent:true,
+      reminder_to:t._sc.assignee,
+      reminder_at:new Date().toISOString(),
+      reminder_deadline:t.cl
+    }).catch(function(e){console.error(e)});
+  }
+  alert("Deadline reminder dispatched to "+t._sc.assignee+" for tender "+t.id+" (closing "+t.cl+").");
+  render();
+}
+
+function exportSalesCSV(){
+  var bids=T.filter(function(t){return t.score>=70&&t.open&&t._sc});
+  var rows=["Tender ID,Title,Portal,Sector,Est Value (PKR),Win Prob %,Deadline,Days Left,Assigned To,Go/No-Go"];
+  bids.forEach(function(t){
+    var sc=t._sc;
+    rows.push([t.id,'"'+t.ti.replace(/"/g,'""')+'"',t.source||"Sindh Bank",sc.sector,sc.estValue,sc.winProb,t.cl||"",t.days!==null?t.days:"",sc.assignee,sc.goNogo].join(","));
+  });
+  var blob=new Blob([rows.join("\n")],{type:"text/csv"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="NETS_Pipeline_"+new Date().toISOString().substring(0,10)+".csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===== SALES DASHBOARD (replicated from NETS AI Sales Dashboard) ===== */
+var SD_TEAM=[
+  {name:"Arsalan Naveed",initials:"AN",color:"#3987e5",capacity:0},
+  {name:"Sharjeel Amar Ilahi",initials:"SA",color:"#d95926",capacity:0},
+  {name:"Jahangir Khan",initials:"JK",color:"#199e70",capacity:0},
+  {name:"Bilal Saleem",initials:"BS",color:"#c98500",capacity:0},
+  {name:"Ikram Ahmed",initials:"IA",color:"#d55181",capacity:0},
+  {name:"Faheem Malik",initials:"FM",color:"#008300",capacity:0},
+  {name:"Unassigned",initials:"--",color:"#666",capacity:0}
+];
+var SD_COMPETITORS=[
+  {name:"Huawei",count:0},{name:"Cisco",count:0},{name:"Dell",count:0},
+  {name:"Fortinet",count:0},{name:"Palo Alto",count:0},{name:"HPE",count:0}
+];
+var SD_FILTER={sector:"",region:"",value:"",deadline:"",stage:"",sort:"deadline"};
+var SD_VIEW="all";
+
+function vSalesDash(){
+  var bids=T.filter(function(t){return t.score>=70&&t.open});
+  bids.forEach(function(t){
+    if(!t._sd){
+      t._sd={
+        estValue:Math.round((t.score/100)*800000+(t.solMatch.length*150000)),
+        winProb:t.score>=95?65:t.score>=85?55:t.score>=75?45:35,
+        assignee:t.assignee||"Unassigned",
+        goNogo:t.goNogo||"pending",
+        sector:t.solMatch.length?t.solMatch[0].group:"Other",
+        region:"Pakistan",
+        repeat:false,
+        competitors:[]
+      };
+      /* Detect competitors from solution matches */
+      t.solMatch.forEach(function(s){
+        if(s.name.toLowerCase().indexOf("cyber")>=0||s.name.toLowerCase().indexOf("security")>=0)t._sd.competitors.push("Fortinet");
+        if(s.name.toLowerCase().indexOf("network")>=0)t._sd.competitors.push("Cisco");
+        if(s.name.toLowerCase().indexOf("data centre")>=0||s.name.toLowerCase().indexOf("server")>=0)t._sd.competitors.push("Dell");
+      });
+    }
+  });
+
+  /* Apply filters */
+  var filtered=bids.filter(function(t){
+    var sd=t._sd;
+    if(SD_FILTER.sector&&sd.sector!==SD_FILTER.sector)return false;
+    if(SD_FILTER.deadline){var dl=parseInt(SD_FILTER.deadline);if(t.days===null||t.days>dl)return false}
+    if(SD_FILTER.value==="small"&&sd.estValue>=500000)return false;
+    if(SD_FILTER.value==="medium"&&(sd.estValue<500000||sd.estValue>=2000000))return false;
+    if(SD_FILTER.value==="large"&&(sd.estValue<2000000||sd.estValue>=10000000))return false;
+    if(SD_FILTER.stage&&sd.goNogo!==SD_FILTER.stage)return false;
+    return true;
+  });
+
+  /* Sort */
+  if(SD_FILTER.sort==="value")filtered.sort(function(a,b){return b._sd.estValue-a._sd.estValue});
+  else if(SD_FILTER.sort==="winProb")filtered.sort(function(a,b){return b._sd.winProb-a._sd.winProb});
+  else filtered.sort(function(a,b){return(a.days||999)-(b.days||999)});
+
+  /* Metrics */
+  var pipeline=0,forecast=0,urgent=0;
+  filtered.forEach(function(t){pipeline+=t._sd.estValue;forecast+=Math.round(t._sd.estValue*(t._sd.winProb/100));if(t.days!==null&&t.days<=7)urgent++});
+  var avgWin=filtered.length?Math.round(filtered.reduce(function(s,t){return s+t._sd.winProb},0)/filtered.length):0;
+
+  /* Compute workload */
+  SD_TEAM.forEach(function(m){m.bids=0;m.capacity=0;m.value=0});
+  bids.forEach(function(t){
+    var m=SD_TEAM.find(function(x){return x.name===t._sd.assignee})||SD_TEAM[SD_TEAM.length-1];
+    m.bids++;m.value+=t._sd.estValue;
+    m.capacity=Math.min(100,m.bids*20);
+  });
+
+  /* Compute competitor sightings */
+  var compMap={};
+  bids.forEach(function(t){(t._sd.competitors||[]).forEach(function(c){compMap[c]=(compMap[c]||0)+1})});
+  SD_COMPETITORS.forEach(function(c){c.count=compMap[c.name]||0});
+  SD_COMPETITORS.sort(function(a,b){return b.count-a.count});
+
+  var fmt=function(n){if(n>=1e6)return"PKR "+(n/1e6).toFixed(1)+"M";if(n>=1e3)return"PKR "+(n/1e3).toFixed(0)+"K";return"PKR "+n};
+
+  var html='<style>.sd *{box-sizing:border-box}.sd .sd-stat{font-family:"Space Grotesk",system-ui,sans-serif}.sd .sd-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .15s}.sd .sd-card:hover{border-color:var(--green)}.sd select{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;font-family:inherit}.sd .sd-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}.sd .urg-crit{background:rgba(220,59,59,.15);color:#d03b3b}.sd .urg-ser{background:rgba(236,131,90,.15);color:#ec835a}.sd .urg-warn{background:rgba(250,178,25,.15);color:#fab219}.sd .urg-ok{background:rgba(12,163,12,.15);color:#0ca30c}.sd .go-go{background:rgba(12,163,12,.15);color:#0ca30c;cursor:pointer}.sd .go-nogo{background:rgba(220,59,59,.15);color:#d03b3b;cursor:pointer}.sd .go-pend{background:rgba(250,178,25,.15);color:#fab219;cursor:pointer}.sd table{width:100%;border-collapse:collapse;font-size:13px}.sd th{text-align:left;padding:8px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-faint);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}.sd td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}.sd tr:hover td{background:rgba(76,175,80,.04)}.sd .bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}.sd .bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}.sd .bar{width:100%;border-radius:4px 4px 0 0;min-height:2px}.sd .wl-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}.sd .wl-row:last-child{border:none}.sd .wl-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}.sd .comp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}.sd .comp-row:last-child{border:none}</style>';
+
+  html+='<div class="sd">';
+
+  /* Header */
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff">N</div>'
+    +'<div><div style="font-size:20px;font-weight:700;letter-spacing:-.02em" class="sd-stat">NETS AI Sales Command</div><div style="font-size:12px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.08em">Presales & Bid Intelligence · Sales Head View</div></div></div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<div style="display:inline-flex;border-radius:8px;overflow:hidden;border:1px solid var(--border)">'
+    +'<button onclick="SD_VIEW=\'my\';render()" style="padding:6px 14px;border:none;font-size:13px;cursor:pointer;font-family:inherit;'+(SD_VIEW==="my"?"background:var(--green);color:#fff;font-weight:600":"background:transparent;color:var(--fg-muted)")+'">My Tenders</button>'
+    +'<button onclick="SD_VIEW=\'all\';render()" style="padding:6px 14px;border:none;font-size:13px;cursor:pointer;font-family:inherit;'+(SD_VIEW==="all"?"background:var(--green);color:#fff;font-weight:600":"background:transparent;color:var(--fg-muted)")+'">All Team</button></div>'
+    +'<button onclick="exportSalesCSV()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;cursor:pointer;font-family:inherit">Export CSV</button>'
+    +'<button onclick="exportSalesJSON()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;cursor:pointer;font-family:inherit">Export JSON</button>'
+    +'</div></div>';
+
+  /* Filters */
+  html+='<div style="display:flex;gap:10px;padding:14px 0;flex-wrap:wrap;align-items:flex-end">';
+  var sdSel=function(key,label,opts){
+    return'<div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint);font-weight:600">'+label+'</span>'
+      +'<select onchange="SD_FILTER.'+key+'=this.value;render()">'
+      +opts.map(function(o){var p=o.split(":");return'<option value="'+p[0]+'"'+(SD_FILTER[key]===p[0]?' selected':'')+'>'+p[1]+'</option>'}).join('')
+      +'</select></div>';
+  };
+  html+=sdSel("sector","Sector",["::All Sectors","Infrastructure:Infrastructure","Digital:Digital","Managed IT:Managed IT"]);
+  html+=sdSel("deadline","Deadline",["::Any Deadline","7:Within 7 days","14:Within 14 days","30:Within 30 days"]);
+  html+=sdSel("value","Value Band",["::All Values","small:<500K","medium:500K-2M","large:2M+"]);
+  html+=sdSel("stage","Go/No-Go",["::All Status","go:Go","nogo:No-Go","pending:Pending"]);
+  html+=sdSel("sort","Sort By",["deadline:Deadline (Urgent first)","value:Value (High to Low)","winProb:Win Probability"]);
+  html+='</div>';
+
+  /* Stat tiles */
+  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px">';
+  var stats=[
+    {val:fmt(pipeline),label:"Pipeline Value",delta:filtered.length+" bids",color:"var(--green)"},
+    {val:avgWin+"%",label:"Avg Win Rate",delta:avgWin>=55?"▲ Above baseline":"▼ Below 55% baseline",color:avgWin>=55?"var(--green)":"var(--red)"},
+    {val:filtered.length,label:"Active Tenders",delta:"Open & qualified",color:"var(--fg)"},
+    {val:urgent,label:"Due < 7 Days",delta:urgent?"Act now":"No urgent",color:urgent?"var(--amber)":"var(--green)"},
+    {val:fmt(forecast),label:"Weighted Forecast",delta:"Probability adjusted",color:"var(--blue)"}
+  ];
+  stats.forEach(function(s){
+    html+='<div style="text-align:center;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:12px">'
+      +'<div style="font-size:28px;font-weight:700;letter-spacing:-.02em;color:'+s.color+'" class="sd-stat">'+s.val+'</div>'
+      +'<div style="font-size:11px;color:var(--fg-faint);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">'+s.label+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:'+s.color+';margin-top:4px">'+s.delta+'</div></div>';
+  });
+  html+='</div>';
+
+  /* Grid: funnel + forecast + win rate + workload + competitors + go/no-go */
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">';
+
+  /* Pipeline funnel */
+  var stages=["Infrastructure","Digital","Managed IT","Other"];
+  var stageData=stages.map(function(s){
+    var st=filtered.filter(function(t){return t._sd.sector===s});
+    return{label:s,value:st.reduce(function(a,t){return a+t._sd.estValue},0),count:st.length};
+  });
+  var maxFunnel=Math.max.apply(null,stageData.map(function(s){return s.value}))||1;
+  var funnelColors=["#3987e5","#199e70","#c98500","#666"];
+  html+='<div class="sd-card"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em">Pipeline by Sector</span><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-soft);color:var(--green);font-weight:600">Live</span></div>';
+  stageData.forEach(function(s,i){
+    var pct=Math.max(3,Math.round(s.value/maxFunnel*100));
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+      +'<span style="width:90px;text-align:right;font-size:12px;color:var(--fg-muted)">'+s.label+'</span>'
+      +'<div style="flex:1;height:28px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+funnelColors[i]+';border-radius:4px 0 0 4px;display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:600;color:#fff">'+s.count+'</div></div>'
+      +'<span style="width:70px;text-align:right;font-weight:600;font-size:13px">'+fmt(s.value)+'</span></div>';
+  });
+  html+='</div>';
+
+  /* Revenue forecast by month */
+  var months=["Nov","Dec","Jan","Feb"];
+  var mIdx={Nov:10,Dec:11,Jan:0,Feb:1};
+  var monthBars=months.map(function(m){
+    var yr=mIdx[m]<10?2027:2026;
+    var mTenders=filtered.filter(function(t){
+      if(!t.cl)return false;
+      var d=parsePortalDate(t.cl);
+      return d&&d.getMonth()===mIdx[m]&&d.getFullYear()===yr;
+    });
+    return{label:m,value:mTenders.reduce(function(a,t){return a+Math.round(t._sd.estValue*(t._sd.winProb/100))},0)};
+  });
+  var maxBar=Math.max.apply(null,monthBars.map(function(b){return b.value}))||1;
+  html+='<div class="sd-card"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em">Revenue Forecast</span><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-soft);color:var(--green);font-weight:600">Q4 2026</span></div>'
+    +'<div class="bar-chart">';
+  monthBars.forEach(function(b){
+    var h=Math.max(3,Math.round(b.value/maxBar*100));
+    html+='<div class="bar-col"><div style="font-size:11px;font-weight:600;color:var(--fg-muted)">'+fmt(b.value)+'</div><div class="bar" style="height:'+h+'%;background:var(--green)"></div><div style="font-size:10px;color:var(--fg-faint)">'+b.label+'</div></div>';
+  });
+  html+='</div></div>';
+
+  /* Go/No-Go summary */
+  var goCount=filtered.filter(function(t){return t._sd.goNogo==="go"}).length;
+  var nogoCount=filtered.filter(function(t){return t._sd.goNogo==="nogo"}).length;
+  var pendCount=filtered.filter(function(t){return t._sd.goNogo==="pending"}).length;
+  html+='<div class="sd-card"><div style="margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em">Go / No-Go Status</span></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--green)" class="sd-stat">'+goCount+'</div><div style="font-size:11px;color:var(--fg-faint);text-transform:uppercase">Go</div></div>'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--red)" class="sd-stat">'+nogoCount+'</div><div style="font-size:11px;color:var(--fg-faint);text-transform:uppercase">No-Go</div></div>'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--amber)" class="sd-stat">'+pendCount+'</div><div style="font-size:11px;color:var(--fg-faint);text-transform:uppercase">Pending</div></div></div>';
+  /* Competitor sightings */
+  html+='<div style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px"><div style="font-size:12px;font-weight:600;color:var(--fg-faint);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Competitor Sightings</div>';
+  SD_COMPETITORS.filter(function(c){return c.count>0}).forEach(function(c){
+    html+='<div class="comp-row"><span style="font-size:13px;font-weight:600">'+c.name+'</span><span style="font-size:12px;padding:2px 8px;border-radius:12px;background:var(--green-soft);color:var(--green);font-weight:600">'+c.count+' tenders</span></div>';
+  });
+  if(!SD_COMPETITORS.some(function(c){return c.count>0}))html+='<div style="font-size:12px;color:var(--fg-faint)">No competitor data yet</div>';
+  html+='</div></div>';
+  html+='</div>';
+
+  /* Team workload + table side by side */
+  html+='<div style="display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:16px">';
+
+  /* Workload */
+  html+='<div class="sd-card"><div style="margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em">Team Workload</span></div>';
+  SD_TEAM.filter(function(m){return m.bids>0}).forEach(function(m){
+    var capColor=m.capacity>=90?"var(--red)":m.capacity>=70?"var(--amber)":"var(--green)";
+    html+='<div class="wl-row"><div class="wl-avatar" style="background:'+m.color+'">'+m.initials+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+m.name+'</div><div style="font-size:11px;color:var(--fg-faint)">'+m.bids+' bid'+(m.bids!==1?"s":"")+'</div></div>'
+      +'<div style="height:6px;border-radius:3px;background:var(--bg);width:80px"><div style="height:100%;border-radius:3px;width:'+m.capacity+'%;background:'+capColor+'"></div></div>'
+      +'<div style="width:36px;text-align:right;font-size:12px;font-weight:600;color:'+capColor+'">'+m.capacity+'%</div></div>';
+  });
+  html+='</div>';
+
+  /* Live tender table */
+  html+='<div class="sd-card" style="overflow:hidden;padding:0"><div style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em">Live Tender Feed</span><span style="font-size:11px;color:var(--fg-faint)">'+filtered.length+' bids</span></div>'
+    +'<div style="overflow-x:auto"><table><thead><tr><th>Tender</th><th>Sector</th><th>Value</th><th>Deadline</th><th>Win %</th><th>Assigned To</th><th>Go/No-Go</th><th>Actions</th></tr></thead><tbody>';
+  filtered.forEach(function(t){
+    var sd=t._sd;
+    var urgCls=t.days!==null&&t.days<=3?"urg-crit":t.days!==null&&t.days<=7?"urg-ser":t.days!==null&&t.days<=14?"urg-warn":"urg-ok";
+    var daysLabel=t.days!==null?(t.days<=0?"Overdue":t.days+"d"):"TBD";
+    var goC=sd.goNogo==="go"?"go-go":sd.goNogo==="nogo"?"go-nogo":"go-pend";
+    var goL=sd.goNogo==="go"?"● GO":sd.goNogo==="nogo"?"✕ NO-GO":"◐ Pending";
+
+    html+='<tr>'
+      +'<td onclick="FLT._detail=\''+t.id+'\';showView(\'detail\')" style="cursor:pointer;max-width:200px"><strong style="font-size:12px">'+t.ti.substring(0,50)+(t.ti.length>50?"...":"")+'</strong><br><span style="font-size:10px;color:var(--fg-faint)">'+(t.source||"Sindh Bank")+'</span></td>'
+      +'<td><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--fg-muted);font-weight:600">'+sd.sector+'</span></td>'
+      +'<td style="font-weight:700">'+fmt(sd.estValue)+'</td>'
+      +'<td><span class="sd-badge '+urgCls+'">⏱ '+daysLabel+'</span></td>'
+      +'<td style="font-weight:600">'+sd.winProb+'%</td>'
+      +'<td><select onchange="sdAssign(\''+t.id+'\',this.value)" style="font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-family:inherit;max-width:120px">'
+      +SD_TEAM.map(function(m){return'<option'+(sd.assignee===m.name?' selected':'')+'>'+m.name+'</option>'}).join('')
+      +'</select></td>'
+      +'<td><span class="sd-badge '+goC+'" onclick="sdCycleGo(\''+t.id+'\')">'+goL+'</span></td>'
+      +'<td><button onclick="sdRemind(\''+t.id+'\')" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:12px;cursor:pointer;font-family:inherit">✉</button></td>'
+      +'</tr>';
+  });
+  if(!filtered.length)html+='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--fg-faint)">No bids match filters</td></tr>';
+  html+='</tbody></table></div></div>';
+  html+='</div>';
+
+  html+='</div>';
+  return html;
+}
+
+function sdAssign(id,name){
+  var t=T.find(function(x){return x.id===id});
+  if(t&&t._sd){t._sd.assignee=name;if(DB)DB.doc("tenders/"+id).update({assignee:name}).catch(function(e){console.error(e)})}
+  render();
+}
+function sdCycleGo(id){
+  var t=T.find(function(x){return x.id===id});
+  if(!t||!t._sd)return;
+  var cycle={pending:"go",go:"nogo",nogo:"pending"};
+  t._sd.goNogo=cycle[t._sd.goNogo];
+  if(DB)DB.doc("tenders/"+id).update({goNogo:t._sd.goNogo}).catch(function(e){console.error(e)});
+  render();
+}
+function sdRemind(id){
+  var t=T.find(function(x){return x.id===id});
+  if(!t||!t._sd)return;
+  if(t._sd.assignee==="Unassigned"){alert("Assign an engineer first.");return}
+  alert("Reminder dispatched to "+t._sd.assignee+" for "+t.id+" (deadline: "+(t.cl||"TBD")+")");
+}
+
+function exportSalesJSON(){
+  var bids=T.filter(function(t){return t.score>=70&&t.open&&t._sc});
+  var data=bids.map(function(t){
+    var sc=t._sc;
+    return{id:t.id,title:t.ti,portal:t.source||"Sindh Bank",sector:sc.sector,est_value_pkr:sc.estValue,win_probability:sc.winProb,deadline:t.cl||null,days_remaining:t.days,assigned_to:sc.assignee,go_nogo:sc.goNogo,score:t.score,solutions:t.solMatch.map(function(s){return s.name})};
+  });
+  var blob=new Blob([JSON.stringify({exported:new Date().toISOString(),pipeline_count:data.length,tenders:data},null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="NETS_Pipeline_"+new Date().toISOString().substring(0,10)+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 </script>
 

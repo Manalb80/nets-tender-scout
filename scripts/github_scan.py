@@ -1,6 +1,6 @@
 """
 Lightweight scraper for GitHub Actions.
-Scrapes BOTH Sindh Bank and PPRA EPMS portals.
+Scrapes THREE portals: Sindh Bank, PPRA EPMS, and EPADS.
 Uses fallback strategies for cloud servers that get blocked.
 Writes directly to Supabase PostgreSQL. No Playwright needed.
 """
@@ -23,6 +23,7 @@ if not DATABASE_URL:
 SINDH_PORTAL_URL = "https://sindhbank.com.pk/tenders"
 PPRA_BASE = "https://epms.ppra.gov.pk"
 PPRA_ACTIVE_URL = f"{PPRA_BASE}/public/tenders/active-tenders"
+EPADS_BASE = "https://epads.gov.pk"
 
 
 def fetch_with_strategies(url, headers):
@@ -237,23 +238,144 @@ def scrape_ppra(max_pages=10):
     return unique
 
 
+def scrape_epads(max_pages=10):
+    """Scrape open procurement tenders from EPADS (epads.gov.pk)."""
+    import requests
+    from bs4 import BeautifulSoup
+
+    full_months = {
+        "january":1,"february":2,"march":3,"april":4,"may":5,"june":6,
+        "july":7,"august":8,"september":9,"october":10,"november":11,"december":12,
+    }
+
+    all_tenders = []
+    seen = set()
+
+    print("=" * 50)
+    print("EPADS SCRAPER")
+    print("=" * 50)
+
+    for page in range(1, max_pages + 1):
+        url = f"{EPADS_BASE}/?page={page}"
+        print(f"  Page {page}: {url}")
+        try:
+            resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+            if resp.status_code != 200:
+                print(f"    HTTP {resp.status_code}, stopping")
+                break
+
+            soup = BeautifulSoup(resp.text, "html.parser")
+            table = soup.find("table", class_="table-cb")
+            if not table:
+                print("    No table found, stopping")
+                break
+
+            tbody = table.find("tbody")
+            rows = tbody.find_all("tr") if tbody else []
+            page_count = 0
+
+            for tr in rows:
+                tds = tr.find_all("td")
+                if len(tds) < 4:
+                    continue
+
+                # TD[1]: Title + Department + Reference
+                td1 = tds[1]
+                link = td1.find("a", href=True)
+                if not link:
+                    continue
+
+                href = link["href"]
+                title = link.get_text(strip=True)
+                td1_text = td1.get_text("|", strip=True)
+
+                ref_match = re.search(r'(P\d{4,})', td1_text)
+                ref_id = ref_match.group(1) if ref_match else href.split("/")[-1]
+                tender_id = f"EPADS-{ref_id}"
+
+                if tender_id in seen:
+                    continue
+                seen.add(tender_id)
+
+                # Department
+                parts = td1_text.split("|")
+                dept = parts[1].strip() if len(parts) >= 2 else ""
+                dept = re.sub(r'\s*\([^)]*\)\s*$', '', dept).strip()
+
+                # TD[2]: Published + Closing dates
+                td2_text = tds[2].get_text("|", strip=True)
+                published = ""
+                closing = ""
+
+                pub_m = re.search(r'Published On:\|?(.+?)(?:\|Closing|\|$|$)', td2_text)
+                if pub_m:
+                    published = pub_m.group(1).strip()
+
+                close_m = re.search(r'Closing On:\|?(.+?)(?:\||$)', td2_text)
+                if close_m:
+                    closing = close_m.group(1).strip()
+
+                # TD[3]: Type
+                td3_text = tds[3].get_text("|", strip=True)
+
+                detail_url = urljoin(EPADS_BASE, href)
+
+                all_tenders.append({
+                    "id": tender_id,
+                    "title": title,
+                    "department": dept[:100],
+                    "advertised": published,
+                    "closing": closing,
+                    "doc_url": "",
+                    "source": "EPADS",
+                    "detail_url": detail_url,
+                })
+                page_count += 1
+
+            print(f"    {page_count} tenders")
+            if page_count == 0:
+                break
+            if page < max_pages:
+                time.sleep(1)
+
+        except Exception as e:
+            print(f"    Error: {e}")
+            break
+
+    print(f"EPADS: {len(all_tenders)} unique tenders across {min(page, max_pages)} pages")
+    return all_tenders
+
+
 def scrape_tenders():
-    """Scrape BOTH Sindh Bank and PPRA, return combined list."""
+    """Scrape ALL THREE portals: Sindh Bank, PPRA, and EPADS."""
     sindh = scrape_sindh_bank()
     ppra = scrape_ppra()
-    combined = sindh + ppra
-    print(f"\nCombined: {len(sindh)} Sindh Bank + {len(ppra)} PPRA = {len(combined)} total")
+    epads = scrape_epads()
+    combined = sindh + ppra + epads
+    print(f"\nCombined: {len(sindh)} Sindh Bank + {len(ppra)} PPRA + {len(epads)} EPADS = {len(combined)} total")
     return combined
 
 
 def parse_date(s):
-    """Parse dates from multiple portal formats."""
+    """Parse dates from multiple portal formats (Sindh Bank, PPRA, EPADS)."""
     if not s:
         return None
     s = s.strip()
 
     months = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,
-               "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+               "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12,
+               "january":1,"february":2,"march":3,"april":4,
+               "june":6,"july":7,"august":8,"september":9,
+               "october":10,"november":11,"december":12}
+
+    # EPADS relative: "16h 8m Left", "2d 5h Left"
+    rel = re.match(r'(?:(\d+)d\s*)?(?:(\d+)h\s*)?(?:(\d+)m\s*)?Left', s)
+    if rel:
+        from datetime import timedelta
+        days = int(rel.group(1) or 0)
+        hours = int(rel.group(2) or 0)
+        minutes = int(rel.group(3) or 0)
+        return datetime.utcnow() + timedelta(days=days, hours=hours, minutes=minutes)
 
     # "5-Nov-26" or "22-Oct-2026"
     m = re.match(r'(\d{1,2})-([A-Za-z]{3,})-(\d{2,4})', s)
@@ -271,10 +393,12 @@ def parse_date(s):
         try: return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
         except ValueError: pass
 
-    # "Nov 25, 2026"
-    m = re.match(r'([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})', s)
+    # EPADS absolute: "Monday, November 13, 2026 11:00 AM" or "Nov 25, 2026"
+    m = re.match(r'(?:\w+,\s*)?([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})', s)
     if m:
         mon = months.get(m.group(1).lower()[:3])
+        if not mon:
+            mon = months.get(m.group(1).lower())
         if mon:
             try: return datetime(int(m.group(3)), mon, int(m.group(2)))
             except ValueError: pass
@@ -301,7 +425,9 @@ def save_to_db(tenders):
             department VARCHAR(100), advertised VARCHAR(50), closing VARCHAR(50),
             closing_date TIMESTAMP, is_open BOOLEAN DEFAULT TRUE,
             days_remaining INTEGER, score INTEGER DEFAULT 0,
-            verdict VARCHAR(20), matched_keywords JSONB DEFAULT '[]',
+            verdict VARCHAR(20), qual_verdict VARCHAR(20),
+            qual_gates JSONB, disqualification_reason TEXT,
+            matched_keywords JSONB DEFAULT '[]',
             matched_solutions JSONB DEFAULT '[]',
             document_url VARCHAR(1000), source_url VARCHAR(1000),
             created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())"""))
@@ -312,33 +438,46 @@ def save_to_db(tenders):
             duration_seconds FLOAT, status VARCHAR(20) DEFAULT 'success',
             error_message TEXT, created_at TIMESTAMP DEFAULT NOW())"""))
 
+        dropped = 0
+        nogo_count = 0
         for raw in tenders:
-            score, verdict, solutions, keywords = score_tender(raw["title"])
+            score, verdict, solutions, keywords, qualification = score_tender(raw["title"])
             if score < 70: continue
             qualified += 1
+            qual_verdict = qualification.get("overall_verdict", "GO")
+            dq_reason = qualification.get("disqualification_reason")
             cl_date = parse_date(raw.get("closing", ""))
             days = (cl_date - now).days if cl_date else None
             is_open = days is not None and days >= 0
-            if is_open: open_qual += 1
+
+            # ── STRICT OPEN-STATUS GATE: drop expired tenders ──
+            if not is_open:
+                dropped += 1
+                continue
+
+            open_qual += 1
             existing = conn.execute(text("SELECT id FROM tenders WHERE id=:id"), {"id": raw["id"]}).fetchone()
+            source = raw.get("source", "Sindh Bank")
+            if qual_verdict == "NOGO":
+                nogo_count += 1
+
             if existing:
-                conn.execute(text("UPDATE tenders SET is_open=:o,days_remaining=:d,score=:s,verdict=:v,matched_keywords=:kw,matched_solutions=:sol,document_url=COALESCE(:doc,document_url),updated_at=:now WHERE id=:id"),
-                    {"id":raw["id"],"o":is_open,"d":days,"s":score,"v":verdict,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"now":now})
+                conn.execute(text("UPDATE tenders SET is_open=:o,days_remaining=:d,score=:s,verdict=:v,qual_verdict=:qv,qual_gates=:qg,disqualification_reason=:dq,matched_keywords=:kw,matched_solutions=:sol,document_url=COALESCE(:doc,document_url),updated_at=:now WHERE id=:id"),
+                    {"id":raw["id"],"o":is_open,"d":days,"s":score,"v":verdict,"qv":qual_verdict,"qg":json.dumps(qualification.get("gates",{})),"dq":dq_reason,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"now":now})
             else:
                 new_count += 1
-                source = raw.get("source", "Sindh Bank")
                 src_url = (
                     "https://epms.ppra.gov.pk/public/tenders/active-tenders"
                     if source == "PPRA"
                     else SINDH_PORTAL_URL
                 )
-                conn.execute(text("INSERT INTO tenders (id,title,department,advertised,closing,closing_date,is_open,days_remaining,score,verdict,matched_keywords,matched_solutions,document_url,source_url) VALUES (:id,:ti,:dept,:ad,:cl,:cld,:o,:d,:s,:v,:kw,:sol,:doc,:src)"),
-                    {"id":raw["id"],"ti":raw["title"],"dept":raw.get("department",""),"ad":raw.get("advertised",""),"cl":raw.get("closing",""),"cld":cl_date,"o":is_open,"d":days,"s":score,"v":verdict,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"src":src_url})
+                conn.execute(text("INSERT INTO tenders (id,title,department,advertised,closing,closing_date,is_open,days_remaining,score,verdict,qual_verdict,qual_gates,disqualification_reason,matched_keywords,matched_solutions,document_url,source_url) VALUES (:id,:ti,:dept,:ad,:cl,:cld,:o,:d,:s,:v,:qv,:qg,:dq,:kw,:sol,:doc,:src)"),
+                    {"id":raw["id"],"ti":raw["title"],"dept":raw.get("department",""),"ad":raw.get("advertised",""),"cl":raw.get("closing",""),"cld":cl_date,"o":is_open,"d":days,"s":score,"v":verdict,"qv":qual_verdict,"qg":json.dumps(qualification.get("gates",{})),"dq":dq_reason,"kw":json.dumps(keywords),"sol":json.dumps(solutions),"doc":raw.get("doc_url"),"src":src_url})
 
         conn.execute(text("INSERT INTO scan_logs (date,total_on_portal,qualified_count,open_qualified_count,new_count,duration_seconds,status) VALUES (:d,:t,:q,:oq,:n,:dur,'success')"),
             {"d":now.strftime("%Y-%m-%d %H:%M"),"t":total,"q":qualified,"oq":open_qual,"n":new_count,"dur":(datetime.utcnow()-now).total_seconds()})
 
-    print(f"DB: {qualified} qualified ({new_count} new), {open_qual} open")
+    print(f"DB: {qualified} qualified, {open_qual} open ({new_count} new), {nogo_count} NOGO, {dropped} dropped (expired)")
     return qualified
 
 

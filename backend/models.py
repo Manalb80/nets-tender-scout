@@ -31,11 +31,19 @@ class Tender(Base):
     is_open = Column(Boolean, default=True)
     days_remaining = Column(Integer, nullable=True)
     score = Column(Integer, default=0)
-    verdict = Column(String(20))                         # BID, REVIEW, SKIP
+    verdict = Column(String(20))                         # BID, REVIEW, NOGO, SKIP
+    qual_verdict = Column(String(20), nullable=True)     # GO, NOGO, REVIEW (from qualification gates)
+    qual_gates = Column(JSON, nullable=True)             # {gate: {pass, status, detail}}
+    disqualification_reason = Column(Text, nullable=True)  # Why NOGO, if applicable
     matched_keywords = Column(JSON, default=list)        # ["firewall", "server"]
     matched_solutions = Column(JSON, default=list)       # [{"id":"...", "name":"...", "group":"..."}]
     document_url = Column(String(1000), nullable=True)   # RFP PDF link
     source_url = Column(String(1000), nullable=True)
+    source_portal = Column(String(50), nullable=True)    # "PPRA" or "Sindh Bank"
+    detail_url = Column(String(1000), nullable=True)     # tender detail page URL
+    acquisition_status = Column(String(30), default="PENDING")  # PENDING, AUTO_DOWNLOADED, MANUAL_DOWNLOAD_REQUIRED, DROPPED
+    doc_accessible = Column(Boolean, default=True)       # False if password protected or restricted
+    local_folder = Column(String(500), nullable=True)    # D:\ path where RFP is saved
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
