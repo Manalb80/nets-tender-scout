@@ -288,6 +288,27 @@ tr{cursor:pointer}
 .kb-cov-dot{width:8px;height:8px;border-radius:50%;flex:none}
 .kb-cov-name{flex:1}.kb-cov-n{color:var(--fg-muted)}
 mark{background:#fef08a;color:inherit;padding:0 2px;border-radius:2px}
+/* ===== KNOWLEDGE BANK ===== */
+.kb-bars{display:flex;flex-direction:column;gap:3px}
+.kb-bar{display:grid;grid-template-columns:300px 1fr 48px;gap:12px;align-items:center;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.kb-bar:hover{background:var(--bg)}.kb-bar.on{background:var(--green-soft)}.kb-bar.zero{color:var(--fg-faint)}
+.kb-bar-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}.kb-bar-fill{display:block;height:100%;background:var(--green);border-radius:4px}
+.kb-bar.zero .kb-bar-fill{background:transparent}.kb-bar-n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.kb-proof{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;line-height:1.7;box-shadow:var(--sh-1)}
+.kb-split{display:grid;grid-template-columns:380px 1fr;gap:14px;align-items:start}
+.kb-list{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-1);max-height:70vh;overflow-y:auto}
+.kb-list table{font-size:13px}.kb-list td{padding:9px 12px;vertical-align:top}.kb-list tr.on td{background:var(--green-soft)}
+.kb-reader{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-1);min-height:420px;max-height:70vh;display:flex;flex-direction:column}
+.kb-reader-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;color:var(--fg-muted)}
+.kb-reader-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.kb-reader-head select{font-size:12.5px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--fg);font-family:inherit;min-width:220px}
+.kb-reader-body{overflow-y:auto;padding:6px 20px 20px}
+.kb-sec{padding:12px 0;border-bottom:1px solid var(--border)}.kb-sec:last-child{border-bottom:none}
+.kb-sec-title{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.kb-para{padding:12px 18px;border-bottom:1px solid var(--border)}.kb-para:last-child{border-bottom:none}
+.kb-para-meta{font-size:12px;color:var(--fg-muted);margin-bottom:4px}
+.kb-para-text{font-size:13.5px;line-height:1.65;white-space:pre-wrap;max-width:860px}
+@media(max-width:1000px){.kb-split{grid-template-columns:1fr}.kb-bar{grid-template-columns:1fr 80px 40px}}
 </style>
 
 <!-- TOP BAR -->
@@ -518,7 +539,7 @@ function buildNav(){
     {v:"presales", l:"Bid board",           badge:qc,live:false},
     {v:"workbench",l:"Architect workbench", badge:wbCount,live:false},
     {sect:"Library"},
-    {v:"knowledge",l:"Knowledge bank",      badge:(KB?Object.keys(kbAll().reduce(function(m,c){m[c.source]=1;return m},{})).length:38),live:false},
+    {v:"knowledge",l:"Knowledge bank",      badge:(KB?Object.keys(kbAll().reduce(function(m,c){m[c.source]=1;return m},{})).length:37),live:false},
     {sect:"Operations"},
     {v:"system",   l:"System and trust",    badge:failing||null,live:false,warn:!!failing}
   ].map(function(n){
@@ -1215,7 +1236,7 @@ function roleBanner(v){
     sales:{who:"Sales team",ans:"Every live tender that matches NETS, who owns it, how many days are left, and its go/no-go.",can:"Assign an owner, set go/no-go, flag a tender for presales. Grey values marked ESTIMATE are placeholders until a real figure arrives."},
     presales:{who:"Presales head",ans:"Which tenders passed the qualification gates, which failed and why, and which RFP documents are in hand.",can:"Override a disqualification, send a tender to an architect, approve or reject a bid decision. Then open the Architect workbench for the detail."},
     workbench:{who:"Solution architect",ans:"One tender at a time: the RFP text, a summary, a bid/no-bid grade with evidence, the document checklist, and an editable BOQ.",can:"Upload the RFP, run the four agents, edit the BOQ, record your decision. Every AI claim shows the RFP quote it came from; UNVERIFIED means the quote was not found."},
-    knowledge:{who:"Everyone",ans:"Every past NETS technical proposal the writer can learn from: 38 seed files plus proposals approved here, with which verticals each one covers.",can:"Search any phrase, filter by vertical, open a file and read it. Nothing here is editable; new proposals arrive through Agent 6 when an architect approves one."},
+    knowledge:{who:"Everyone",ans:"Every past NETS technical proposal the writer can learn from: the archive (37 distinct proposals) plus proposals approved here, with the verticals each one covers.",can:"Search any phrase, filter by vertical, open a file and read it. Nothing here is editable; new proposals arrive through Agent 6 when an architect approves one."},
     system:{who:"Whoever maintains the system",ans:"Is every number on the dashboard confirmed, are the portals being scanned, is the database healthy.",can:"Re-score with the current taxonomy, read scan history, see the agent and portal status."}
   }[v];
   if(!b)return"";
@@ -1645,9 +1666,9 @@ async function wbWriteSection(id,key,feedback){
   a.proposal=a.proposal||{sections:{}};a.proposal.sections=a.proposal.sections||{};
   WB.busy["prop_"+key]=true;showView("workbench");
   var ctl=new AbortController();WB.ctl=ctl;
-  var refs=kbRetrieve(t,a,sec,5);
+  var refs=kbRetrieve(t,a,sec,4);
   var d=a.decision||{};var g=a.grading||{};var s=a.summary||{};var c=a.compliance||{};var b=a.boq||{};
-  var refText=refs.map(function(r,i){return"[REF-"+(i+1)+" | id="+r.id+" | "+r.client+" | "+r.section+"]\n"+r.text.slice(0,1400)}).join("\n\n");
+  var refText=refs.map(function(r,i){return"[REF-"+(i+1)+" | id="+r.id+" | "+r.client+" | "+r.section+"]\n"+r.text.slice(0,1100)}).join("\n\n");
   var boqBrief=b.sections?b.sections.map(function(sc){return sc.section+": "+(sc.lines||[]).slice(0,8).map(function(l){return l.item+" x"+l.qty+(l.oem?" ("+l.oem+")":"")}).join("; ")}).join("\n"):"BOQ not drafted yet";
   var out=document.getElementById("wb-out-prop_"+key);
   try{
@@ -1740,57 +1761,75 @@ function wbProposalCard(t,a,d){
 }
 
 
-/* ═══════════════ KNOWLEDGE BANK (left nav) ═══════════════
-   Read-only library of every past proposal the writer can draw on: the 38 seed files plus proposals
-   approved in this dashboard (Agent 6). Search any phrase, filter by vertical, open a file to read it. */
-var KBV={q:"",vert:"",open:null};
+
+/* ═══════════════ KNOWLEDGE BANK v2 ═══════════════
+   One question per user:
+     Head of sales:      "Have we done this before, and for whom?"   → pick a vertical, see the client list.
+     Presales architect: "Give me the best past wording on X."       → type a phrase, read paragraphs.
+     Leadership:         "How deep is our proposal library?"          → three numbers, one coverage bar list.
+   Controls are dropdowns and one search box. Reading happens in a pane on the right, never in a wall of chips. */
+var KBV={q:"",vert:"",file:"",mode:"proposals",cov:false,sec:""};
 function kbSolName(id){var s=SCORER_SOLUTIONS.find(function(x){return x.id===id});return s?s.name:id}
+function kbShort(n){return String(n).split(" (")[0].split(" / ")[0]}
+function kbFiles(){var files={};kbAll().forEach(function(c){var f=files[c.source]||(files[c.source]={source:c.source,client:c.client,verticals:c.verticals||[],chunks:[],words:0,live:!!c.tender_id,tender_id:c.tender_id,added_at:c.added_at});f.chunks.push(c);f.words+=c.words||0});return Object.keys(files).map(function(k){return files[k]}).sort(function(a,b){return(b.live?1:0)-(a.live?1:0)||a.client.localeCompare(b.client)})}
+function kbSet(k,v){KBV[k]=v;if(k==="vert"||k==="q"){KBV.file="";KBV.sec=""}showView("knowledge")}
 function vKnowledge(){
   if(!KB&&!KB_LOADING){kbLoad().then(function(){var a=document.querySelector('.sb-item.active');if(a&&a.getAttribute("data-v")==="knowledge")showView("knowledge")})}
   var all=kbAll();
-  if(!all.length)return'<div class="drawer" style="text-align:center;color:var(--fg-muted);padding:40px">Loading the knowledge base...</div>';
-  /* group by source file */
-  var files={};all.forEach(function(c){var f=files[c.source]||(files[c.source]={source:c.source,client:c.client,verticals:c.verticals||[],chunks:[],words:0,live:!!c.tender_id,tender_id:c.tender_id,added_at:c.added_at});f.chunks.push(c);f.words+=c.words||0});
-  var list=Object.keys(files).map(function(k){return files[k]});
-  /* vertical counts for the filter */
-  var vc={};list.forEach(function(f){f.verticals.forEach(function(v){vc[v]=(vc[v]||0)+1})});
-  var verts=Object.keys(vc).sort(function(a,b){return vc[b]-vc[a]});
+  if(!all.length)return'<div class="drawer" style="text-align:center;color:var(--fg-muted);padding:40px">Loading the knowledge bank...</div>';
+  var list=kbFiles();var vc={};list.forEach(function(f){f.verticals.forEach(function(v){vc[v]=(vc[v]||0)+1})});
   var q=KBV.q.toLowerCase();
   var shown=list.filter(function(f){if(KBV.vert&&f.verticals.indexOf(KBV.vert)<0)return false;if(q&&!(f.client+" "+f.source).toLowerCase().includes(q)&&!f.chunks.some(function(c){return c.text.toLowerCase().includes(q)}))return false;return true});
-  shown.sort(function(a,b){return(b.live?1:0)-(a.live?1:0)||a.client.localeCompare(b.client)});
-  var html='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'
-    +'<div class="ktile"><div class="kl">Past proposals</div><div class="kb">'+list.length+'</div><div class="ks">'+list.filter(function(f){return !f.live}).length+' seed files, '+list.filter(function(f){return f.live}).length+' approved in this dashboard</div></div>'
-    +'<div class="ktile"><div class="kl">Paragraphs</div><div class="kb">'+all.length+'</div><div class="ks">'+Math.round(all.reduce(function(s,c){return s+(c.words||0)},0)/1000)+'k words the writer can reuse</div></div>'
-    +'<div class="ktile"><div class="kl">Verticals covered</div><div class="kb">'+verts.filter(function(v){return v!=="networking"}).length+'</div><div class="ks">of '+(SCORER_SOLUTIONS.length-1)+' NETS solution areas (Enterprise Networking is in every file)</div></div>'
-    +'<div class="ktile"><div class="kl">Not covered</div><div class="kb" style="color:var(--red)">'+SCORER_SOLUTIONS.filter(function(s){return !vc[s.id]}).length+'</div><div class="ks">'+SCORER_SOLUTIONS.filter(function(s){return !vc[s.id]}).map(function(s){return s.name.split(" (")[0].split(" /")[0]}).slice(0,6).join(", ")+'...</div></div>'
+  var covered=Object.keys(vc).filter(function(v){return v!=="networking"}).length,notCov=SCORER_SOLUTIONS.filter(function(s){return !vc[s.id]});
+  var sel=function(k,cur,label,opts){return'<select onchange="kbSet(\''+k+'\',this.value)"><option value="">'+label+'</option>'+opts.map(function(o){return'<option value="'+wbEsc(o[0])+'"'+(cur===o[0]?' selected':'')+(o[2]?' disabled':'')+'>'+wbEsc(o[1])+'</option>'}).join("")+'</select>'};
+  var html='';
+  /* 1. three numbers */
+  html+='<div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'
+    +'<div class="ktile"><div class="kl">Past proposals</div><div class="kb">'+list.length+'</div><div class="ks">'+list.filter(function(f){return !f.live}).length+' from the archive, '+list.filter(function(f){return f.live}).length+' approved in this dashboard</div></div>'
+    +'<div class="ktile"><div class="kl">Reusable paragraphs</div><div class="kb">'+all.length+'</div><div class="ks">'+Math.round(all.reduce(function(s,c){return s+(c.words||0)},0)/1000)+'k words of NETS wording the writer can draw on</div></div>'
+    +'<div class="ktile" onclick="KBV.cov=!KBV.cov;showView(\'knowledge\')"><div class="kl">Verticals with proof</div><div class="kb">'+covered+'<span style="font-size:16px;color:var(--fg-faint);font-weight:600"> of '+(SCORER_SOLUTIONS.length-1)+'</span></div><div class="ks">'+notCov.length+' verticals have no past proposal yet. '+(KBV.cov?'Hide':'Show')+' coverage \u203a</div></div>'
     +'</div>';
-  /* coverage strip */
-  html+='<div class="drawer" style="padding:16px 20px;margin-bottom:14px"><div class="sec-head" style="font-size:14px;margin-bottom:10px">Coverage by vertical <span class="hint">click to filter</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'
-    +SCORER_SOLUTIONS.map(function(s){var n=vc[s.id]||0;var on=KBV.vert===s.id;return'<span class="wb-pick'+(on?' on':'')+'" style="'+(n?'':'opacity:.45;text-decoration:line-through')+'" onclick="KBV.vert=KBV.vert===\''+s.id+'\'?\'\':\''+s.id+'\';KBV.open=null;showView(\'knowledge\')">'+wbEsc(s.name)+' <b>'+n+'</b></span>'}).join("")+'</div></div>';
-  /* search */
-  html+='<div class="fbar"><div class="row"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input value="'+wbEsc(KBV.q)+'" placeholder="Search any phrase across all proposals (e.g. SLA, escalation matrix, Fortinet, P1 response), then press Enter" onchange="KBV.q=this.value;KBV.open=null;showView(\'knowledge\')"></div>'
-    +(KBV.q||KBV.vert?'<span class="clear" onclick="KBV.q=\'\';KBV.vert=\'\';showView(\'knowledge\')">Clear</span>':'')+'<span class="showing">Showing '+shown.length+' of '+list.length+'</span></div></div>';
-  /* file list */
-  html+='<div class="wb-prop-list">';
-  shown.forEach(function(f){
-    var open=KBV.open===f.source;
-    var hits=q?f.chunks.filter(function(c){return c.text.toLowerCase().includes(q)}):[];
-    html+='<div class="wb-prop'+(f.live?' ok':'')+'"><div class="wb-prop-head" onclick="KBV.open=KBV.open===\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\'?null:\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\';showView(\'knowledge\')">'
-      +'<span class="wb-prop-n">'+(f.live?'\u2713':'\ud83d\udcc4')+'</span><div style="flex:1;min-width:0"><div class="wb-prop-title">'+wbEsc(f.client)+(f.live?' <span class="chip chip-g">approved in dashboard</span>':'')+'</div><div class="wb-help" style="font-size:12px">'+wbEsc(f.source)+' \u00b7 '+f.chunks.length+' paragraphs \u00b7 '+f.words.toLocaleString()+' words'+(q?' \u00b7 <b style="color:var(--green)">'+hits.length+' match'+(hits.length===1?'':'es')+'</b>':'')+'</div></div>'
-      +'<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:420px">'+f.verticals.map(function(v){return'<span class="chip chip-grey">'+wbEsc(kbSolName(v).split(" (")[0])+'</span>'}).join("")+'</div><span class="wb-prop-caret">'+(open?'\u25b4':'\u25be')+'</span></div>';
-    if(open){
-      var show=q?hits:f.chunks;
-      html+='<div class="wb-prop-body">'+(f.live?'<div class="wb-help" style="margin:8px 0">Written in this dashboard for tender <span class="wb-link" onclick="WB.sel=\''+wbEsc(f.tender_id)+'\';showView(\'workbench\')">'+wbEsc(f.tender_id)+'</span>, approved '+wbEsc(String(f.added_at||"").slice(0,10))+'.</div>':'')
-        +show.map(function(c){var txt=wbEsc(c.text);if(q){var re=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");txt=txt.replace(re,'<mark>$1</mark>')}return'<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">'+wbEsc(c.section)+'</div><div style="font-size:13px;line-height:1.6;white-space:pre-wrap">'+txt+'</div></div>'}).join("")
-        +'</div>';
-    }
+  /* 2. coverage bars (collapsed by default) */
+  if(KBV.cov){var mx=Math.max.apply(null,SCORER_SOLUTIONS.map(function(s){return vc[s.id]||0}))||1;
+    html+='<div class="drawer" style="padding:16px 20px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><div style="font-size:14px;font-weight:700">Coverage by vertical</div><div class="wb-help">Number of past proposals that cover each NETS solution area. Click a row to filter. Enterprise Networking appears in every file as boilerplate.</div></div><div class="kb-bars">'
+      +SCORER_SOLUTIONS.slice().sort(function(a,b){return(vc[b.id]||0)-(vc[a.id]||0)}).map(function(s){var n=vc[s.id]||0;var on=KBV.vert===s.id;return'<div class="kb-bar'+(on?' on':'')+(n?'':' zero')+'" onclick="kbSet(\'vert\',KBV.vert===\''+s.id+'\'?\'\':\''+s.id+'\')"><span class="kb-bar-name">'+wbEsc(s.name)+'</span><span class="kb-bar-track"><span class="kb-bar-fill" style="width:'+Math.round(100*n/mx)+'%"></span></span><span class="kb-bar-n">'+(n||'none')+'</span></div>'}).join("")+'</div></div>'}
+  /* 3. controls */
+  html+='<div class="fbar"><div class="row">'
+    +'<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input value="'+wbEsc(KBV.q)+'" placeholder="Find wording: SLA, escalation matrix, P1 response, Fortinet, migration plan... then press Enter" onchange="kbSet(\'q\',this.value)"></div>'
+    +'<span class="lbl">Vertical</span>'+sel("vert",KBV.vert,"All verticals",SCORER_SOLUTIONS.slice().sort(function(a,b){return(vc[b.id]||0)-(vc[a.id]||0)}).map(function(s){var n=vc[s.id]||0;return[s.id,s.name+"  ("+n+")",n===0]}))
+    +'<span class="lbl">Proposal</span>'+sel("file",KBV.file,"All proposals",shown.map(function(f){return[f.source,f.client+(f.live?" (approved here)":"")]}))
+    +'<span class="lbl">Show</span><select onchange="kbSet(\'mode\',this.value)"><option value="proposals"'+(KBV.mode==="proposals"?" selected":"")+'>Proposals</option><option value="paragraphs"'+(KBV.mode==="paragraphs"?" selected":"")+'>Paragraphs</option></select>'
+    +(KBV.q||KBV.vert||KBV.file?'<span class="clear" onclick="KBV.q=\'\';KBV.vert=\'\';KBV.file=\'\';KBV.sec=\'\';showView(\'knowledge\')">Clear</span>':'')
+    +'<span class="showing">'+shown.length+' of '+list.length+' proposals'+(KBV.vert?' in '+wbEsc(kbShort(kbSolName(KBV.vert))):'')+'</span></div></div>';
+  /* 4. sales answer: who have we done this for */
+  if(KBV.vert&&!KBV.file){html+='<div class="kb-proof"><b>Proof points for '+wbEsc(kbSolName(KBV.vert))+':</b> '+(shown.length?shown.map(function(f){return'<span class="wb-link" onclick="kbSet(\'file\',\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\')">'+wbEsc(f.client)+'</span>'}).join(', '):'<span style="color:var(--red)">none yet. A proposal in this vertical must be written and approved before the writer can use it.</span>')+'</div>'}
+  /* 5. results */
+  var file=KBV.file?list.find(function(f){return f.source===KBV.file}):null;
+  if(KBV.mode==="paragraphs"||q){
+    var paras=[];shown.forEach(function(f){if(file&&f!==file)return;f.chunks.forEach(function(c){if(q&&!c.text.toLowerCase().includes(q))return;paras.push(c)})});
+    paras=paras.slice(0,120);
+    html+='<div class="drawer" style="padding:0;overflow:hidden"><div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">'+paras.length+' paragraph'+(paras.length===1?'':'s')+(q?' matching \u201c'+wbEsc(KBV.q)+'\u201d':'')+'</span><span class="wb-help">Each one names the proposal and section it came from. Copy freely; the writer uses the same text.</span></div>';
+    html+=paras.map(function(c){var txt=wbEsc(c.text);if(q){var re=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");txt=txt.replace(re,'<mark>$1</mark>')}return'<div class="kb-para"><div class="kb-para-meta"><span class="wb-link" onclick="kbSet(\'file\',\''+wbEsc(c.source).replace(/'/g,"\\\\'")+'\');KBV.mode=\'proposals\';showView(\'knowledge\')">'+wbEsc(c.client)+'</span> \u00b7 '+wbEsc(c.section)+(c.tender_id?' \u00b7 <span class="chip chip-g">approved here</span>':'')+'</div><div class="kb-para-text">'+txt+'</div></div>'}).join("");
+    if(!paras.length)html+='<div style="padding:24px;text-align:center;color:var(--fg-muted)">Nothing matches. Try a shorter phrase.</div>';
     html+='</div>';
-  });
-  if(!shown.length)html+='<div class="drawer" style="text-align:center;color:var(--fg-muted)">No proposal matches.</div>';
-  html+='</div>';
+  }else{
+    html+='<div class="kb-split">';
+    /* list */
+    html+='<div class="kb-list"><table><thead><tr><th>Client</th><th>Covers</th><th style="text-align:right">Paras</th></tr></thead><tbody>'
+      +shown.map(function(f){return'<tr class="'+(file===f?'on':'')+'" onclick="kbSet(\'file\',\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\')"><td><div style="font-weight:600">'+wbEsc(f.client)+(f.live?' <span class="chip chip-g" style="font-size:9.5px">approved</span>':'')+'</div><div class="wb-help" style="font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">'+wbEsc(f.source)+'</div></td><td style="font-size:12px;color:var(--fg-muted)">'+f.verticals.filter(function(v){return v!=="networking"}).map(function(v){return kbShort(kbSolName(v))}).join(", ")+'</td><td style="text-align:right">'+f.chunks.length+'</td></tr>'}).join("")
+      +(shown.length?'':'<tr><td colspan="3" style="text-align:center;color:var(--fg-muted);padding:20px">No proposal in this vertical.</td></tr>')+'</tbody></table></div>';
+    /* reader */
+    html+='<div class="kb-reader">';
+    if(!file)html+='<div class="kb-reader-empty"><div style="font-size:32px;margin-bottom:8px">\ud83d\udcd6</div><div style="font-size:14px;font-weight:600">Pick a proposal to read it</div><div class="wb-help">Or type a phrase above to see matching paragraphs across all proposals.</div></div>';
+    else{var secs=[];file.chunks.forEach(function(c){if(secs.indexOf(c.section)<0)secs.push(c.section)});var showSecs=KBV.sec?[KBV.sec]:secs;
+      html+='<div class="kb-reader-head"><div><div style="font-size:18px;font-weight:800;letter-spacing:-.01em">'+wbEsc(file.client)+'</div><div class="wb-help">'+wbEsc(file.source)+' \u00b7 '+file.chunks.length+' paragraphs \u00b7 '+file.words.toLocaleString()+' words'+(file.live?' \u00b7 written here for <span class="wb-link" onclick="WB.sel=\''+wbEsc(file.tender_id)+'\';showView(\'workbench\')">'+wbEsc(file.tender_id)+'</span>':'')+'</div><div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+file.verticals.map(function(v){return'<span class="chip chip-grey">'+wbEsc(kbSolName(v))+'</span>'}).join("")+'</div></div>'
+        +'<div><select onchange="KBV.sec=this.value;showView(\'knowledge\')"><option value="">All sections ('+secs.length+')</option>'+secs.map(function(s){return'<option value="'+wbEsc(s)+'"'+(KBV.sec===s?' selected':'')+'>'+wbEsc(s)+'</option>'}).join("")+'</select></div></div>';
+      html+='<div class="kb-reader-body">'+showSecs.map(function(sname){return'<div class="kb-sec"><div class="kb-sec-title">'+wbEsc(sname)+'</div>'+file.chunks.filter(function(c){return c.section===sname}).map(function(c){return'<div class="kb-para-text" style="margin-bottom:10px">'+wbEsc(c.text)+'</div>'}).join("")+'</div>'}).join("")+'</div>';
+    }
+    html+='</div></div>';
+  }
   return html;
 }
-
 
 /* ═══════════════ STEP 5: PROPOSAL REVIEW (ported from backend/agent4_technical.py and agent5_regulatory.py) ═══════════════
    Two independent reviewers read the whole proposal:
@@ -1798,14 +1837,26 @@ function vKnowledge(){
      Regulatory QA  passes at 90 or more, with zero legal red flags (PPRA, data sovereignty, SECP, SBP).
    "Review and fix" runs them in order; failing sections are rewritten with the reviewer's remediation text,
    up to three rounds, then the proposal is ESCALATED to a person. Sections a person has approved are never rewritten. */
-var REVIEW_MAX_ROUNDS=3,REVIEW_TECH_PASS=85,REVIEW_REG_PASS=90;
+var REVIEW_MAX_ROUNDS=3,REVIEW_TECH_PASS=85,REVIEW_REG_PASS=90,REVIEW_DRAFT_CAP=45000;
+function wbEconomy(){try{return localStorage.getItem("ts_economy")!=="0"}catch(e){return true}}
+function wbSetEconomy(on){try{localStorage.setItem("ts_economy",on?"1":"0")}catch(e){}wbLog(on?"Economy review on: re-checks read only changed sections on the quick tier":"Economy review off: every round reads the full draft");showView("workbench")}
+function wbReviewDraft(id,which){
+  var a=RFPA[id]||{};var P=a.proposal||{sections:{}};var R=wbReviewState(a);var last=R[which];
+  var full=wbProposalMarkdown(id);
+  if(!wbEconomy()||!last||!last.at)return{text:full.slice(0,REVIEW_DRAFT_CAP),delta:false};
+  var changed=PROP_SECTIONS.filter(function(s){var sec=P.sections[s.key];return sec&&sec.generated_at&&sec.generated_at>last.at});
+  if(!changed.length)return{text:full.slice(0,REVIEW_DRAFT_CAP),delta:false};
+  var txt=PROP_SECTIONS.map(function(s,i){var sec=P.sections[s.key];if(!sec)return"";var isNew=changed.indexOf(s)>=0;return"## "+(i+1)+". "+sec.title+(isNew?"  [REWRITTEN SINCE YOUR LAST REVIEW]\n\n"+sec.body_md:"  [unchanged since your last review; you scored it then]\n\n"+String(sec.body_md).split(/\s+/).slice(0,40).join(" ")+" ...")+"\n"}).join("\n");
+  return{text:txt.slice(0,REVIEW_DRAFT_CAP),delta:true,changed:changed.map(function(s){return s.key})};
+}
 function wbReviewState(a){return a.review||{round:0,status:"NOT_REVIEWED",history:[]}}
 async function wbRunReviewer(id,which){
   var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);var P=a.proposal||{sections:{}};
   if(!SAMPLE){alert("Allow Claude in this page's Permissions menu first.");return null}
   var keys=PROP_SECTIONS.filter(function(s){return P.sections[s.key]}).map(function(s){return s.key});
   if(keys.length<PROP_SECTIONS.length){alert("Write all 13 sections before review ("+keys.length+" of 13 written).");return null}
-  var draft=wbProposalMarkdown(id);var s=a.summary||{};var c=a.compliance||{};
+  var dr=wbReviewDraft(id,which);var draft=dr.text;var s=a.summary||{};var c=a.compliance||{};
+  var tier=(dr.delta&&wbEconomy())?"quick":"default";
   WB.busy["review_"+which]=true;showView("workbench");var ctl=new AbortController();WB.ctl=ctl;
   var out=document.getElementById("wb-out-review_"+which);var onText=function(u){if(out)out.textContent=u.text};
   var sectionList=PROP_SECTIONS.map(function(x,i){return(i+1)+". "+x.title+" (key: "+x.key+")"}).join("\n");
@@ -1819,17 +1870,17 @@ async function wbRunReviewer(id,which){
 '{"compliance_score":number (0-100),"passed_audit":boolean,"verified_requirements":[string],"missing_requirements":[string (each prefixed CRITICAL, MAJOR or MINOR, and naming the section it belongs to)],"sections_to_rewrite":[string (section keys from the list below, only those that must change)],"remediation_feedback":string (precise instructions the writer can act on, grouped by section key)}\n\n'+
 "SECTION KEYS:\n"+sectionList+"\n\nRFP SUMMARY:\n"+JSON.stringify({key_requirements:s.key_requirements,deliverables:s.deliverables,timeline:s.timeline,eligibility:s.eligibility,evaluation:s.evaluation_method}).slice(0,6000)+
 "\n\nCOMPLIANCE DOCUMENTS REQUIRED:\n"+JSON.stringify((c.required_documents||[]).slice(0,25).map(function(x){return x.doc})).slice(0,2500)+
-"\n\nPROPOSAL DRAFT:\n"+draft.slice(0,90000),{signal:ctl.signal,onText:onText,modelTier:"default",cache:false});
++(dr.delta?"\n\nNOTE: this is a re-check. Only sections marked REWRITTEN changed; carry your previous findings for unchanged sections forward unless the rewrite resolves them.":"")+"\n\nPROPOSAL DRAFT:\n"+draft,{signal:ctl.signal,onText:onText,modelTier:tier,cache:false});
       r.passed_audit=(Number(r.compliance_score)>=REVIEW_TECH_PASS)&&!(r.missing_requirements||[]).some(function(m){return /^CRITICAL/i.test(m)});
     }else{
       r=await SAMPLE.json(
 "You are senior Legal, Regulatory and AI Governance Counsel specialising in Pakistani public procurement law (Federal PPRA 2004 and Provincial PPRAs), SECP corporate compliance (Companies Act 2017), NAB/FIA anti-corruption standards, SBP banking regulation and data sovereignty. Audit the PROPOSAL DRAFT rigorously. A proposal passes ONLY if regulatory_score >= "+REVIEW_REG_PASS+" and legal_red_flags is empty. Return ONLY JSON.\n"+
 "Audit against: 1. PPRA transparency and fair competition (no sole-source or 'preferred partner' language, open competition, clear evaluation criteria). 2. Data sovereignty and AI governance (data, backups and DR inside Pakistan unless the RFP says otherwise; audit logs; no offshore transfer). 3. SECP and anti-corruption safeguards (clear liability, no ambiguous preferential clauses, no conflict of interest, integrity pact where PPRA requires). 4. SBP requirements where the buyer is a bank. 5. Commitments NETS cannot lawfully make (turnover above PKR 2 billion, OEM tiers NETS does not hold).\n"+
 '{"regulatory_score":number (0-100),"passed_regulatory_audit":boolean,"ppra_compliance_status":string,"data_sovereignty_verified":boolean,"legal_red_flags":[string (each naming the section key)],"sections_to_rewrite":[string (section keys)],"remediation_directives":string (precise rewrite instructions grouped by section key)}\n\n'+
-"SECTION KEYS:\n"+sectionList+"\n\nTENDER: "+wbTenderCtx(t)+"\nISSUER: "+(s.issuer||"?")+"\n\nPROPOSAL DRAFT:\n"+draft.slice(0,90000),{signal:ctl.signal,onText:onText,modelTier:"default",cache:false});
+"SECTION KEYS:\n"+sectionList+"\n\nTENDER: "+wbTenderCtx(t)+"\nISSUER: "+(s.issuer||"?")+(dr.delta?"\n\nNOTE: this is a re-check. Only sections marked REWRITTEN changed; carry your previous findings for unchanged sections forward unless the rewrite resolves them.":"")+"\n\nPROPOSAL DRAFT:\n"+draft,{signal:ctl.signal,onText:onText,modelTier:tier,cache:false});
       r.passed_regulatory_audit=(Number(r.regulatory_score)>=REVIEW_REG_PASS)&&!(r.legal_red_flags||[]).length;
     }
-    r.at=new Date().toISOString();
+    r.at=new Date().toISOString();r.delta=dr.delta;r.tier=tier;r.chars=draft.length;
     a.review=wbReviewState(a);a.review[which]=r;a.review.history.push({round:a.review.round,which:which,score:which==="technical"?r.compliance_score:r.regulatory_score,passed:which==="technical"?r.passed_audit:r.passed_regulatory_audit,at:r.at});
     await wbSave(id,{review:a.review});
     wbLog((which==="technical"?"Technical QA":"Regulatory QA")+": "+(which==="technical"?r.compliance_score:r.regulatory_score)+"/100, "+((which==="technical"?r.passed_audit:r.passed_regulatory_audit)?"PASSED":"needs rewrite"));
@@ -1873,7 +1924,9 @@ function wbReviewCard(t,a,d){
     +(busy?'<button class="btn btn-danger" onclick="wbStop()">Stop</button>':'<button class="btn btn-primary" onclick="wbReviewLoop(\''+wbEsc(t.id)+'\')" '+(canRun?'':'disabled')+'>↻ Review and fix (up to '+REVIEW_MAX_ROUNDS+' rounds)</button>')
     +'<button class="btn" onclick="wbRunReviewer(\''+wbEsc(t.id)+'\',\'technical\')" '+(canRun&&!busy?'':'disabled')+'>Technical QA only</button>'
     +'<button class="btn" onclick="wbRunReviewer(\''+wbEsc(t.id)+'\',\'regulatory\')" '+(canRun&&!busy?'':'disabled')+'>Regulatory QA only</button>'
-    +(tq||rq?'<button class="btn" onclick="wbDownload(\''+wbEsc(t.id)+'\',\'review\')">⬇ Export audit</button>':'')+'</div>';
+    +(tq||rq?'<button class="btn" onclick="wbDownload(\''+wbEsc(t.id)+'\',\'review\')">⬇ Export audit</button>':'')
+    +'<label class="wb-toggle" style="margin-left:auto"><input type="checkbox" '+(wbEconomy()?'checked':'')+' onchange="wbSetEconomy(this.checked)"> Economy: re-checks read only changed sections</label></div>'
+    +'<div class="wb-help" style="margin:-6px 0 12px">Cost: round 1 reads the whole draft (capped at '+Math.round(REVIEW_DRAFT_CAP/1000)+'k characters) with two calls. With Economy on, later rounds read only the rewritten sections on the quick tier, so a full three-round cycle is about 6 calls instead of 12 to 15.</div>';
   var card=function(title,r,pass,score,lines,fix,key){var b=WB.busy["review_"+key];
     return'<div class="wb-ana'+(r&&pass?' done':'')+'" style="'+(r&&!pass?'border-color:var(--red-border);box-shadow:inset 3px 0 0 var(--red)':'')+'"><div class="wb-ana-head"><div><div class="wb-ana-title">'+title+'</div><div class="wb-ana-desc">'+(key==="technical"?"SLA, ISO, NOC, severity table, escalation, architecture specifics, timeline, team, BOM, no invented facts":"PPRA fair competition, data sovereignty, SECP and anti-corruption, SBP, commitments NETS cannot make")+'</div></div>'
       +(r?'<div style="text-align:right"><div class="wb-grade-pct" style="font-size:30px;color:'+(pass?"var(--green)":"var(--red)")+'">'+score+'</div><span class="chip '+(pass?"chip-g":"chip-r")+'">'+(pass?"Passed":"Needs rewrite")+'</span></div>':'<span class="chip chip-grey">'+(b?'Reviewing':'Not run')+'</span>')+'</div>'
