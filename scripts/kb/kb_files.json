@@ -1,0 +1,306 @@
+[
+ {
+  "file": "BOC-Technical Proposal Updated (1).pdf",
+  "client": "BOC",
+  "pages": 21,
+  "chars": 35804,
+  "chunks": 20,
+  "scanned": false
+ },
+ {
+  "file": "Bank-Islami-Tech-Proposal.pdf",
+  "client": "Bank Islami",
+  "pages": 22,
+  "chars": 35601,
+  "chunks": 20,
+  "scanned": false
+ },
+ {
+  "file": "DATA CHECK-NOC-TECH PROPOSAL.pdf",
+  "client": "DATA CHECK NOC",
+  "pages": 13,
+  "chars": 21205,
+  "chunks": 16,
+  "scanned": false
+ },
+ {
+  "file": "DUET 75 PCs Technical Proposal.pdf",
+  "client": "DUET 75 PCs",
+  "pages": 19,
+  "chars": 29085,
+  "chunks": 11,
+  "scanned": false
+ },
+ {
+  "file": "ENAR-HYPERVISOR LICENSING-TECHNICAL-PROPOSAL.pdf",
+  "client": "ENAR HYPERVISOR LICENSING",
+  "pages": 20,
+  "chars": 33229,
+  "chunks": 21,
+  "scanned": false
+ },
+ {
+  "file": "ENAR-PRECISION COOLING SYSTEM-TECHNICAL-PROPOSAL.pdf",
+  "client": "ENAR PRECISION COOLING SYSTEM",
+  "pages": 19,
+  "chars": 32488,
+  "chunks": 21,
+  "scanned": false
+ },
+ {
+  "file": "ENAR-TECH-PROPOSAL.pdf",
+  "client": "ENAR",
+  "pages": 19,
+  "chars": 27180,
+  "chunks": 11,
+  "scanned": false
+ },
+ {
+  "file": "FWBL Technical Proposal.pdf",
+  "client": "FWBL",
+  "pages": 21,
+  "chars": 37916,
+  "chunks": 19,
+  "scanned": false
+ },
+ {
+  "file": "Getz Pharma Router Technical Proposal.pdf",
+  "client": "Getz Pharma Router",
+  "pages": 22,
+  "chars": 37492,
+  "chunks": 19,
+  "scanned": false
+ },
+ {
+  "file": "HBL Routers Technical Proposal.pdf",
+  "client": "HBL Routers",
+  "pages": 18,
+  "chars": 29744,
+  "chunks": 17,
+  "scanned": false
+ },
+ {
+  "file": "IBA Switches Technical Proposal (1).pdf",
+  "client": "IBA Switches",
+  "pages": 19,
+  "chars": 31786,
+  "chunks": 15,
+  "scanned": false
+ },
+ {
+  "file": "KE SD-WAN Tech Proposal.pdf",
+  "client": "KE SD WAN",
+  "pages": 38,
+  "chars": 63106,
+  "chunks": 65,
+  "scanned": false
+ },
+ {
+  "file": "KICT Technical Proposal.pdf",
+  "client": "KICT",
+  "pages": 20,
+  "chars": 34837,
+  "chunks": 19,
+  "scanned": false
+ },
+ {
+  "file": "LCI-NOC-TECHNICAL-PROPOSAL.pdf",
+  "client": "LCI NOC",
+  "pages": 15,
+  "chars": 29042,
+  "chunks": 27,
+  "scanned": false
+ },
+ {
+  "file": "Lucky One Technical Proposal (1).pdf",
+  "client": "Lucky One",
+  "pages": 24,
+  "chars": 43787,
+  "chunks": 25,
+  "scanned": false
+ },
+ {
+  "file": "MAL-Lahore RE-TECHNICAL-PROPOSAL ( July 2026 ) UPDATED (1).pdf",
+  "client": "MAL Lahore RE",
+  "pages": 21,
+  "chars": 34567,
+  "chunks": 20,
+  "scanned": false
+ },
+ {
+  "file": "MAL-RE-TECHNICAL-PROPOSAL ( July 2026 ).pdf",
+  "client": "MAL RE",
+  "pages": 19,
+  "chars": 31872,
+  "chunks": 16,
+  "scanned": false
+ },
+ {
+  "file": "NETS- JS BANK- TECHNICAL PROPOSAL.pdf",
+  "client": "JS BANK",
+  "pages": 23,
+  "chars": 33711,
+  "chunks": 21,
+  "scanned": false
+ },
+ {
+  "file": "NETS- PAK SUZUKI-TECH-PROPOSAL.pdf",
+  "client": "PAK SUZUKI",
+  "pages": 22,
+  "chars": 39841,
+  "chunks": 25,
+  "scanned": false
+ },
+ {
+  "file": "NETS-AL-GHURAIR-TECH-PRPOSAL.pdf",
+  "client": "AL GHURAIR",
+  "pages": 22,
+  "chars": 35217,
+  "chunks": 19,
+  "scanned": false
+ },
+ {
+  "file": "NETS-BAFL-ROUTERS & SWITCHES-TECH PROPOSAL.pdf",
+  "client": "BAFL ROUTERS & SWITCHES",
+  "pages": 9,
+  "chars": 13995,
+  "chunks": 9,
+  "scanned": false
+ },
+ {
+  "file": "NETS-Bank of China- Technical Proposal - Huawei Network Compute & Storage (Sep 2026).pdf",
+  "client": "Bank of China",
+  "pages": 15,
+  "chars": 29639,
+  "chunks": 25,
+  "scanned": false
+ },
+ {
+  "file": "NETS-CONGO-FORTINET-TECH PROPOSAL.pdf",
+  "client": "CONGO FORTINET",
+  "pages": 24,
+  "chars": 37687,
+  "chunks": 22,
+  "scanned": false
+ },
+ {
+  "file": "NETS-DUET-PHASE 1-TECHNICAL-PROPOSAL.pdf",
+  "client": "DUET PHASE 1",
+  "pages": 32,
+  "chars": 56820,
+  "chunks": 35,
+  "scanned": false
+ },
+ {
+  "file": "NETS-Habib Qatar-FW 121G-Technical Proposal.pdf",
+  "client": "Habib Qatar FW 121G",
+  "pages": 19,
+  "chars": 32848,
+  "chunks": 15,
+  "scanned": false
+ },
+ {
+  "file": "NETS-NCCPL-TECHNICAL-PROPOSAL.pdf",
+  "client": "NCCPL",
+  "pages": 19,
+  "chars": 28803,
+  "chunks": 14,
+  "scanned": false
+ },
+ {
+  "file": "NETS-NIFT-Huawei Storage-Technical Proposal.pdf",
+  "client": "NIFT Huawei Storage",
+  "pages": 11,
+  "chars": 15712,
+  "chunks": 8,
+  "scanned": false
+ },
+ {
+  "file": "NETS-SINDH-BANK-TECHNICAL-PROPOSAL.pdf",
+  "client": "SINDH BANK",
+  "pages": 21,
+  "chars": 34014,
+  "chunks": 17,
+  "scanned": false
+ },
+ {
+  "file": "NETS-SLIC- DC RESOURCES-TECHNICAL-PROPOSAL.pdf",
+  "client": "SLIC DC RESOURCES",
+  "pages": 26,
+  "chars": 49706,
+  "chunks": 37,
+  "scanned": false
+ },
+ {
+  "file": "NETS_RE For KSA and DXB.pdf",
+  "client": "RE For KSA and DXB",
+  "pages": 11,
+  "chars": 24760,
+  "chunks": 24,
+  "scanned": false
+ },
+ {
+  "file": "PIA Edge Routers Technical Proposal.pdf",
+  "client": "PIA Edge Routers",
+  "pages": 20,
+  "chars": 36377,
+  "chunks": 18,
+  "scanned": false
+ },
+ {
+  "file": "PMRC-TECH-PROPOSAL.pdf",
+  "client": "PMRC",
+  "pages": 21,
+  "chars": 32829,
+  "chunks": 16,
+  "scanned": false
+ },
+ {
+  "file": "SIEHS Wireless Technical Proposal (1).pdf",
+  "client": "SIEHS Wireless",
+  "pages": 21,
+  "chars": 37543,
+  "chunks": 24,
+  "scanned": false
+ },
+ {
+  "file": "SLC-Technical Proposal (NOS + RE).pdf",
+  "client": "SLC",
+  "pages": 24,
+  "chars": 39329,
+  "chunks": 23,
+  "scanned": false
+ },
+ {
+  "file": "State Life Insurance Technical Proposal.pdf",
+  "client": "State Life Insurance",
+  "pages": 22,
+  "chars": 39306,
+  "chunks": 25,
+  "scanned": false
+ },
+ {
+  "file": "Technical Proposal (NOS + RE) for Statelife.pdf",
+  "client": "State Life (NOS + RE)",
+  "pages": 21,
+  "chars": 32600,
+  "chunks": 23,
+  "scanned": false
+ },
+ {
+  "file": "UBL Switches Technical Proposal (1).pdf",
+  "client": "UBL Switches",
+  "pages": 22,
+  "chars": 37690,
+  "chunks": 26,
+  "scanned": false
+ },
+ {
+  "file": "UBL Switches Technical Proposal.pdf",
+  "client": "UBL Switches",
+  "pages": 22,
+  "chars": 37704,
+  "chunks": 26,
+  "scanned": false
+ }
+]

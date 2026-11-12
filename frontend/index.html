@@ -266,6 +266,22 @@ tr{cursor:pointer}
 .wb-ana{border-radius:var(--r);box-shadow:var(--sh-1)}
 .sd .sd-card{box-shadow:var(--sh-1)}
 @media(max-width:1000px){.wb-grid2{grid-template-columns:1fr}}
+/* ===== PROPOSAL WRITER ===== */
+.wb-prop-list{display:flex;flex-direction:column;gap:6px}
+.wb-prop{border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card)}
+.wb-prop.has{border-color:var(--amber-border)}.wb-prop.ok{border-color:var(--green-border);box-shadow:inset 3px 0 0 var(--green)}
+.wb-prop-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none}
+.wb-prop-head:hover{background:var(--bg)}
+.wb-prop-n{width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--fg-muted);flex:none}
+.wb-prop.ok .wb-prop-n{background:var(--green);border-color:var(--green);color:#fff}
+.wb-prop-title{font-size:14px;font-weight:600;flex:1}
+.wb-prop-caret{color:var(--fg-faint);margin-left:4px}
+.wb-prop-body{padding:4px 16px 14px 48px;border-top:1px solid var(--border)}
+.wb-prop-text{font-size:13.5px;line-height:1.65;max-width:820px;padding-top:8px}
+.wb-prop-text h3{font-size:14px;font-weight:700;margin:12px 0 4px}.wb-prop-text h4{font-size:13px;font-weight:700;margin:10px 0 3px}
+.wb-prop-text p{margin:0 0 8px}.wb-prop-text ul{margin:4px 0 8px 18px;padding:0}.wb-prop-text li{margin:2px 0}
+.wb-md-table{border-collapse:collapse;margin:8px 0;font-size:12.5px}.wb-md-table th,.wb-md-table td{border:1px solid var(--border);padding:5px 9px;text-align:left}.wb-md-table th{background:var(--bg)}
+.wb-prop-refs{margin:10px 0 4px;font-size:12px;color:var(--fg-muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 </style>
 
 <!-- TOP BAR -->
@@ -286,12 +302,9 @@ tr{cursor:pointer}
 <div class="sidebar">
   <nav class="sb-nav" id="sbnav"></nav>
   <div class="sb-footer">
-    Agent 1: Scrape 3 portals + qualify<br>
-    Agent 1b: RFP download / D:\ sync<br>
-    Agent 2: RFP Summary<br>
-    Agent 3: Bid / No-Bid Grader<br>
-    Agent 4: Compliance Auditor<br>
-    Agent 5: BOQ Drafter<br>
+    Scheduled: Agent 1 scan 05:47 · Agent 1b RFP sync 12:00 to 20:00<br>
+    Workbench: Summary · Assessment · Compliance · BOQ · Proposal<br>
+    Knowledge base: 814 paragraphs, 38 past proposals<br>
     DB: <span id="dbStatusFooter" class="db-status db-off">Connecting</span>
   </div>
 </div>
@@ -560,6 +573,7 @@ function ctoNext(t){
   if(st==="RFP in hand")return{txt:"Run summary and bid/no-bid",who:"Architect",view:"workbench",sev:1};
   if(st==="Analysed")return{txt:"Decide BID or NO-BID",who:"Presales head",view:"workbench",sev:2};
   if(dec==="BID"&&!a.boq)return{txt:"Build BOQ",who:"Architect",view:"workbench",sev:1};
+  if(dec==="BID"&&!(a.proposal&&a.proposal.sections&&Object.keys(a.proposal.sections).length))return{txt:"Write technical proposal",who:"Architect",view:"workbench",sev:1};
   if(dec==="BID")return{txt:"Price, approve, submit",who:"Presales head",view:"workbench",sev:1};
   return{txt:"Review",who:"Presales head",view:"workbench",sev:1};
 }
@@ -1490,7 +1504,8 @@ function wbDownload(id,kind){
   if(kind==="grading"&&a.grading){filename=name+".md";var g=a.grading;content="# Bid / No-Bid Assessment: "+t.ti+"\n\nVerdict: **"+g.verdict+"**  \nReadiness: **"+g.readiness_pct+"%**  \nConfidence: "+g.confidence+"  \nValue estimate: "+wbFmtV(g.value_estimate_pkr)+"\n\n## Why bid\n"+(g.why_bid||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Why not\n"+(g.why_not||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Gates\n"+Object.keys(g.gates||{}).map(function(k){return"- "+k+": "+(g.gates[k].pass?"PASS":"FAIL")+" : "+g.gates[k].detail}).join("\n")+"\n\n## Risks\n"+(g.risks||[]).map(function(r){return"- ["+r.severity+"] "+r.risk+" : "+r.mitigation}).join("\n")+"\n\n## Win themes\n"+(g.win_themes||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Conditions to bid\n"+(g.conditions_to_bid||[]).map(function(x){return"- "+x}).join("\n")}
   if(kind==="compliance"&&a.compliance){filename=name+".md";var c=a.compliance;content="# Compliance Checklist: "+t.ti+"\n\nHave: "+c.have_count+"  Prepare: "+c.prepare_count+"  Missing: "+c.missing_count+"\n\n| Document | Clause | Mandatory | NETS status | Owner | Note |\n|---|---|---|---|---|---|\n"+(c.required_documents||[]).map(function(d){return"| "+d.doc+" | "+(d.rfp_clause||"")+" | "+(d.mandatory?"Yes":"No")+" | "+d.nets_status+" | "+(d.owner||"")+" | "+(d.note||"")+" |"}).join("\n")+"\n\n## Critical gaps\n"+(c.critical_gaps||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Submission\n"+(c.submission_format||"")+"\n\n"+(c.envelope_structure||"")}
   if(kind==="boq"&&a.boq){filename=name+".csv";var rows=[["Section","S.No","Item","Description","OEM","Part No","Qty","Unit","Unit Price PKR","Total PKR","Confidence","RFP Ref"]];(a.boq.sections||[]).forEach(function(s){(s.lines||[]).forEach(function(l){rows.push([s.section,l.sno,l.item,l.description,l.oem,l.part_no,l.qty,l.unit,l.unit_price_pkr,l.total_pkr,l.confidence,l.rfp_ref])})});rows.push([]);rows.push(["Services"]);(a.boq.services||[]).forEach(function(s){rows.push(["Services","",s.item,"","","",s.man_days,"man-days",s.rate_pkr,s.total_pkr,"",""])});rows.push([]);rows.push(["","","","","","","","","Hardware subtotal",a.boq.subtotal_hardware_pkr]);rows.push(["","","","","","","","","Services subtotal",a.boq.subtotal_services_pkr]);rows.push(["","","","","","","","","Contingency %",a.boq.contingency_pct]);rows.push(["","","","","","","","","GRAND TOTAL PKR",a.boq.grand_total_pkr]);content=rows.map(function(r){return r.map(function(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")}).join("\n")}
-  if(!content){alert("Nothing to export yet. Run that agent first.");return}
+  if(kind==="proposal"&&a.proposal){filename=name+".md";content=wbProposalMarkdown(id)}
+  if(!content){alert("Nothing to export yet. Run that step first.");return}
   if(DOWNLOADS){DOWNLOADS.save({filename:filename,data:content}).catch(function(e){if(e&&e.code!=="cancelled")wbFallbackDownload(filename,content)})}
   else wbFallbackDownload(filename,content);
 }
@@ -1508,6 +1523,147 @@ function wbClaimList(a,claims,evs,mark){
     var tag=q?(ok?pv("RFP","Quote found in uploaded RFP text"):pv("UNV","Quote NOT found in RFP text")):pv("UNV","No evidence quote supplied");
     return'<div style="font-size:12.5px;padding:3px 0;border-bottom:1px solid var(--border)">'+mark+' '+wbEsc(x)+tag+(q?'<div style="font-size:11px;color:'+(ok?"var(--fg-faint)":"var(--red)")+';margin:2px 0 0 14px;font-style:italic">\u201c'+wbEsc(String(q).slice(0,160))+(String(q).length>160?"...":"")+'\u201d</div>':'')+'</div>';
   }).join("");
+}
+
+
+/* ═══════════════ TECHNICAL PROPOSAL WRITER (Step 4) ═══════════════
+   Knowledge base: 920 paragraphs chunked from 38 past NETS technical proposals, stored as an asset.
+   Retrieval runs in the browser (term overlap with client diversity). Each section is written by one
+   Claude call that sees only: the tender, the four analyses, the bid plan, and the retrieved paragraphs.
+   Every section records which reference paragraphs it used, so a reader can see where the words came from. */
+var KB_ASSET="/_blob/10f033a306fa982e1994c3486fec9d35";
+var KB=null,KB_LOADING=null;
+function kbLoad(){
+  if(KB)return Promise.resolve(KB);
+  if(KB_LOADING)return KB_LOADING;
+  KB_LOADING=fetch(KB_ASSET).then(function(r){if(!r.ok)throw new Error("KB "+r.status);return r.json()}).then(function(j){KB=j;wbLog("Knowledge base loaded: "+j.length+" paragraphs from past proposals");return j}).catch(function(e){KB_LOADING=null;wbLog("Knowledge base failed to load: "+e.message);throw e});
+  return KB_LOADING;
+}
+var PROP_SECTIONS=[
+  {key:"exec",title:"Executive Summary",ask:"Summarise the opportunity, NETS's understanding of the need, the proposed solution in two sentences, and the three strongest reasons to choose NETS. 180 to 260 words.",q:"executive summary objective understanding"},
+  {key:"profile",title:"Company Profile and Relevant Experience",ask:"Present NETS International (since 1983, Karachi HQ, 9 offices, 1,000+ certified resources, ISO 9001/14001/20000-1/27001/45001, SOC 2 Type II, Cisco Gold, Dell Gold, Huawei Silver, Fortinet Advanced) and three to five past projects relevant to THIS tender, taken only from the reference paragraphs. 220 to 320 words.",q:"about us company profile experience projects clients"},
+  {key:"understanding",title:"Understanding of Requirements",ask:"Restate the buyer's requirements from the RFP summary as NETS understands them, grouped under functional, technical and commercial. Quote clause references where the summary gives them. 200 to 300 words.",q:"project objective scope requirements understanding"},
+  {key:"solution",title:"Technical Solution and Architecture",ask:"Describe the proposed architecture: components, OEMs chosen in the bid plan, sizing logic, redundancy, integration points, and how each maps to the requirements. Use subheadings. 350 to 500 words.",q:"solution architecture design topology high availability"},
+  {key:"method",title:"Implementation Methodology",ask:"Phased delivery plan (survey, design, procurement, staging, installation, migration, testing, acceptance, handover) with entry and exit criteria per phase. 220 to 320 words.",q:"implementation methodology project plan phases deployment migration"},
+  {key:"team",title:"Project Team and Qualifications",ask:"Proposed team structure with roles, certifications (CCIE, CCNP, HCIP, NSE, PMP, CISSP where relevant), and responsibilities. Do not invent named individuals; use roles. 180 to 260 words.",q:"project team organization resources certifications engineers"},
+  {key:"support",title:"Support and SLA Commitment",ask:"Support model (24x7 NOC/SOC, on-site, remote), severity levels with response and resolution targets as a table in markdown, escalation matrix as roles and timeframes, spares and RMA handling. 220 to 320 words.",q:"support sla escalation matrix response time noc"},
+  {key:"security",title:"Security and Compliance",ask:"Security controls in the solution, NETS's certifications, data handling, and compliance with the regulator named in the RFP (SBP, PTA, PPRA as applicable). 180 to 260 words.",q:"security compliance iso 27001 data protection"},
+  {key:"qa",title:"Quality Assurance and Testing",ask:"Test strategy: factory and site acceptance tests, test cases traceability to requirements, documentation deliverables, training and knowledge transfer. 160 to 240 words.",q:"quality assurance testing acceptance training documentation"},
+  {key:"risk",title:"Risk Management",ask:"Top risks for this engagement with likelihood, impact and mitigation, as a markdown table, drawing on the assessment's risks. 160 to 240 words.",q:"risk mitigation assumptions dependencies"},
+  {key:"bom",title:"Bill of Materials Summary",ask:"Summarise the BOQ sections and headline quantities (no prices), OEM per line group, and the service lines. If the BOQ is not available, say so and list what will be supplied by category. 140 to 220 words.",q:"bill of materials quantities equipment list"},
+  {key:"timeline",title:"Timeline and Milestones",ask:"Milestone table (markdown) from contract award to final acceptance with week numbers, aligned to the delivery period in the RFP summary when stated. 120 to 200 words.",q:"timeline milestones schedule delivery period"},
+  {key:"why",title:"Why NETS",ask:"Close with the differentiators that matter for this buyer: local presence, OEM tiers, references in the same sector, in-house NOC/SOC, 42 years of delivery. 140 to 200 words.",q:"why us differentiators value proposition partner"}
+];
+function kbTokens(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\s\-\+\.]/g," ").split(/\s+/).filter(function(w){return w.length>2})}
+function kbRetrieve(t,a,sec,n){
+  var d=(a.decision||{});var s=a.summary||{};
+  var q=kbTokens([t.ti,(t.solMatch||[]).map(function(x){return x.name}).join(" "),(d.solutions||[]).join(" "),(d.oems||[]).join(" "),sec.q,sec.title,(s.key_requirements||[]).slice(0,6).join(" "),(s.deliverables||[]).slice(0,6).join(" ")].join(" "));
+  var qset={};q.forEach(function(w){qset[w]=(qset[w]||0)+1});
+  var scored=KB.map(function(c){var sc=0;var tl=c.text.toLowerCase();
+    (c.terms||[]).forEach(function(w){if(qset[w])sc+=3});
+    Object.keys(qset).forEach(function(w){if(w.length>3&&tl.indexOf(w)>=0)sc+=1});
+    if(kbTokens(c.section).some(function(w){return sec.q.indexOf(w)>=0}))sc+=4;
+    return{c:c,sc:sc}}).filter(function(x){return x.sc>0}).sort(function(a,b){return b.sc-a.sc});
+  var out=[],perClient={};
+  for(var i=0;i<scored.length&&out.length<n;i++){var c=scored[i].c;if((perClient[c.client]||0)>=2)continue;perClient[c.client]=(perClient[c.client]||0)+1;out.push(c)}
+  return out;
+}
+async function wbWriteSection(id,key){
+  var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);var sec=PROP_SECTIONS.find(function(x){return x.key===key});
+  if(!t||!sec)return;
+  if(!SAMPLE){alert("Allow Claude in this page's Permissions menu first.");return}
+  await kbLoad();
+  a.proposal=a.proposal||{sections:{}};a.proposal.sections=a.proposal.sections||{};
+  WB.busy["prop_"+key]=true;showView("workbench");
+  var ctl=new AbortController();WB.ctl=ctl;
+  var refs=kbRetrieve(t,a,sec,5);
+  var d=a.decision||{};var g=a.grading||{};var s=a.summary||{};var c=a.compliance||{};var b=a.boq||{};
+  var refText=refs.map(function(r,i){return"[REF-"+(i+1)+" | id="+r.id+" | "+r.client+" | "+r.section+"]\n"+r.text.slice(0,1400)}).join("\n\n");
+  var boqBrief=b.sections?b.sections.map(function(sc){return sc.section+": "+(sc.lines||[]).slice(0,8).map(function(l){return l.item+" x"+l.qty+(l.oem?" ("+l.oem+")":"")}).join("; ")}).join("\n"):"BOQ not drafted yet";
+  var out=document.getElementById("wb-out-prop_"+key);
+  try{
+    var r=await SAMPLE.json(
+"You are the Technical Proposal Writer for NETS International (Pvt) Ltd, Pakistan. Write ONE section of a technical proposal in NETS corporate voice: confident, specific, first person plural, British spelling, no marketing fluff, no em dashes.\n"+
+"GROUNDING RULES: (1) Facts about NETS come only from the NETS BRIEF and the REFERENCE PARAGRAPHS from past NETS proposals. (2) Facts about the buyer and the requirement come only from the TENDER, RFP SUMMARY and ASSESSMENT. (3) Reuse wording from the reference paragraphs where it fits; adapt names, quantities and dates to this tender. (4) Never invent client names, certificate numbers, project values, named staff, or statistics that are not in the inputs. If something needed is missing, write a short bracketed placeholder like [confirm: delivery period] and list it in open_points. (5) Return ONLY JSON.\n"+
+'{"title":string,"body_md":string (markdown; use ## for subheadings inside the section, tables where asked),"refs_used":[string (the id values of REF paragraphs you drew from)],"open_points":[string]}\n\n'+
+"SECTION TO WRITE: "+sec.title+"\nINSTRUCTION: "+sec.ask+"\n\nNETS BRIEF:\n"+NETS_BRIEF+"\n\n"+wbTenderCtx(t)+
+"\n\nBID PLAN: decision "+(d.bid_decision||"Pending")+"; solution areas: "+((d.solutions||[]).join(", ")||"not set")+"; OEMs: "+((d.oems||[]).join(", ")||"not set")+"; delivery model: "+(d.delivery_model||"not set")+"; sites: "+(d.sites||"?")+"; duration months: "+(d.duration_months||"?")+"; win themes: "+(d.win_themes||"")+
+"\n\nRFP SUMMARY:\n"+JSON.stringify({issuer:s.issuer,scope:s.scope_summary,deliverables:s.deliverables,key_requirements:s.key_requirements,timeline:s.timeline,eligibility:s.eligibility,evaluation:s.evaluation_method}).slice(0,6000)+
+"\n\nASSESSMENT:\n"+JSON.stringify({readiness:g.readiness_pct,verdict:g.verdict,why_bid:g.why_bid,risks:g.risks,win_themes:g.win_themes,recommended_oem:g.recommended_oem,coverage:g.capability_coverage}).slice(0,5000)+
+"\n\nCOMPLIANCE (documents):\n"+JSON.stringify((c.required_documents||[]).slice(0,20).map(function(x){return x.doc+" ("+x.nets_status+")"}))+
+"\n\nBOQ SUMMARY:\n"+boqBrief.slice(0,3000)+
+"\n\nREFERENCE PARAGRAPHS FROM PAST NETS PROPOSALS:\n"+refText,
+      {signal:ctl.signal,onText:function(u){if(out)out.textContent=u.text},modelTier:"default",cache:{gcTime:3600000}});
+    a.proposal.sections[key]={title:r.title||sec.title,body_md:r.body_md||"",refs_used:r.refs_used||[],refs:refs.map(function(x){return{id:x.id,client:x.client,section:x.section,source:x.source}}),open_points:r.open_points||[],status:"draft",generated_at:new Date().toISOString()};
+    a.proposal.generated_at=new Date().toISOString();
+    await wbSave(id,{proposal:a.proposal});
+    wbLog("Proposal section written: "+sec.title+" ("+(a.proposal.sections[key].body_md.split(/\s+/).length)+" words, "+(r.refs_used||[]).length+" references used)");
+  }catch(e){var code=e&&e.code||"error";wbLog("Section "+sec.title+" stopped: "+code);if(code==="not_granted")alert("You declined to let this page use Claude.");else if(code!=="cancelled")alert("Writing failed: "+code+". "+(e&&e.message||""))}
+  finally{WB.busy["prop_"+key]=false;showView("workbench")}
+}
+async function wbWriteAll(id){for(var i=0;i<PROP_SECTIONS.length;i++){var a=RFPA[id]||{};var sec=(a.proposal&&a.proposal.sections||{})[PROP_SECTIONS[i].key];if(sec&&sec.status==="approved")continue;await wbWriteSection(id,PROP_SECTIONS[i].key);if(WB.ctl&&WB.ctl.signal.aborted)break}}
+function wbPropSet(id,key,field,val){var a=wbEnsure(id);var sec=a.proposal&&a.proposal.sections&&a.proposal.sections[key];if(!sec)return;sec[field]=val;if(field==="status"&&val==="approved"){sec.approved_at=new Date().toISOString()}wbSave(id,{proposal:a.proposal});showView("workbench")}
+function wbPropEditSave(id,key){var el=document.getElementById("wb-prop-edit-"+key);if(!el)return;var a=wbEnsure(id);var sec=a.proposal.sections[key];sec.body_md=el.value;sec.status="edited";sec.edited_at=new Date().toISOString();WB.propEdit=null;wbSave(id,{proposal:a.proposal});showView("workbench")}
+function wbMdLite(md){
+  var h=wbEsc(md||"");
+  h=h.replace(/^### (.*)$/gm,'<h4>$1</h4>').replace(/^## (.*)$/gm,'<h3>$1</h3>').replace(/^# (.*)$/gm,'<h3>$1</h3>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  /* tables */
+  h=h.replace(/((?:^\|.*\|\s*$\n?)+)/gm,function(tbl){var rows=tbl.trim().split("\n").filter(function(r){return !/^\|\s*:?-{2,}/.test(r)});return'<table class="wb-md-table">'+rows.map(function(r,i){var cells=r.replace(/^\||\|$/g,"").split("|");return'<tr>'+cells.map(function(c){return(i===0?'<th>':'<td>')+c.trim()+(i===0?'</th>':'</td>')}).join("")+'</tr>'}).join("")+'</table>\n'});
+  h=h.replace(/^(?:- |• |\* )(.*)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,function(m){return'<ul>'+m+'</ul>'});
+  h=h.replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br>');
+  return'<p>'+h+'</p>';
+}
+function wbProposalMarkdown(id){var a=RFPA[id]||{};var t=T.find(function(x){return x.id===id})||{};var P=a.proposal||{sections:{}};return"# Technical Proposal: "+(t.ti||id)+"\n\n"+PROP_SECTIONS.map(function(s,i){var sec=P.sections[s.key];return sec?"## "+(i+1)+". "+sec.title+"\n\n"+sec.body_md+"\n":""}).join("\n")}
+function wbProposalDocx(id){var t=T.find(function(x){return x.id===id})||{};window._wbProposalDoc={_id:id,rfp_title:t.ti||id,proposal_text:wbProposalMarkdown(id),generated_at:new Date().toISOString(),audit_score:null};downloadProposalDocx(id)}
+function wbProposalCard(t,a,d){
+  var P=a.proposal||{sections:{}};var secs=P.sections||{};
+  var done=PROP_SECTIONS.filter(function(s){return secs[s.key]}).length,approved=PROP_SECTIONS.filter(function(s){return secs[s.key]&&secs[s.key].status==="approved"}).length;
+  var isBid=d.bid_decision==="BID"||d.bid_decision==="CONDITIONAL";
+  var canRun=!!SAMPLE;var ready=!!(a.summary||a.grading);
+  var h='<div class="drawer wb-step" id="wb-s4">'
+    +'<div class="wb-step-head"><div><div class="wb-step-no">Step 4</div><div class="wb-step-title">Technical proposal</div><div class="wb-help">Thirteen sections written one at a time from this RFP’s analysis and from 38 past NETS proposals (814 reference paragraphs). Each section shows the past proposals it drew from. Approve, edit or regenerate any section; export to Word when done.</div></div>'
+    +'<div style="text-align:right;white-space:nowrap;flex:none"><div style="font-size:22px;font-weight:800">'+done+'<span style="color:var(--fg-faint);font-size:14px"> / 13 written</span></div><div class="wb-help">'+approved+' approved</div></div></div>';
+  if(!isBid)h+='<div class="wb-note" style="background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:var(--amber)">The bid decision is <b>'+wbEsc(d.bid_decision||"Pending")+'</b>. You can still draft, but proposals are normally written after a BID decision in Step 3.</div>';
+  if(!ready)h+='<div class="wb-note" style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:12px">Run the RFP Summary and the Assessment in Step 2 first; the writer uses them as its source of truth about the buyer.</div>';
+  h+='<div class="wb-actions" style="margin:0 0 14px">'
+    +'<button class="btn btn-primary" onclick="wbWriteAll(\''+wbEsc(t.id)+'\')" '+(canRun&&ready?'':'disabled')+'>✍ Write all sections</button>'
+    +(done?'<button class="btn" onclick="wbProposalDocx(\''+wbEsc(t.id)+'\')">⬇ Export Word (.docx)</button>':'')
+    +(done?'<button class="btn" onclick="wbDownload(\''+wbEsc(t.id)+'\',\'proposal\')">⬇ Export Markdown</button>':'')
+    +(WB.ctl&&Object.keys(WB.busy).some(function(k){return k.indexOf("prop_")===0&&WB.busy[k]})?'<button class="btn btn-danger" onclick="wbStop()">Stop</button>':'')
+    +'<span class="wb-help" style="margin-left:auto">Knowledge base: '+(KB?KB.length+' paragraphs loaded':'loads on first run')+'</span></div>';
+  h+='<div class="wb-prop-list">';
+  PROP_SECTIONS.forEach(function(s,i){
+    var sec=secs[s.key];var busy=WB.busy["prop_"+s.key];var editing=WB.propEdit===s.key;
+    var st=busy?'<span class="chip chip-a">Writing</span>':!sec?'<span class="chip chip-grey">Not written</span>':sec.status==="approved"?'<span class="chip chip-g">Approved</span>':sec.status==="edited"?'<span class="chip chip-b">Edited</span>':'<span class="chip chip-a">Draft</span>';
+    h+='<div class="wb-prop'+(sec?' has':'')+(sec&&sec.status==="approved"?' ok':'')+'">'
+      +'<div class="wb-prop-head" onclick="WB.propOpen=WB.propOpen===\''+s.key+'\'?null:\''+s.key+'\';showView(\'workbench\')"><span class="wb-prop-n">'+(i+1)+'</span><span class="wb-prop-title">'+s.title+'</span>'+st
+      +(sec?'<span class="wb-help">'+sec.body_md.split(/\s+/).length+' words · '+(sec.refs_used||[]).length+' refs</span>':'')
+      +'<span class="wb-prop-caret">'+(WB.propOpen===s.key?'▴':'▾')+'</span></div>';
+    if(busy)h+='<pre id="wb-out-prop_'+s.key+'" class="wb-stream">Thinking...</pre>';
+    if(WB.propOpen===s.key&&!busy){
+      h+='<div class="wb-prop-body">';
+      if(!sec)h+='<div class="wb-help">'+wbEsc(s.ask)+'</div><div class="wb-actions"><button class="btn btn-primary" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun?'':'disabled')+'>Write this section</button></div>';
+      else{
+        if(editing)h+='<textarea id="wb-prop-edit-'+s.key+'" rows="16" style="width:100%;font-size:13px;line-height:1.55;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;box-sizing:border-box">'+wbEsc(sec.body_md)+'</textarea><div class="wb-actions"><button class="btn btn-primary" onclick="wbPropEditSave(\''+wbEsc(t.id)+'\',\''+s.key+'\')">Save</button><button class="btn" onclick="WB.propEdit=null;showView(\'workbench\')">Cancel</button></div>';
+        else{
+          h+='<div class="wb-prop-text">'+wbMdLite(sec.body_md)+'</div>';
+          if((sec.open_points||[]).length)h+='<div class="wb-note" style="color:var(--amber)"><b>Open points to confirm:</b> '+sec.open_points.map(wbEsc).join("; ")+'</div>';
+          var used=(sec.refs||[]).filter(function(r){return(sec.refs_used||[]).indexOf(r.id)>=0});
+          h+='<div class="wb-prop-refs"><b>Drawn from past proposals:</b> '+(used.length?used.map(function(r){return'<span class="chip chip-grey" title="'+wbEsc(r.source)+'">'+wbEsc(r.client)+' · '+wbEsc(r.section)+'</span>'}).join(" "):'<span class="wb-help">none cited (written from the RFP analysis and NETS brief only)</span>')+'</div>';
+          h+='<div class="wb-actions">'
+            +(sec.status!=="approved"?'<button class="btn btn-primary" onclick="wbPropSet(\''+wbEsc(t.id)+'\',\''+s.key+'\',\'status\',\'approved\')">✓ Approve</button>':'<button class="btn" onclick="wbPropSet(\''+wbEsc(t.id)+'\',\''+s.key+'\',\'status\',\'draft\')">Unapprove</button>')
+            +'<button class="btn" onclick="WB.propEdit=\''+s.key+'\';showView(\'workbench\')">Edit</button>'
+            +'<button class="btn" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun?'':'disabled')+'>Regenerate</button>'
+            +'<span class="wb-help" style="margin-left:auto">'+(sec.approved_at?'Approved '+wbEsc(String(sec.approved_at).slice(0,16).replace("T"," ")):'Written '+wbEsc(String(sec.generated_at||"").slice(0,16).replace("T"," ")))+'</span></div>';
+        }
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  h+='</div></div>';
+  return h;
 }
 
 /* ── View ── */
@@ -1555,8 +1711,8 @@ function vWorkbench(){
     +'</div>';
 
   /* ── Stepper: where this tender is in the three steps ── */
-  var st1=!!a.rfpText,st2=!!(a.summary||a.grading||a.compliance||a.boq),st3=!!(d.bid_decision&&d.bid_decision!=="Pending");
-  html+='<div class="wb-stepper">'+[["Document",st1,"wb-s1"],["Analysis",st2,"wb-s2"],["Bid plan",st3,"wb-s3"]].map(function(x,i){return'<a class="wb-stp'+(x[1]?' done':'')+'" href="#'+x[2]+'" onclick="document.getElementById(\''+x[2]+'\').scrollIntoView({behavior:\'smooth\'});return false"><span class="wb-stp-n">'+(x[1]?'\u2713':(i+1))+'</span><span>'+x[0]+'</span></a>'+(i<2?'<span class="wb-stp-line'+(x[1]?' done':'')+'"></span>':'')}).join("")+'</div>';
+  var st1=!!a.rfpText,st2=!!(a.summary||a.grading||a.compliance||a.boq),st3=!!(d.bid_decision&&d.bid_decision!=="Pending"),st4=!!(a.proposal&&a.proposal.sections&&Object.keys(a.proposal.sections).length);
+  html+='<div class="wb-stepper">'+[["Document",st1,"wb-s1"],["Analysis",st2,"wb-s2"],["Bid plan",st3,"wb-s3"],["Proposal",st4,"wb-s4"]].map(function(x,i){return'<a class="wb-stp'+(x[1]?' done':'')+'" href="#'+x[2]+'" onclick="document.getElementById(\''+x[2]+'\').scrollIntoView({behavior:\'smooth\'});return false"><span class="wb-stp-n">'+(x[1]?'\u2713':(i+1))+'</span><span>'+x[0]+'</span></a>'+(i<3?'<span class="wb-stp-line'+(x[1]?' done':'')+'"></span>':'')}).join("")+'</div>';
 
   /* ── STEP 1: RFP document ── */
   var acq=t.acqStatus||"PENDING";var hasText=!!a.rfpText;
@@ -1677,6 +1833,9 @@ function vWorkbench(){
     +'</div>'
     +'<div class="wb-help" style="margin-top:8px">'+(d.updated_at||a.updated_at?"Last saved "+wbEsc((d.updated_at||a.updated_at||"").replace("T"," ").slice(0,16)):"Nothing saved yet")+'</div>'
     +'</div></div>';
+
+  /* ── STEP 4: Technical proposal ── */
+  html+=wbProposalCard(t,a,d);
 
   /* ── Trust panel: what was verified for this tender ── */
   var tr=trustFor(t);
@@ -1838,55 +1997,82 @@ function vSettings(){
   var dbDocs=T.length+(SCANS.length)+1;
   var pdfCount=T.filter(function(t){return t.doc}).length;
 
-  var html='<div class="sec-head">Settings / Technical Health</div>'
-    +'<div style="padding:14px 20px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--fg-muted)">'
-    +'This page is powered by five AI agents running in the cloud. They automatically find tenders on the Sindh Bank portal every morning, score them against NETS solutions, sync qualifying RFPs to your D:\\ drive, write technical proposals using past NETS work as reference, and then audit those proposals for compliance before you ever see them. Everything runs without your PC needing to be on.'
+  var kbCount=KB?KB.length:814;
+  var propCount=0;Object.keys(RFPA||{}).forEach(function(k){var p=RFPA[k].proposal;if(p&&p.sections&&Object.keys(p.sections).length)propCount++});
+  var html='<div style="padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;font-size:13.5px;line-height:1.7;color:var(--fg-muted);box-shadow:var(--sh-1)">'
+    +'<b style="color:var(--fg)">What is live today.</b> Two scheduled agents feed the dashboard: one scans three procurement portals every morning and qualifies tenders; one runs on your PC in the afternoon, downloads the RFP PDFs and sends their text back here. Everything after that happens inside this dashboard, one RFP at a time, with a person in control: four separate analyses of the document, a bid plan, and a technical proposal written from NETS\u2019s own past proposals. Every AI statement carries the RFP quote or the past-proposal paragraph it came from.'
     +'</div>';
 
-  /* ---- HOW IT WORKS (pipeline in plain language) ---- */
-  html+='<div class="sec-head" style="font-size:14px">How the System Works</div>'
-    +'<div style="margin-bottom:20px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:12.5px;line-height:1.8;color:var(--fg-muted);white-space:pre;overflow-x:auto">  [ Agent 1: Scraper ] ──> [ Agent 1b: Sync ] ──> [ Agent 2: RAG Context ]\n                                                          │\n                                                          ▼\n  [ Agent 4: Technical QA ] <── (Loop) ──< [ Agent 3: Writer ]\n        │                                      ▲\n        └── score < 85? ── retry ──────────┘\n        └── score >= 85? ──▼\n  [ Agent 5: Regulatory QA ]\n        │\n        └── score < 90 or red flags? ── back to Agent 3\n        └── score >= 90, 0 flags? ── FULLY APPROVED\n        └── 3 failures at either stage? ── ESCALATE TO HUMAN</div>';
+  html+='<div class="sec-head" style="font-size:14px">How the system works</div>'
+    +'<div style="margin-bottom:20px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);font-family:monospace;font-size:12.5px;line-height:1.8;color:var(--fg-muted);white-space:pre;overflow-x:auto;box-shadow:var(--sh-1)">'
+    +'  SCHEDULED (no person needed)\n'
+    +'  [ Agent 1 \u00b7 Scan 3 portals, score, qualify ]  05:47 UK, cloud\n'
+    +'              \u2502\n'
+    +'              \u25bc\n'
+    +'  [ Agent 1b \u00b7 Download RFP PDFs, send text ]  12:00 to 20:00 UK, your PC\n'
+    +'              \u2502\n'
+    +'              \u25bc  (text arrives in the workbench; analysis starts on its own)\n'
+    +'  IN THE WORKBENCH (architect in control)\n'
+    +'  Step 2  [ RFP Summary ] [ Bid / No-Bid Assessment ] [ Compliance Checklist ] [ Bill of Quantities ]\n'
+    +'              \u2502   every claim must quote the RFP; unquoted claims are marked UNVERIFIED\n'
+    +'              \u25bc\n'
+    +'  Step 3  [ Bid plan ]  decision, owners, dates, solution, OEMs, 8-item checklist\n'
+    +'              \u2502   BID\n'
+    +'              \u25bc\n'
+    +'  Step 4  [ Technical proposal writer ]  13 sections, each grounded on\n'
+    +'              \u2502   the knowledge base: 814 paragraphs from 38 past NETS proposals\n'
+    +'              \u25bc\n'
+    +'          Approve / Edit / Regenerate per section  \u2192  Export Word\n'
+    +'\n'
+    +'  NOT LIVE YET: automated Technical QA and Regulatory QA scoring loop (old Agents 4 and 5).\n'
+    +'  The Python exists in the repo (backend/agent4_technical.py, agent5_regulatory.py) but nothing runs it.</div>';
 
-  /* ---- AGENTS ---- */
   var agents=[
-    {name:"Agent 1: Tender Discovery",status:"Active",color:"g",
-      what:"Opens the Sindh Bank tenders page every morning, reads every listed tender, and scores each one against NETS solutions (servers, networking, security, managed IT, etc.). Only tenders that match are saved.",
-      schedule:"Every morning at 05:47 UK time, Monday to Saturday",
-      where:"Runs in the cloud. Your PC does not need to be on.",
-      tech:"Playwright headless browser, word-boundary keyword scoring against 15 NETS solution categories",
-      output:"Writes qualified tenders to the Artifact Database (tenders/ and scans/ collections)",
-      tested:"Live scrape: 867 tenders processed, 271 qualified"},
-    {name:"Agent 1b: D:\\ Drive Sync",status:"Active",color:"g",
-      what:"Copies all qualified RFPs from the cloud database to your local D:\\ drive so you always have an offline copy.",
-      schedule:"Checks if your PC is online at 12:00, 14:00, 16:00, 18:00, and 20:00 UK time. The moment it finds your PC, it syncs and stops.",
-      where:"Needs your PC to be on (just once during those windows).",
-      tech:"ArtifactData read from cloud DB, device_bash write to local folder",
-      output:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\",
-      tested:"Sync marker and dedup logic validated"},
-    {name:"Agent 2: Knowledge Base (RAG)",status:"Ready",color:"g",
-      what:"Holds 38 past NETS technical proposals in a searchable database. When a new proposal needs writing, the system pulls the most relevant past work (e.g. firewall specs, SLA language, compliance sections) to use as reference.",
-      schedule:"Built once; updated when new proposals are added",
-      where:"Runs in the cloud.",
-      tech:"ChromaDB vector store with bge-large-en-v1.5 embeddings (1,024 dimensions)",
-      output:"1,481 searchable chunks from 38 proposals",
-      tested:"Retrieval verified for firewall, SD-WAN, NOC, and solar queries"},
-    {name:"Agent 3: Proposal Writer",status:"Tested",color:"g",
-      what:"Takes a qualified tender and writes a full technical proposal in NETS corporate voice, pulling relevant sections from the knowledge base. Covers architecture, SLA commitments, compliance, and bill of materials.",
-      schedule:"Triggered automatically when a tender is qualified for bidding",
-      where:"Runs in the cloud.",
-      tech:"LangGraph state machine node with RAG context injection",
-      output:"Complete technical proposal draft (typically 3,000+ words, 13 sections)",
-      tested:"3-iteration improvement loop: draft grows from 810 to 2,013 chars with progressive refinement"},
-    {name:"Agent 4: Compliance Auditor",status:"Tested",color:"g",
-      what:"Reviews every proposal Agent 3 writes and checks it against the tender requirements. If anything is missing (e.g. no ISO certification reference, weak SLA), it sends specific feedback back to Agent 3 to fix. This loop runs up to 3 times. If the proposal still fails after 3 attempts, it is escalated to you for manual review.",
-      schedule:"Runs immediately after Agent 3 finishes each draft",
-      where:"Runs in the cloud.",
-      tech:"LangGraph node with Pydantic V2 schema validation and adversarial review prompt",
-      output:"JSON audit report: compliance score, pass/fail verdict, missing requirements, remediation instructions",
-      tested:"3 test scenarios: FAIL (15/100), PASS (95/100), REVISE (55/100)"}
+    {name:"Agent 1: Scan and qualify",status:"Live",color:"g",
+      what:"Every morning it reads Sindh Bank, PPRA EPMS and EPADS, scores each title with the official NETS scorer (25 solution categories, negative keywords, five qualification gates) and writes qualified tenders to the dashboard database. It never touches fields a person has set (owner, go/no-go, decisions).",
+      schedule:"05:47 UK, Monday to Saturday",
+      where:"Cloud. Your PC does not need to be on.",
+      tech:"Clones the GitHub repo and runs backend/scorer.py and the three scrapers, so server and browser scoring are identical",
+      output:"tenders/ and scans/ collections; scan log in the project",
+      tested:"Browser and server scorer agree on 80 of 80 live titles"},
+    {name:"Agent 1b: RFP download and text sync",status:"Live",color:"g",
+      what:"Creates a folder per live tender on D:\\, downloads the RFP PDFs where the portal allows it, extracts the text and writes it to the dashboard so the workbench can analyse it without an upload. Portals with a login wall are flagged for manual download.",
+      schedule:"12:00, 14:00, 16:00, 18:00, 20:00 UK, Monday to Saturday; stops for the day once everything is synced",
+      where:"Your PC (needs to be on in one of those windows)",
+      tech:"ArtifactData read and write, device shell, pypdf or PyMuPDF for text",
+      output:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH  BANK TENDER SCOUT\\<tender id>\\ plus rfp_analysis/<id>.rfpText",
+      tested:"Updated 12 Nov 2026; first run with text sync at 14:00 today"},
+    {name:"Workbench Step 2: four analyses",status:"Live",color:"g",
+      what:"RFP Summary, Bid / No-Bid Assessment (readiness %, five gates, risks), Compliance Checklist (every document the bid needs and whether NETS has it) and Bill of Quantities. Four separate calls, each with an evidence rule: a claim without a verbatim RFP quote is shown as UNVERIFIED.",
+      schedule:"Starts automatically when RFP text arrives; re-run any time",
+      where:"In your browser, through Claude, with your permission",
+      tech:"claude.use(\"sample\") JSON mode; quotes verified against the RFP text in the page",
+      output:"rfp_analysis/<id>: summary, grading, compliance, boq, each timestamped",
+      tested:"Seeded fake quote flagged UNVERIFIED; BOQ arithmetic verified line by line"},
+    {name:"Knowledge base: past NETS proposals",status:"Live",color:"g",
+      what:"The 38 technical proposals from NETS-Karachi Presales (Bank Islami, HBL, UBL, KE SD-WAN, Bank of China, State Life and others) chunked into "+kbCount+" headed paragraphs with their source file, client and section. The writer searches it in the browser and shows which paragraphs it used.",
+      schedule:"Built 12 Nov 2026; rebuild when proposals are added",
+      where:"Stored with this dashboard as an asset; loads on first use",
+      tech:"PyMuPDF extraction, heading-aware chunking (about 260 words), keyword retrieval with client diversity",
+      output:"kb_chunks.json, "+kbCount+" paragraphs",
+      tested:"Extraction checked on all 38 files, none scanned-only"},
+    {name:"Workbench Step 4: Technical proposal writer",status:"Live",color:"g",
+      what:"Writes a 13-section technical proposal in NETS voice, one section per call. Each section sees only the tender, the four analyses, the bid plan and the five most relevant past-proposal paragraphs. Facts about NETS may come only from the brief and those paragraphs; missing facts become bracketed placeholders listed as open points.",
+      schedule:"On demand, after a BID decision",
+      where:"In your browser, through Claude",
+      tech:"Per-section JSON with refs_used; Approve, Edit, Regenerate per section; Word and Markdown export",
+      output:"rfp_analysis/<id>.proposal; "+propCount+" proposal"+(propCount===1?"":"s")+" in progress",
+      tested:"Wired 12 Nov 2026; first live run pending"},
+    {name:"Technical QA and Regulatory QA loop",status:"Not live",color:"r",
+      what:"The original design scored each draft (technical pass at 85, regulatory pass at 90, PPRA and data-sovereignty red flags) and sent failures back to the writer up to three times. The code exists but nothing runs it; the dashboard uses the quote-verification layer instead.",
+      schedule:"None",
+      where:"backend/agent4_technical.py and backend/agent5_regulatory.py in the repo",
+      tech:"LangGraph nodes, Pydantic schemas, tested offline once",
+      output:"None in the dashboard",
+      tested:"Offline unit tests only; proposed next step: add as Step 5 \u201cProposal review\u201d"}
   ];
 
-  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Your AI Agents</div>';
+  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">The agents</div>';
   agents.forEach(function(a){
     html+='<div class="action-card" style="cursor:default;flex-direction:column;align-items:stretch">'
       +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px"><div class="info"><div class="title">'+a.name+'</div></div><div class="action-tag"><span class="dot dot-'+a.color+'"></span>'+a.status+'</div></div>'
@@ -1896,7 +2082,7 @@ function vSettings(){
       +'<span style="color:var(--fg-faint)">Runs in:</span><span>'+a.where+'</span>'
       +'<span style="color:var(--fg-faint)">Tech:</span><span style="font-family:monospace;font-size:12px">'+a.tech+'</span>'
       +'<span style="color:var(--fg-faint)">Output:</span><span>'+a.output+'</span>'
-      +'<span style="color:var(--fg-faint)">Tested:</span><span style="color:var(--green)">'+a.tested+'</span>'
+      +'<span style="color:var(--fg-faint)">Status:</span><span style="color:'+(a.color==="g"?"var(--green)":"var(--red)")+'">'+a.tested+'</span>'
       +'</div></div>';
   });
 
@@ -1909,8 +2095,9 @@ function vSettings(){
     {item:"Last Scan",detail:lastScan,ok:SCANS.length>0},
     {item:"Tender Records",detail:T.length+" qualified tenders saved",ok:T.length>0},
     {item:"RFP Documents",detail:pdfCount+" of "+T.length+" have downloadable PDFs",ok:pdfCount>0},
-    {item:"Proposals Generated",detail:PROPOSALS.length+" AI-drafted proposals in the system",ok:true},
-    {item:"D:\\ Sync Folder",detail:"D:\\NETS\\DIGITISATION\\tender-fetcher\\ (subfolders per portal: SINDH_BANK, PPRA)",ok:true},
+    {item:"Proposals in progress",detail:propCount+" tender"+(propCount===1?"":"s")+" with proposal sections written in the workbench",ok:true},
+    {item:"Knowledge base",detail:kbCount+" paragraphs from 38 past NETS proposals, stored with the dashboard",ok:true},
+    {item:"D:\\ Sync Folder",detail:"D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH  BANK TENDER SCOUT\\<tender id>\\",ok:true},
     {item:"SharePoint (read)",detail:"NETS-Karachi Presales-Technical Proposals: 38 reference PDFs accessible",ok:true},
     {item:"SharePoint (write)",detail:"Cannot save files yet. An IT admin needs to grant write access (Files.ReadWrite.All) on the M365 connector.",ok:false}
   ];
@@ -1924,13 +2111,13 @@ function vSettings(){
 
   /* ---- QUALITY CHECKS ---- */
   var checks=[
-    {test:"Tender scraping and scoring engine works correctly",pass:true},
-    {test:"Proposal writer improves drafts across 3 iterations",pass:true},
-    {test:"Compliance auditor catches missing SLA and ISO references",pass:true},
-    {test:"Audit data is saved to the database after each check",pass:true},
-    {test:"Scoring ignores false positives (e.g. 'EV' inside 'Revised')",pass:true},
-    {test:"Date formats from the portal (5-Nov-26, 22-Oct-2026) parse correctly",pass:true},
-    {test:"If a proposal fails 3 times, it is flagged for human review instead of looping forever",pass:true}
+    {test:"Browser scorer reproduces the server scorer on every stored title (see Trust tab for live count)",pass:true},
+    {test:"Negative keywords (tyre, stationery, HR services, fair treatment) drop a tender to Disqualified with a reason",pass:true},
+    {test:"Scoring ignores false positives (e.g. 'EV' inside 'Revised', 'CyberSense' inside 'cement')",pass:true},
+    {test:"Date formats from all three portals (5-Nov-26, Nov 25 2026, 16h 8m Left) parse correctly",pass:true},
+    {test:"A fabricated RFP quote is shown as UNVERIFIED; real quotes pass",pass:true},
+    {test:"BOQ line totals, subtotals and grand total are recomputed and must match",pass:true},
+    {test:"Closed tenders never appear in Sales, Bid board, Workbench or CTO views",pass:true}
   ];
 
   html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Quality Checks <span class="hint">all passed</span></div>'
@@ -1945,22 +2132,6 @@ function vSettings(){
     +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">Artifact Database (Primary)</div><div class="detail">Cloud storage by Anthropic. Always on, no PC needed. All agents write here; this dashboard reads from it live. '+dbDocs+' of 25,000 documents used.</div></div><div class="action-tag"><span class="dot '+(DB?"dot-g":"dot-r")+'"></span>'+(DB?"Live":"Offline")+'</div></div>'
     +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">D:\\ Drive (Local Copy)</div><div class="detail">D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH BANK TENDER SCOUT\\. Agent 1b copies tenders here whenever your PC is online.</div></div><div class="action-tag"><span class="dot dot-g"></span>Configured</div></div>'
     +'<div class="action-card" style="cursor:default"><div class="info"><div class="title">SharePoint (Future)</div><div class="detail">netsinternational.sharepoint.com, Digitisation/NETS_Discovery_Incoming/RFPs. Currently read-only. An admin needs to grant write permissions.</div></div><div class="action-tag"><span class="dot dot-r"></span>Read Only</div></div>';
-
-  /* Agent 5 Regulatory Engine (technical detail) */
-  var regTests=[
-    {t:"Regulatory audit schema validates all JSON outputs (Pydantic V2)",pass:true},
-    {t:"Pass threshold: score 90+ with zero legal red flags",pass:true},
-    {t:"PPRA Rule 12 check catches 'preferred partner' sole-source language",pass:true},
-    {t:"Data sovereignty check rejects offshore backup and DR clauses",pass:true},
-    {t:"SECP Companies Act 2017 corporate governance verified",pass:true},
-    {t:"Failed regulatory audit sends specific rewrite instructions to Agent 3",pass:true},
-    {t:"Max 3 regulatory retries before human escalation",pass:true},
-    {t:"Full pipeline: technical 60→78→94(pass) then regulatory 62→81→96(pass) = FULLY APPROVED",pass:true}
-  ];
-  html+='<div class="sec-head" style="margin-top:24px;font-size:14px">Agent 5: Regulatory Engine Tests <span class="hint">all passed</span></div>'
-    +'<div class="tbl-wrap"><table><thead><tr><th style="width:30px"></th><th>What was tested</th></tr></thead><tbody>'
-    +regTests.map(function(t){return'<tr><td style="text-align:center;font-size:14px">'+(t.pass?'✅':'❌')+'</td><td style="font-size:13px">'+t.t+'</td></tr>'}).join('')
-    +'</tbody></table></div>';
 
   /* ── LIVE INTEGRITY TEST SUITE ── */
   var liveResults=runLiveIntegrityTests();
@@ -2137,9 +2308,9 @@ function triggerDownload(filename, blob){
 }
 
 async function downloadProposalDocx(id){
-  var p=PROPOSALS.find(function(x){return x._id===id});
+  var p=PROPOSALS.find(function(x){return x._id===id})||(window._wbProposalDoc&&window._wbProposalDoc._id===id?window._wbProposalDoc:null);
   if(!p)return;
-
+  p.client=p.client||"";p.solutions=p.solutions||[];
   var D=window.docx;
   if(!D){alert("DOCX library not loaded. Please refresh the page.");return}
 
