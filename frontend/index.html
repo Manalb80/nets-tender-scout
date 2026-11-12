@@ -348,8 +348,10 @@ function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMin
         solMatch:solMatch, matched:r.matched||[],
         open:isOpen, days:days,
         source:r.source_portal||r.source||"Sindh Bank",
-        acqStatus:r.acquisition_status||"PENDING",
-        detailUrl:r.detail_url||"",
+        acqStatus:r.acquisition_status||r.acqStatus||"PENDING",
+        localFolder:r.local_folder||"",
+        assignee:r.assignee||"",goNogo:r.goNogo||"",
+        detailUrl:r.detail_url||r.detailUrl||"",
         qualVerdict:r.qualVerdict||r.qual_verdict||"GO",
         qualGates:r.qualGates||r.qual_gates||{},
         dqReason:r.dqReason||r.disqualification_reason||null
@@ -1480,7 +1482,7 @@ function vWorkbench(){
 
   /* ── STEP 1: RFP document ── */
   var acq=t.acqStatus||"PENDING";var hasText=!!a.rfpText;
-  var folder="D:\\NETS\\DIGITISATION\\tender-fetcher\\"+String(t.source||"SINDH_BANK").toUpperCase().replace(/ /g,"_")+"\\"+t.id.replace(/[<>:"/\\|?*]/g,"-");
+  var folder=(t.localFolder||a.local_folder)||("D:\\NETS\\DIGITISATION\\tender-fetcher\\SINDH  BANK TENDER SCOUT\\"+t.id);
   var s1status=hasText?{cls:"chip-g",txt:"Document in hand: "+((a.docs||[]).length||1)+" file"+(((a.docs||[]).length||1)===1?"":"s")+", "+(a.rfpText.length/1000).toFixed(0)+"k characters of text"}
     :acq==="AUTO_DOWNLOADED"?{cls:"chip-a",txt:"PDF saved on your PC, text not yet loaded here"}
     :acq==="MANUAL_DOWNLOAD_REQUIRED"?{cls:"chip-a",txt:"Portal needs a login: download by hand"}
@@ -1499,7 +1501,7 @@ function vWorkbench(){
     +'</div>'
     +(a.uploading?'<div class="wb-note" style="color:var(--amber)">Reading the PDFs...</div>':'')
     +'</div>'
-    +'<div class="wb-s1-side"><div class="wb-side-lbl">Automatic route</div><div class="wb-help">The PC sync task saves this tender\u2019s PDFs to</div><code class="wb-path">'+wbEsc(folder)+'</code><div class="wb-help" style="margin-top:6px">'+(acq==="AUTO_DOWNLOADED"?'Files are there. Until the sync task also sends the text here, upload them with the button.':acq==="MANUAL_DOWNLOAD_REQUIRED"?'This portal blocks automatic download. Open the portal page, save the PDFs, then upload them.':'The next sync run (every 2 hours while your PC is on) will try to fetch it.')+'</div></div>'
+    +'<div class="wb-s1-side"><div class="wb-side-lbl">Automatic route</div><div class="wb-help">The PC sync task (12:00 to 20:00 UK, every 2 hours) saves this tender\u2019s PDFs to the folder below and sends the text here on its own</div><code class="wb-path">'+wbEsc(folder)+'</code><div class="wb-help" style="margin-top:6px">'+(acq==="AUTO_DOWNLOADED"?'PDFs are on the PC. The text arrives on the next sync run; upload now if you cannot wait.':acq==="MANUAL_DOWNLOAD_REQUIRED"?'This portal blocks automatic download. Open the portal page, save the PDFs, then upload them.':'The next sync run (every 2 hours while your PC is on) will try to fetch it.')+'</div></div>'
     +'</div></div>';
 
   /* ── STEP 2: Analysis (four separate runs, each verifiable) ── */
