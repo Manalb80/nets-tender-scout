@@ -1,0 +1,37 @@
+{
+ "built_at": "2026-11-12T12:53:20.555028Z",
+ "files": 38,
+ "seed_files": 38,
+ "approved_files": 0,
+ "chunks": 498,
+ "words": 39804,
+ "coverage": {
+  "Enterprise Networking (LAN/WAN/SD-WAN/ACI)": 38,
+  "Managed O&M / AMC / Break-Fix": 8,
+  "Network Security (NGFW, VPN, NAC)": 7,
+  "Storage & Backup": 6,
+  "Data Centre Infrastructure": 6,
+  "Servers & Compute": 5,
+  "Endpoint & Threat Protection (EPP/EDR/XDR)": 4,
+  "Resource Outsourcing / Staff Augmentation": 4,
+  "Project Management & IT Consulting": 3,
+  "ELV Systems": 3,
+  "Automation, AI/ML & DevOps": 2,
+  "NOC / Helpdesk / L1-L2 Support": 1,
+  "NMS / Observability / ITSM Platforms": 1,
+  "FTTX / Fibre Access Network": 1
+ },
+ "not_covered": [
+  "Wireless Access & Mobile Sites",
+  "EV Charging Solutions",
+  "DC Power Systems",
+  "Power, UPS, Solar & Energy Infrastructure",
+  "Unified Communications",
+  "Cloud & Hybrid IT",
+  "SOC / SIEM / SOAR / Monitoring",
+  "Identity & Access Management (IAM/PAM/MFA)",
+  "Data & Cloud Security (DLP/Encryption/DAM)",
+  "VAPT / Vulnerability Management",
+  "GRC / vCISO / Security Consulting"
+ ]
+}

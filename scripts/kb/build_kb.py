@@ -6,6 +6,12 @@ import sys, os, re, json, collections, hashlib
 import fitz  # PyMuPDF
 
 pdf_dir, out_dir = sys.argv[1], sys.argv[2]
+scorer_dir = sys.argv[3] if len(sys.argv)>3 else None
+score_tender=None
+if scorer_dir:
+    sys.path.insert(0, scorer_dir)
+    from scorer import score_tender, SOLUTIONS as _SOLS
+    NAME_OF={x["id"]:x["name"] for x in _SOLS}
 os.makedirs(out_dir, exist_ok=True)
 
 STOP=set("""a an the and or of to in for on with by from as at is are was were be been this that these those it its into over under
@@ -89,6 +95,26 @@ for fn in sorted(os.listdir(pdf_dir)):
                 buf.append(l)
     flush()
     files.append({"file":fn,"client":client,"pages":pages,"chars":chars,"chunks":nchunks,"scanned":chars<500*max(1,pages)})
+# Vertical tags: run the NETS scorer over each file's full text and keep the solution ids it matches.
+if score_tender:
+    by_file={}
+    for c in chunks: by_file.setdefault(c["source"],[]).append(c["text"])
+    vert_of={}
+    for fn,texts in by_file.items():
+        full=(client_of(fn)+" . "+" ".join(texts))[:60000]
+        low=full.lower()
+        counts={}
+        for sol in _SOLS:
+            n=0
+            for k in sol["keywords"]:
+                if len(k)<4: continue
+                n+=len(re.findall(r'(?<![a-z0-9])'+re.escape(k.lower())+r'(?![a-z0-9])',low))
+            counts[sol["id"]]=n
+        # a vertical counts when its keywords occur at least 6 times in the proposal; keep the top 3
+        top=[k for k,v in sorted(counts.items(),key=lambda x:-x[1]) if v>=6][:3]
+        vert_of[fn]=top
+    for c in chunks: c["verticals"]=vert_of.get(c["source"],[])
+    for f in files: f["verticals"]=vert_of.get(f.get("file"),[]); f["vertical_names"]=[NAME_OF.get(v,v) for v in f["verticals"]]
 json.dump(chunks,open(os.path.join(out_dir,'kb_chunks.json'),'w'),ensure_ascii=False)
 json.dump(files,open(os.path.join(out_dir,'kb_files.json'),'w'),indent=1)
 print(len(files),"files",len(chunks),"chunks",sum(c['words'] for c in chunks),"words")

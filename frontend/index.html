@@ -282,6 +282,12 @@ tr{cursor:pointer}
 .wb-prop-text p{margin:0 0 8px}.wb-prop-text ul{margin:4px 0 8px 18px;padding:0}.wb-prop-text li{margin:2px 0}
 .wb-md-table{border-collapse:collapse;margin:8px 0;font-size:12.5px}.wb-md-table th,.wb-md-table td{border:1px solid var(--border);padding:5px 9px;text-align:left}.wb-md-table th{background:var(--bg)}
 .wb-prop-refs{margin:10px 0 4px;font-size:12px;color:var(--fg-muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.kb-cov{background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px}
+.kb-cov-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:8px}
+.kb-cov-row{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:3px 0}
+.kb-cov-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.kb-cov-name{flex:1}.kb-cov-n{color:var(--fg-muted)}
+mark{background:#fef08a;color:inherit;padding:0 2px;border-radius:2px}
 </style>
 
 <!-- TOP BAR -->
@@ -304,7 +310,7 @@ tr{cursor:pointer}
   <div class="sb-footer">
     Scheduled: Agent 1 scan 05:47 · Agent 1b RFP sync 12:00 to 20:00<br>
     Workbench: Summary · Assessment · Compliance · BOQ · Proposal<br>
-    Knowledge base: 814 paragraphs, 38 past proposals<br>
+    Knowledge bank: 38 past proposals, grows with approvals<br>
     DB: <span id="dbStatusFooter" class="db-status db-off">Connecting</span>
   </div>
 </div>
@@ -429,6 +435,8 @@ function fmt(d){var h=String(d.getHours()).padStart(2,"0");var m=String(d.getMin
     if(LOG.length===0){
       LOG=[{time:"--:--",text:"No scans recorded yet. Agent 1 runs daily at 05:47 UK."}];
     }
+    /* Paragraphs added by Agent 6 from approved proposals */
+    try{DB.collection("kb_live").onSnapshot(function(snap){KB_LIVE=snap.docs.map(function(d){return d.data()})})}catch(e){}
     /* Subscribe to proposals */
     DB.collection("proposals").onSnapshot(function(snap){
       PROPOSALS=snap.docs.filter(function(d){return d.exists}).map(function(d){return Object.assign({_id:d.id},d.data())});
@@ -501,13 +509,16 @@ function buildNav(){
     sales:'<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
     presales:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
     workbench:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
-    system:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>'};
+    system:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+    knowledge:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16M8 7h8M8 11h6"/>'};
   var ico=function(k){return'<svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+ICO[k]+'</svg>'};
   var h='<div class="sb-sect">Dashboards</div>'+[
     {v:"cto",      l:"Where we stand",      badge:null,live:true},
     {v:"sales",    l:"Sales pipeline",      badge:qc,live:false},
     {v:"presales", l:"Bid board",           badge:qc,live:false},
     {v:"workbench",l:"Architect workbench", badge:wbCount,live:false},
+    {sect:"Library"},
+    {v:"knowledge",l:"Knowledge bank",      badge:(KB?Object.keys(kbAll().reduce(function(m,c){m[c.source]=1;return m},{})).length:38),live:false},
     {sect:"Operations"},
     {v:"system",   l:"System and trust",    badge:failing||null,live:false,warn:!!failing}
   ].map(function(n){
@@ -524,7 +535,7 @@ function showView(v){
   /* Canonical role views, plus legacy keys kept as aliases so old links still work */
   var alias={overview:"cto",salesDash:"sales",pipelineControl:"sales",qualified:"presales",compliance:"presales",proposals:"presales",trust:"system",settings:"system",activity:"system"};
   if(alias[v]){if(v==="trust")window._sysTab="trust";if(v==="settings")window._sysTab="settings";if(v==="activity")window._sysTab="activity";v=alias[v]}
-  var views={cto:vOverview,sales:vSalesDash,presales:vQualified,workbench:vWorkbench,system:vSystem,detail:vDetail,proposalDetail:vProposalDetail,pipeline:vPipeline};
+  var views={cto:vOverview,sales:vSalesDash,presales:vQualified,workbench:vWorkbench,knowledge:vKnowledge,system:vSystem,detail:vDetail,proposalDetail:vProposalDetail,pipeline:vPipeline};
   var roleOf={cto:"cto",sales:"sales",presales:"presales",workbench:"workbench"};
   if(roleOf[v]){window._role=v;try{localStorage.setItem("ts_role",v)}catch(e){}}
   document.querySelectorAll(".sb-item").forEach(function(el){el.classList.toggle("active",el.getAttribute("data-v")===v)});
@@ -574,6 +585,8 @@ function ctoNext(t){
   if(st==="Analysed")return{txt:"Decide BID or NO-BID",who:"Presales head",view:"workbench",sev:2};
   if(dec==="BID"&&!a.boq)return{txt:"Build BOQ",who:"Architect",view:"workbench",sev:1};
   if(dec==="BID"&&!(a.proposal&&a.proposal.sections&&Object.keys(a.proposal.sections).length))return{txt:"Write technical proposal",who:"Architect",view:"workbench",sev:1};
+  if(dec==="BID"&&a.review&&a.review.status==="ESCALATED")return{txt:"Proposal review escalated: decide",who:"Presales head",view:"workbench",sev:2};
+  if(dec==="BID"&&a.proposal&&Object.keys(a.proposal.sections||{}).length>=13&&!(a.review&&a.review.status==="PASSED"))return{txt:"Run proposal review",who:"Architect",view:"workbench",sev:1};
   if(dec==="BID")return{txt:"Price, approve, submit",who:"Presales head",view:"workbench",sev:1};
   return{txt:"Review",who:"Presales head",view:"workbench",sev:1};
 }
@@ -1202,10 +1215,11 @@ function roleBanner(v){
     sales:{who:"Sales team",ans:"Every live tender that matches NETS, who owns it, how many days are left, and its go/no-go.",can:"Assign an owner, set go/no-go, flag a tender for presales. Grey values marked ESTIMATE are placeholders until a real figure arrives."},
     presales:{who:"Presales head",ans:"Which tenders passed the qualification gates, which failed and why, and which RFP documents are in hand.",can:"Override a disqualification, send a tender to an architect, approve or reject a bid decision. Then open the Architect workbench for the detail."},
     workbench:{who:"Solution architect",ans:"One tender at a time: the RFP text, a summary, a bid/no-bid grade with evidence, the document checklist, and an editable BOQ.",can:"Upload the RFP, run the four agents, edit the BOQ, record your decision. Every AI claim shows the RFP quote it came from; UNVERIFIED means the quote was not found."},
+    knowledge:{who:"Everyone",ans:"Every past NETS technical proposal the writer can learn from: 38 seed files plus proposals approved here, with which verticals each one covers.",can:"Search any phrase, filter by vertical, open a file and read it. Nothing here is editable; new proposals arrive through Agent 6 when an architect approves one."},
     system:{who:"Whoever maintains the system",ans:"Is every number on the dashboard confirmed, are the portals being scanned, is the database healthy.",can:"Re-score with the current taxonomy, read scan history, see the agent and portal status."}
   }[v];
   if(!b)return"";
-  var titles={cto:"Where we stand",sales:"Sales pipeline",presales:"Bid board",workbench:"Architect workbench",system:"System and trust"};
+  var titles={cto:"Where we stand",sales:"Sales pipeline",presales:"Bid board",workbench:"Architect workbench",knowledge:"Knowledge bank",system:"System and trust"};
   return'<div class="role-banner"><div class="rb-who">For '+b.who+'</div><div class="rb-title">'+titles[v]+'</div><div class="rb-ans">'+b.ans+'</div><div class="rb-can">'+b.can+'</div></div>';
 }
 
@@ -1505,6 +1519,7 @@ function wbDownload(id,kind){
   if(kind==="compliance"&&a.compliance){filename=name+".md";var c=a.compliance;content="# Compliance Checklist: "+t.ti+"\n\nHave: "+c.have_count+"  Prepare: "+c.prepare_count+"  Missing: "+c.missing_count+"\n\n| Document | Clause | Mandatory | NETS status | Owner | Note |\n|---|---|---|---|---|---|\n"+(c.required_documents||[]).map(function(d){return"| "+d.doc+" | "+(d.rfp_clause||"")+" | "+(d.mandatory?"Yes":"No")+" | "+d.nets_status+" | "+(d.owner||"")+" | "+(d.note||"")+" |"}).join("\n")+"\n\n## Critical gaps\n"+(c.critical_gaps||[]).map(function(x){return"- "+x}).join("\n")+"\n\n## Submission\n"+(c.submission_format||"")+"\n\n"+(c.envelope_structure||"")}
   if(kind==="boq"&&a.boq){filename=name+".csv";var rows=[["Section","S.No","Item","Description","OEM","Part No","Qty","Unit","Unit Price PKR","Total PKR","Confidence","RFP Ref"]];(a.boq.sections||[]).forEach(function(s){(s.lines||[]).forEach(function(l){rows.push([s.section,l.sno,l.item,l.description,l.oem,l.part_no,l.qty,l.unit,l.unit_price_pkr,l.total_pkr,l.confidence,l.rfp_ref])})});rows.push([]);rows.push(["Services"]);(a.boq.services||[]).forEach(function(s){rows.push(["Services","",s.item,"","","",s.man_days,"man-days",s.rate_pkr,s.total_pkr,"",""])});rows.push([]);rows.push(["","","","","","","","","Hardware subtotal",a.boq.subtotal_hardware_pkr]);rows.push(["","","","","","","","","Services subtotal",a.boq.subtotal_services_pkr]);rows.push(["","","","","","","","","Contingency %",a.boq.contingency_pct]);rows.push(["","","","","","","","","GRAND TOTAL PKR",a.boq.grand_total_pkr]);content=rows.map(function(r){return r.map(function(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")}).join("\n")}
   if(kind==="proposal"&&a.proposal){filename=name+".md";content=wbProposalMarkdown(id)}
+  if(kind==="review"&&a.review){filename=name+".md";var R=a.review;content="# Proposal review: "+(t.ti||id)+"\n\nStatus: "+R.status+" (round "+R.round+")\n\n## Technical QA\n"+(R.technical?"Score "+R.technical.compliance_score+"/100, "+(R.technical.passed_audit?"PASSED":"FAILED")+"\n\nVerified:\n"+(R.technical.verified_requirements||[]).map(function(x){return"- "+x}).join("\n")+"\n\nGaps:\n"+(R.technical.missing_requirements||[]).map(function(x){return"- "+x}).join("\n")+"\n\nRemediation:\n"+(R.technical.remediation_feedback||""):"not run")+"\n\n## Regulatory QA\n"+(R.regulatory?"Score "+R.regulatory.regulatory_score+"/100, "+(R.regulatory.passed_regulatory_audit?"PASSED":"FAILED")+"\n\nPPRA: "+(R.regulatory.ppra_compliance_status||"")+"\nData sovereignty verified: "+R.regulatory.data_sovereignty_verified+"\n\nRed flags:\n"+(R.regulatory.legal_red_flags||[]).map(function(x){return"- "+x}).join("\n")+"\n\nDirectives:\n"+(R.regulatory.remediation_directives||""):"not run")+"\n\n## History\n"+(R.history||[]).map(function(x){return"- Round "+x.round+" "+x.which+" "+x.score+" "+(x.passed?"pass":"fail")+" "+x.at}).join("\n")}
   if(!content){alert("Nothing to export yet. Run that step first.");return}
   if(DOWNLOADS){DOWNLOADS.save({filename:filename,data:content}).catch(function(e){if(e&&e.code!=="cancelled")wbFallbackDownload(filename,content)})}
   else wbFallbackDownload(filename,content);
@@ -1531,7 +1546,7 @@ function wbClaimList(a,claims,evs,mark){
    Retrieval runs in the browser (term overlap with client diversity). Each section is written by one
    Claude call that sees only: the tender, the four analyses, the bid plan, and the retrieved paragraphs.
    Every section records which reference paragraphs it used, so a reader can see where the words came from. */
-var KB_ASSET="/_blob/10f033a306fa982e1994c3486fec9d35";
+var KB_ASSET="/_blob/3d010998b727fd3f7bf37b5553bf580c";
 var KB=null,KB_LOADING=null;
 function kbLoad(){
   if(KB)return Promise.resolve(KB);
@@ -1559,7 +1574,9 @@ function kbRetrieve(t,a,sec,n){
   var d=(a.decision||{});var s=a.summary||{};
   var q=kbTokens([t.ti,(t.solMatch||[]).map(function(x){return x.name}).join(" "),(d.solutions||[]).join(" "),(d.oems||[]).join(" "),sec.q,sec.title,(s.key_requirements||[]).slice(0,6).join(" "),(s.deliverables||[]).slice(0,6).join(" ")].join(" "));
   var qset={};q.forEach(function(w){qset[w]=(qset[w]||0)+1});
-  var scored=KB.map(function(c){var sc=0;var tl=c.text.toLowerCase();
+  var vids=kbSolIds(t,a);
+  var scored=kbAll().map(function(c){var sc=0;var tl=c.text.toLowerCase();
+    if((c.verticals||[]).some(function(v){return v!=="networking"&&vids.indexOf(v)>=0}))sc+=6;
     (c.terms||[]).forEach(function(w){if(qset[w])sc+=3});
     Object.keys(qset).forEach(function(w){if(w.length>3&&tl.indexOf(w)>=0)sc+=1});
     if(kbTokens(c.section).some(function(w){return sec.q.indexOf(w)>=0}))sc+=4;
@@ -1568,7 +1585,59 @@ function kbRetrieve(t,a,sec,n){
   for(var i=0;i<scored.length&&out.length<n;i++){var c=scored[i].c;if((perClient[c.client]||0)>=2)continue;perClient[c.client]=(perClient[c.client]||0)+1;out.push(c)}
   return out;
 }
-async function wbWriteSection(id,key){
+
+/* ═══ Knowledge-base coverage and Agent 6 (approved proposals flow back into the knowledge base) ═══ */
+var KB_LIVE=[]; /* paragraphs added from proposals approved in this dashboard, read from collection kb_live */
+function kbAll(){var seen={};var out=[];(KB||[]).concat(KB_LIVE).forEach(function(c){if(!seen[c.id]){seen[c.id]=1;out.push(c)}});return out}
+function kbSolIds(t,a){
+  var ids={};(t.solMatch||[]).forEach(function(s){if(s.id)ids[s.id]=1});
+  var d=(a&&a.decision)||{};(d.solutions||[]).forEach(function(n){var s=SCORER_SOLUTIONS.find(function(x){return x.name===n});if(s)ids[s.id]=1});
+  return Object.keys(ids);
+}
+function kbCoverage(t,a){
+  var all=kbAll();var ids=kbSolIds(t,a);
+  var rows=ids.map(function(id){var files={};all.forEach(function(c){if((c.verticals||[]).indexOf(id)>=0)files[c.source]=1});var n=Object.keys(files).length;var s=SCORER_SOLUTIONS.find(function(x){return x.id===id});
+    return{id:id,name:s?s.name:id,files:n,level:n>=3?"strong":n>=1?"limited":"none"}});
+  /* "networking" appears in every past proposal as boilerplate, so it alone does not count as coverage */
+  var real=rows.filter(function(r){return r.id!=="networking"});
+  var best=real.length?real.reduce(function(m,r){return r.files>m?r.files:m},0):(rows[0]?rows[0].files:0);
+  return{rows:rows,overall:!rows.length?"none":best>=3?"strong":best>=1?"limited":"none"};
+}
+function kbCoverageHtml(t,a){
+  var cv=kbCoverage(t,a);if(!cv.rows.length)return'<div class="wb-help">No solution areas chosen yet (Step 3). Coverage cannot be judged.</div>';
+  var col={strong:"var(--green)",limited:"var(--amber)",none:"var(--red)"};
+  var h='<div class="kb-cov"><div class="kb-cov-head"><span>Knowledge-base coverage for this tender</span><span class="chip '+(cv.overall==="strong"?"chip-g":cv.overall==="limited"?"chip-a":"chip-r")+'">'+(cv.overall==="strong"?"Strong":cv.overall==="limited"?"Limited":"Not covered")+'</span></div>';
+  h+=cv.rows.map(function(r){return'<div class="kb-cov-row"><span class="kb-cov-dot" style="background:'+col[r.level]+'"></span><span class="kb-cov-name">'+wbEsc(r.name)+'</span><span class="kb-cov-n">'+r.files+' past proposal'+(r.files===1?"":"s")+(r.id==="networking"?' (boilerplate in all)':'')+'</span></div>'}).join("");
+  h+='<div class="wb-help" style="margin-top:6px">'+(cv.overall==="strong"?'Past NETS proposals exist in this vertical; sections will reuse their wording.':cv.overall==="limited"?'Only one or two past proposals touch this vertical. Expect thinner sections and more [confirm] placeholders; review closely.':'NETS has no past proposal in this vertical in the knowledge base. The writer is disabled for this tender until one is added (Agent 6) or the solution areas are corrected in Step 3.')+'</div></div>';
+  return h;
+}
+/* Agent 6: chunk an approved proposal and write it to kb_live, tagged with this tender's verticals */
+function kbTerms(text,k){var ws=String(text).toLowerCase().match(/[a-z][a-z0-9\-\+\.]{2,}/g)||[];var stop={"the":1,"and":1,"for":1,"with":1,"that":1,"this":1,"from":1,"will":1,"shall":1,"are":1,"our":1,"nets":1,"international":1,"proposal":1,"section":1,"have":1,"been":1,"their":1,"which":1,"into":1,"over":1,"under":1,"than":1,"also":1,"any":1,"all":1,"per":1,"each":1};var c={};ws.forEach(function(w){w=w.replace(/\.$/,"");if(w.length>2&&!stop[w])c[w]=(c[w]||0)+1});return Object.keys(c).sort(function(a,b){return c[b]-c[a]}).slice(0,k||12)}
+function kbHash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0}return("00000000"+(h>>>0).toString(16)).slice(-8)}
+async function wbKbAdd(id){
+  var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);var P=a.proposal||{sections:{}};
+  var allApproved=PROP_SECTIONS.every(function(s){return P.sections[s.key]&&P.sections[s.key].status==="approved"});
+  if(!allApproved){alert("All 13 sections must be approved before the proposal goes into the knowledge base.");return}
+  if(!DB){alert("Database not connected");return}
+  var verticals=kbSolIds(t,a);var issuer=(a.summary&&a.summary.issuer)||t.dept||"Unknown client";
+  var source="NETS proposal "+id+" ("+issuer+")";
+  /* remove this tender's earlier contribution, if any */
+  var old=a.kb_chunk_ids||[];for(var i=0;i<old.length;i++){try{await DB.doc("kb_live/"+old[i]).delete()}catch(e){}}
+  var ids=[];var n=0;
+  for(var si=0;si<PROP_SECTIONS.length;si++){var s=PROP_SECTIONS[si];var sec=P.sections[s.key];var paras=String(sec.body_md||"").split(/\n\s*\n/).filter(function(p){return p.trim()});
+    var cur=[],cw=0;var windows=[];
+    paras.forEach(function(p){var w=p.split(/\s+/).length;if(cw+w>260&&cur.length){windows.push(cur.join("\n\n"));cur=[];cw=0}cur.push(p);cw+=w});if(cur.length)windows.push(cur.join("\n\n"));
+    for(var wi=0;wi<windows.length;wi++){var text=windows[wi];if(text.split(/\s+/).length<25)continue;
+      var cid="live_"+kbHash(id+"|"+s.key+"|"+wi+"|"+text.slice(0,80));
+      await DB.doc("kb_live/"+cid).set({id:cid,source:source,client:issuer,section:sec.title||s.title,text:text.slice(0,2400),words:text.split(/\s+/).length,terms:kbTerms(text),verticals:verticals,tender_id:id,added_at:new Date().toISOString(),added_by:(a.decision&&a.decision.decided_by)||"Workbench"});
+      ids.push(cid);n++}}
+  a.kb_chunk_ids=ids;a.kb_added_at=new Date().toISOString();a.kb_verticals=verticals;
+  await wbSave(id,{kb_chunk_ids:ids,kb_added_at:a.kb_added_at,kb_verticals:verticals});
+  wbLog("Agent 6: "+n+" paragraphs from this proposal added to the knowledge base, tagged "+verticals.join(", "));
+  showView("workbench");
+}
+
+async function wbWriteSection(id,key,feedback){
   var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);var sec=PROP_SECTIONS.find(function(x){return x.key===key});
   if(!t||!sec)return;
   if(!SAMPLE){alert("Allow Claude in this page's Permissions menu first.");return}
@@ -1586,7 +1655,7 @@ async function wbWriteSection(id,key){
 "You are the Technical Proposal Writer for NETS International (Pvt) Ltd, Pakistan. Write ONE section of a technical proposal in NETS corporate voice: confident, specific, first person plural, British spelling, no marketing fluff, no em dashes.\n"+
 "GROUNDING RULES: (1) Facts about NETS come only from the NETS BRIEF and the REFERENCE PARAGRAPHS from past NETS proposals. (2) Facts about the buyer and the requirement come only from the TENDER, RFP SUMMARY and ASSESSMENT. (3) Reuse wording from the reference paragraphs where it fits; adapt names, quantities and dates to this tender. (4) Never invent client names, certificate numbers, project values, named staff, or statistics that are not in the inputs. If something needed is missing, write a short bracketed placeholder like [confirm: delivery period] and list it in open_points. (5) Return ONLY JSON.\n"+
 '{"title":string,"body_md":string (markdown; use ## for subheadings inside the section, tables where asked),"refs_used":[string (the id values of REF paragraphs you drew from)],"open_points":[string]}\n\n'+
-"SECTION TO WRITE: "+sec.title+"\nINSTRUCTION: "+sec.ask+"\n\nNETS BRIEF:\n"+NETS_BRIEF+"\n\n"+wbTenderCtx(t)+
+"SECTION TO WRITE: "+sec.title+"\nINSTRUCTION: "+sec.ask+(feedback?"\n\nREVIEWER FEEDBACK (you MUST address every point that concerns this section; keep what already works):\n"+feedback:"")+"\n\nNETS BRIEF:\n"+NETS_BRIEF+"\n\n"+wbTenderCtx(t)+
 "\n\nBID PLAN: decision "+(d.bid_decision||"Pending")+"; solution areas: "+((d.solutions||[]).join(", ")||"not set")+"; OEMs: "+((d.oems||[]).join(", ")||"not set")+"; delivery model: "+(d.delivery_model||"not set")+"; sites: "+(d.sites||"?")+"; duration months: "+(d.duration_months||"?")+"; win themes: "+(d.win_themes||"")+
 "\n\nRFP SUMMARY:\n"+JSON.stringify({issuer:s.issuer,scope:s.scope_summary,deliverables:s.deliverables,key_requirements:s.key_requirements,timeline:s.timeline,eligibility:s.eligibility,evaluation:s.evaluation_method}).slice(0,6000)+
 "\n\nASSESSMENT:\n"+JSON.stringify({readiness:g.readiness_pct,verdict:g.verdict,why_bid:g.why_bid,risks:g.risks,win_themes:g.win_themes,recommended_oem:g.recommended_oem,coverage:g.capability_coverage}).slice(0,5000)+
@@ -1594,7 +1663,7 @@ async function wbWriteSection(id,key){
 "\n\nBOQ SUMMARY:\n"+boqBrief.slice(0,3000)+
 "\n\nREFERENCE PARAGRAPHS FROM PAST NETS PROPOSALS:\n"+refText,
       {signal:ctl.signal,onText:function(u){if(out)out.textContent=u.text},modelTier:"default",cache:{gcTime:3600000}});
-    a.proposal.sections[key]={title:r.title||sec.title,body_md:r.body_md||"",refs_used:r.refs_used||[],refs:refs.map(function(x){return{id:x.id,client:x.client,section:x.section,source:x.source}}),open_points:r.open_points||[],status:"draft",generated_at:new Date().toISOString()};
+    a.proposal.sections[key]={title:r.title||sec.title,body_md:r.body_md||"",refs_used:r.refs_used||[],refs:refs.map(function(x){return{id:x.id,client:x.client,section:x.section,source:x.source}}),open_points:r.open_points||[],status:"draft",generated_at:new Date().toISOString(),rewritten_for:feedback?String(feedback).split(":")[0]:undefined};
     a.proposal.generated_at=new Date().toISOString();
     await wbSave(id,{proposal:a.proposal});
     wbLog("Proposal section written: "+sec.title+" ("+(a.proposal.sections[key].body_md.split(/\s+/).length)+" words, "+(r.refs_used||[]).length+" references used)");
@@ -1621,17 +1690,21 @@ function wbProposalCard(t,a,d){
   var done=PROP_SECTIONS.filter(function(s){return secs[s.key]}).length,approved=PROP_SECTIONS.filter(function(s){return secs[s.key]&&secs[s.key].status==="approved"}).length;
   var isBid=d.bid_decision==="BID"||d.bid_decision==="CONDITIONAL";
   var canRun=!!SAMPLE;var ready=!!(a.summary||a.grading);
+  var cov=kbCoverage(t,a);var covered=cov.overall!=="none";
+  var allApproved=done===PROP_SECTIONS.length&&approved===PROP_SECTIONS.length;
   var h='<div class="drawer wb-step" id="wb-s4">'
-    +'<div class="wb-step-head"><div><div class="wb-step-no">Step 4</div><div class="wb-step-title">Technical proposal</div><div class="wb-help">Thirteen sections written one at a time from this RFP’s analysis and from 38 past NETS proposals (814 reference paragraphs). Each section shows the past proposals it drew from. Approve, edit or regenerate any section; export to Word when done.</div></div>'
+    +'<div class="wb-step-head"><div><div class="wb-step-no">Step 4</div><div class="wb-step-title">Technical proposal</div><div class="wb-help">Thirteen sections written one at a time from this RFP’s analysis and from 38 past NETS proposals (498 reference paragraphs). Each section shows the past proposals it drew from. Approve, edit or regenerate any section; export to Word when done.</div></div>'
     +'<div style="text-align:right;white-space:nowrap;flex:none"><div style="font-size:22px;font-weight:800">'+done+'<span style="color:var(--fg-faint);font-size:14px"> / 13 written</span></div><div class="wb-help">'+approved+' approved</div></div></div>';
   if(!isBid)h+='<div class="wb-note" style="background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:var(--amber)">The bid decision is <b>'+wbEsc(d.bid_decision||"Pending")+'</b>. You can still draft, but proposals are normally written after a BID decision in Step 3.</div>';
   if(!ready)h+='<div class="wb-note" style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:12px">Run the RFP Summary and the Assessment in Step 2 first; the writer uses them as its source of truth about the buyer.</div>';
+  h+=kbCoverageHtml(t,a);
   h+='<div class="wb-actions" style="margin:0 0 14px">'
-    +'<button class="btn btn-primary" onclick="wbWriteAll(\''+wbEsc(t.id)+'\')" '+(canRun&&ready?'':'disabled')+'>✍ Write all sections</button>'
+    +'<button class="btn btn-primary" onclick="wbWriteAll(\''+wbEsc(t.id)+'\')" '+(canRun&&ready&&covered?'':'disabled title="'+(!canRun?'Allow Claude first':!ready?'Run Step 2 first':'No past proposal in this vertical')+'"')+'>✍ Write all sections</button>'
+    +(allApproved?'<button class="btn" onclick="wbKbAdd(\''+wbEsc(t.id)+'\')" title="Agent 6: chunk this approved proposal and add it to the knowledge base for its verticals">+ Add to knowledge base'+(a.kb_added_at?' (added '+wbEsc(String(a.kb_added_at).slice(0,10))+', re-add)':'')+'</button>':'')
     +(done?'<button class="btn" onclick="wbProposalDocx(\''+wbEsc(t.id)+'\')">⬇ Export Word (.docx)</button>':'')
     +(done?'<button class="btn" onclick="wbDownload(\''+wbEsc(t.id)+'\',\'proposal\')">⬇ Export Markdown</button>':'')
     +(WB.ctl&&Object.keys(WB.busy).some(function(k){return k.indexOf("prop_")===0&&WB.busy[k]})?'<button class="btn btn-danger" onclick="wbStop()">Stop</button>':'')
-    +'<span class="wb-help" style="margin-left:auto">Knowledge base: '+(KB?KB.length+' paragraphs loaded':'loads on first run')+'</span></div>';
+    +'<span class="wb-help" style="margin-left:auto">Knowledge base: '+(KB?kbAll().length+' paragraphs ('+KB_LIVE.length+' from approved proposals)':'loads on first run')+'</span></div>';
   h+='<div class="wb-prop-list">';
   PROP_SECTIONS.forEach(function(s,i){
     var sec=secs[s.key];var busy=WB.busy["prop_"+s.key];var editing=WB.propEdit===s.key;
@@ -1643,7 +1716,7 @@ function wbProposalCard(t,a,d){
     if(busy)h+='<pre id="wb-out-prop_'+s.key+'" class="wb-stream">Thinking...</pre>';
     if(WB.propOpen===s.key&&!busy){
       h+='<div class="wb-prop-body">';
-      if(!sec)h+='<div class="wb-help">'+wbEsc(s.ask)+'</div><div class="wb-actions"><button class="btn btn-primary" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun?'':'disabled')+'>Write this section</button></div>';
+      if(!sec)h+='<div class="wb-help">'+wbEsc(s.ask)+'</div><div class="wb-actions"><button class="btn btn-primary" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun&&covered?'':'disabled')+'>Write this section</button></div>';
       else{
         if(editing)h+='<textarea id="wb-prop-edit-'+s.key+'" rows="16" style="width:100%;font-size:13px;line-height:1.55;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;box-sizing:border-box">'+wbEsc(sec.body_md)+'</textarea><div class="wb-actions"><button class="btn btn-primary" onclick="wbPropEditSave(\''+wbEsc(t.id)+'\',\''+s.key+'\')">Save</button><button class="btn" onclick="WB.propEdit=null;showView(\'workbench\')">Cancel</button></div>';
         else{
@@ -1654,7 +1727,7 @@ function wbProposalCard(t,a,d){
           h+='<div class="wb-actions">'
             +(sec.status!=="approved"?'<button class="btn btn-primary" onclick="wbPropSet(\''+wbEsc(t.id)+'\',\''+s.key+'\',\'status\',\'approved\')">✓ Approve</button>':'<button class="btn" onclick="wbPropSet(\''+wbEsc(t.id)+'\',\''+s.key+'\',\'status\',\'draft\')">Unapprove</button>')
             +'<button class="btn" onclick="WB.propEdit=\''+s.key+'\';showView(\'workbench\')">Edit</button>'
-            +'<button class="btn" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun?'':'disabled')+'>Regenerate</button>'
+            +'<button class="btn" onclick="wbWriteSection(\''+wbEsc(t.id)+'\',\''+s.key+'\')" '+(canRun&&covered?'':'disabled')+'>Regenerate</button>'
             +'<span class="wb-help" style="margin-left:auto">'+(sec.approved_at?'Approved '+wbEsc(String(sec.approved_at).slice(0,16).replace("T"," ")):'Written '+wbEsc(String(sec.generated_at||"").slice(0,16).replace("T"," ")))+'</span></div>';
         }
       }
@@ -1663,6 +1736,155 @@ function wbProposalCard(t,a,d){
     h+='</div>';
   });
   h+='</div></div>';
+  return h;
+}
+
+
+/* ═══════════════ KNOWLEDGE BANK (left nav) ═══════════════
+   Read-only library of every past proposal the writer can draw on: the 38 seed files plus proposals
+   approved in this dashboard (Agent 6). Search any phrase, filter by vertical, open a file to read it. */
+var KBV={q:"",vert:"",open:null};
+function kbSolName(id){var s=SCORER_SOLUTIONS.find(function(x){return x.id===id});return s?s.name:id}
+function vKnowledge(){
+  if(!KB&&!KB_LOADING){kbLoad().then(function(){var a=document.querySelector('.sb-item.active');if(a&&a.getAttribute("data-v")==="knowledge")showView("knowledge")})}
+  var all=kbAll();
+  if(!all.length)return'<div class="drawer" style="text-align:center;color:var(--fg-muted);padding:40px">Loading the knowledge base...</div>';
+  /* group by source file */
+  var files={};all.forEach(function(c){var f=files[c.source]||(files[c.source]={source:c.source,client:c.client,verticals:c.verticals||[],chunks:[],words:0,live:!!c.tender_id,tender_id:c.tender_id,added_at:c.added_at});f.chunks.push(c);f.words+=c.words||0});
+  var list=Object.keys(files).map(function(k){return files[k]});
+  /* vertical counts for the filter */
+  var vc={};list.forEach(function(f){f.verticals.forEach(function(v){vc[v]=(vc[v]||0)+1})});
+  var verts=Object.keys(vc).sort(function(a,b){return vc[b]-vc[a]});
+  var q=KBV.q.toLowerCase();
+  var shown=list.filter(function(f){if(KBV.vert&&f.verticals.indexOf(KBV.vert)<0)return false;if(q&&!(f.client+" "+f.source).toLowerCase().includes(q)&&!f.chunks.some(function(c){return c.text.toLowerCase().includes(q)}))return false;return true});
+  shown.sort(function(a,b){return(b.live?1:0)-(a.live?1:0)||a.client.localeCompare(b.client)});
+  var html='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'
+    +'<div class="ktile"><div class="kl">Past proposals</div><div class="kb">'+list.length+'</div><div class="ks">'+list.filter(function(f){return !f.live}).length+' seed files, '+list.filter(function(f){return f.live}).length+' approved in this dashboard</div></div>'
+    +'<div class="ktile"><div class="kl">Paragraphs</div><div class="kb">'+all.length+'</div><div class="ks">'+Math.round(all.reduce(function(s,c){return s+(c.words||0)},0)/1000)+'k words the writer can reuse</div></div>'
+    +'<div class="ktile"><div class="kl">Verticals covered</div><div class="kb">'+verts.filter(function(v){return v!=="networking"}).length+'</div><div class="ks">of '+(SCORER_SOLUTIONS.length-1)+' NETS solution areas (Enterprise Networking is in every file)</div></div>'
+    +'<div class="ktile"><div class="kl">Not covered</div><div class="kb" style="color:var(--red)">'+SCORER_SOLUTIONS.filter(function(s){return !vc[s.id]}).length+'</div><div class="ks">'+SCORER_SOLUTIONS.filter(function(s){return !vc[s.id]}).map(function(s){return s.name.split(" (")[0].split(" /")[0]}).slice(0,6).join(", ")+'...</div></div>'
+    +'</div>';
+  /* coverage strip */
+  html+='<div class="drawer" style="padding:16px 20px;margin-bottom:14px"><div class="sec-head" style="font-size:14px;margin-bottom:10px">Coverage by vertical <span class="hint">click to filter</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'
+    +SCORER_SOLUTIONS.map(function(s){var n=vc[s.id]||0;var on=KBV.vert===s.id;return'<span class="wb-pick'+(on?' on':'')+'" style="'+(n?'':'opacity:.45;text-decoration:line-through')+'" onclick="KBV.vert=KBV.vert===\''+s.id+'\'?\'\':\''+s.id+'\';KBV.open=null;showView(\'knowledge\')">'+wbEsc(s.name)+' <b>'+n+'</b></span>'}).join("")+'</div></div>';
+  /* search */
+  html+='<div class="fbar"><div class="row"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input value="'+wbEsc(KBV.q)+'" placeholder="Search any phrase across all proposals (e.g. SLA, escalation matrix, Fortinet, P1 response), then press Enter" onchange="KBV.q=this.value;KBV.open=null;showView(\'knowledge\')"></div>'
+    +(KBV.q||KBV.vert?'<span class="clear" onclick="KBV.q=\'\';KBV.vert=\'\';showView(\'knowledge\')">Clear</span>':'')+'<span class="showing">Showing '+shown.length+' of '+list.length+'</span></div></div>';
+  /* file list */
+  html+='<div class="wb-prop-list">';
+  shown.forEach(function(f){
+    var open=KBV.open===f.source;
+    var hits=q?f.chunks.filter(function(c){return c.text.toLowerCase().includes(q)}):[];
+    html+='<div class="wb-prop'+(f.live?' ok':'')+'"><div class="wb-prop-head" onclick="KBV.open=KBV.open===\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\'?null:\''+wbEsc(f.source).replace(/'/g,"\\\\'")+'\';showView(\'knowledge\')">'
+      +'<span class="wb-prop-n">'+(f.live?'\u2713':'\ud83d\udcc4')+'</span><div style="flex:1;min-width:0"><div class="wb-prop-title">'+wbEsc(f.client)+(f.live?' <span class="chip chip-g">approved in dashboard</span>':'')+'</div><div class="wb-help" style="font-size:12px">'+wbEsc(f.source)+' \u00b7 '+f.chunks.length+' paragraphs \u00b7 '+f.words.toLocaleString()+' words'+(q?' \u00b7 <b style="color:var(--green)">'+hits.length+' match'+(hits.length===1?'':'es')+'</b>':'')+'</div></div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:420px">'+f.verticals.map(function(v){return'<span class="chip chip-grey">'+wbEsc(kbSolName(v).split(" (")[0])+'</span>'}).join("")+'</div><span class="wb-prop-caret">'+(open?'\u25b4':'\u25be')+'</span></div>';
+    if(open){
+      var show=q?hits:f.chunks;
+      html+='<div class="wb-prop-body">'+(f.live?'<div class="wb-help" style="margin:8px 0">Written in this dashboard for tender <span class="wb-link" onclick="WB.sel=\''+wbEsc(f.tender_id)+'\';showView(\'workbench\')">'+wbEsc(f.tender_id)+'</span>, approved '+wbEsc(String(f.added_at||"").slice(0,10))+'.</div>':'')
+        +show.map(function(c){var txt=wbEsc(c.text);if(q){var re=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");txt=txt.replace(re,'<mark>$1</mark>')}return'<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">'+wbEsc(c.section)+'</div><div style="font-size:13px;line-height:1.6;white-space:pre-wrap">'+txt+'</div></div>'}).join("")
+        +'</div>';
+    }
+    html+='</div>';
+  });
+  if(!shown.length)html+='<div class="drawer" style="text-align:center;color:var(--fg-muted)">No proposal matches.</div>';
+  html+='</div>';
+  return html;
+}
+
+
+/* ═══════════════ STEP 5: PROPOSAL REVIEW (ported from backend/agent4_technical.py and agent5_regulatory.py) ═══════════════
+   Two independent reviewers read the whole proposal:
+     Technical QA   passes at 85 or more, with no CRITICAL gap.
+     Regulatory QA  passes at 90 or more, with zero legal red flags (PPRA, data sovereignty, SECP, SBP).
+   "Review and fix" runs them in order; failing sections are rewritten with the reviewer's remediation text,
+   up to three rounds, then the proposal is ESCALATED to a person. Sections a person has approved are never rewritten. */
+var REVIEW_MAX_ROUNDS=3,REVIEW_TECH_PASS=85,REVIEW_REG_PASS=90;
+function wbReviewState(a){return a.review||{round:0,status:"NOT_REVIEWED",history:[]}}
+async function wbRunReviewer(id,which){
+  var t=T.find(function(x){return x.id===id});var a=wbEnsure(id);var P=a.proposal||{sections:{}};
+  if(!SAMPLE){alert("Allow Claude in this page's Permissions menu first.");return null}
+  var keys=PROP_SECTIONS.filter(function(s){return P.sections[s.key]}).map(function(s){return s.key});
+  if(keys.length<PROP_SECTIONS.length){alert("Write all 13 sections before review ("+keys.length+" of 13 written).");return null}
+  var draft=wbProposalMarkdown(id);var s=a.summary||{};var c=a.compliance||{};
+  WB.busy["review_"+which]=true;showView("workbench");var ctl=new AbortController();WB.ctl=ctl;
+  var out=document.getElementById("wb-out-review_"+which);var onText=function(u){if(out)out.textContent=u.text};
+  var sectionList=PROP_SECTIONS.map(function(x,i){return(i+1)+". "+x.title+" (key: "+x.key+")"}).join("\n");
+  try{
+    var r;
+    if(which==="technical"){
+      r=await SAMPLE.json(
+"You are the Senior Technical Compliance Auditor for NETS International. You audit technical proposals with zero tolerance for vague or missing requirements. A proposal passes ONLY if compliance_score >= "+REVIEW_TECH_PASS+" and no CRITICAL gap remains. Return ONLY JSON.\n"+
+"Audit the PROPOSAL DRAFT against (a) the buyer's own requirements in the RFP SUMMARY and COMPLIANCE list, and (b) this NETS proposal standard, applying each item only where the RFP calls for that kind of commitment:\n"+
+"1. Uptime SLA stated as a figure, with service credits or penalties\n2. ISO 27001 cited with certificate number and auditing body (NETS: IS 764521, BSI) and the other ISO standards NETS holds\n3. 24x7 support with a named NOC/SOC location\n4. Severity table with P1 response and resolution targets and tiered P2/P3\n5. Escalation matrix with roles and timeframes\n6. Regulator compliance named where applicable (SBP Circular 02/2019 for banks, PTA, PPRA)\n7. Specific architecture with named components and quantities, not generic text\n8. Implementation timeline with milestones\n9. Team roles with qualifications\n10. Bill of materials summary consistent with the BOQ\n11. No invented facts: every client reference, certificate, number or date must be traceable to the inputs; flag any that look invented as CRITICAL\n"+
+'{"compliance_score":number (0-100),"passed_audit":boolean,"verified_requirements":[string],"missing_requirements":[string (each prefixed CRITICAL, MAJOR or MINOR, and naming the section it belongs to)],"sections_to_rewrite":[string (section keys from the list below, only those that must change)],"remediation_feedback":string (precise instructions the writer can act on, grouped by section key)}\n\n'+
+"SECTION KEYS:\n"+sectionList+"\n\nRFP SUMMARY:\n"+JSON.stringify({key_requirements:s.key_requirements,deliverables:s.deliverables,timeline:s.timeline,eligibility:s.eligibility,evaluation:s.evaluation_method}).slice(0,6000)+
+"\n\nCOMPLIANCE DOCUMENTS REQUIRED:\n"+JSON.stringify((c.required_documents||[]).slice(0,25).map(function(x){return x.doc})).slice(0,2500)+
+"\n\nPROPOSAL DRAFT:\n"+draft.slice(0,90000),{signal:ctl.signal,onText:onText,modelTier:"default",cache:false});
+      r.passed_audit=(Number(r.compliance_score)>=REVIEW_TECH_PASS)&&!(r.missing_requirements||[]).some(function(m){return /^CRITICAL/i.test(m)});
+    }else{
+      r=await SAMPLE.json(
+"You are senior Legal, Regulatory and AI Governance Counsel specialising in Pakistani public procurement law (Federal PPRA 2004 and Provincial PPRAs), SECP corporate compliance (Companies Act 2017), NAB/FIA anti-corruption standards, SBP banking regulation and data sovereignty. Audit the PROPOSAL DRAFT rigorously. A proposal passes ONLY if regulatory_score >= "+REVIEW_REG_PASS+" and legal_red_flags is empty. Return ONLY JSON.\n"+
+"Audit against: 1. PPRA transparency and fair competition (no sole-source or 'preferred partner' language, open competition, clear evaluation criteria). 2. Data sovereignty and AI governance (data, backups and DR inside Pakistan unless the RFP says otherwise; audit logs; no offshore transfer). 3. SECP and anti-corruption safeguards (clear liability, no ambiguous preferential clauses, no conflict of interest, integrity pact where PPRA requires). 4. SBP requirements where the buyer is a bank. 5. Commitments NETS cannot lawfully make (turnover above PKR 2 billion, OEM tiers NETS does not hold).\n"+
+'{"regulatory_score":number (0-100),"passed_regulatory_audit":boolean,"ppra_compliance_status":string,"data_sovereignty_verified":boolean,"legal_red_flags":[string (each naming the section key)],"sections_to_rewrite":[string (section keys)],"remediation_directives":string (precise rewrite instructions grouped by section key)}\n\n'+
+"SECTION KEYS:\n"+sectionList+"\n\nTENDER: "+wbTenderCtx(t)+"\nISSUER: "+(s.issuer||"?")+"\n\nPROPOSAL DRAFT:\n"+draft.slice(0,90000),{signal:ctl.signal,onText:onText,modelTier:"default",cache:false});
+      r.passed_regulatory_audit=(Number(r.regulatory_score)>=REVIEW_REG_PASS)&&!(r.legal_red_flags||[]).length;
+    }
+    r.at=new Date().toISOString();
+    a.review=wbReviewState(a);a.review[which]=r;a.review.history.push({round:a.review.round,which:which,score:which==="technical"?r.compliance_score:r.regulatory_score,passed:which==="technical"?r.passed_audit:r.passed_regulatory_audit,at:r.at});
+    await wbSave(id,{review:a.review});
+    wbLog((which==="technical"?"Technical QA":"Regulatory QA")+": "+(which==="technical"?r.compliance_score:r.regulatory_score)+"/100, "+((which==="technical"?r.passed_audit:r.passed_regulatory_audit)?"PASSED":"needs rewrite"));
+    return r;
+  }catch(e){var code=e&&e.code||"error";wbLog("Review stopped: "+code);if(code!=="cancelled")alert("Review failed: "+code+". "+(e&&e.message||""));return null}
+  finally{WB.busy["review_"+which]=false;showView("workbench")}
+}
+async function wbReviewLoop(id){
+  var a=wbEnsure(id);a.review=wbReviewState(a);a.review.status="RUNNING";a.review.round=0;await wbSave(id,{review:a.review});
+  for(var round=1;round<=REVIEW_MAX_ROUNDS;round++){
+    a.review.round=round;
+    var tq=await wbRunReviewer(id,"technical");if(!tq)return;
+    if(!tq.passed_audit){var fixed=await wbRewriteFor(id,tq.sections_to_rewrite,tq.remediation_feedback,"Technical QA round "+round);if(!fixed)return;continue}
+    var rq=await wbRunReviewer(id,"regulatory");if(!rq)return;
+    if(!rq.passed_regulatory_audit){var fixed2=await wbRewriteFor(id,rq.sections_to_rewrite,rq.remediation_directives,"Regulatory QA round "+round);if(!fixed2)return;continue}
+    a.review.status="PASSED";a.review.passed_at=new Date().toISOString();await wbSave(id,{review:a.review});wbLog("Proposal review PASSED in round "+round);showView("workbench");return;
+  }
+  a.review.status="ESCALATED";a.review.escalated_at=new Date().toISOString();await wbSave(id,{review:a.review});
+  wbLog("Proposal review ESCALATED after "+REVIEW_MAX_ROUNDS+" rounds: a person must decide");showView("workbench");
+}
+async function wbRewriteFor(id,keys,feedback,label){
+  var a=wbEnsure(id);var P=a.proposal||{sections:{}};keys=(keys||[]).filter(function(k){return PROP_SECTIONS.some(function(s){return s.key===k})});
+  if(!keys.length)keys=PROP_SECTIONS.map(function(s){return s.key}).slice(0,3);
+  var skipped=[];
+  for(var i=0;i<keys.length;i++){var sec=P.sections[keys[i]];if(sec&&sec.status==="approved"){skipped.push(keys[i]);continue}
+    await wbWriteSection(id,keys[i],label+":\n"+String(feedback||"").slice(0,6000));if(WB.ctl&&WB.ctl.signal.aborted)return false}
+  if(skipped.length)wbLog("Not rewritten (approved by a person): "+skipped.join(", "));
+  return true;
+}
+function wbReviewCard(t,a,d){
+  var P=a.proposal||{sections:{}};var written=PROP_SECTIONS.filter(function(s){return P.sections[s.key]}).length;
+  var R=wbReviewState(a);var tq=R.technical,rq=R.regulatory;var busy=WB.busy.review_technical||WB.busy.review_regulatory||R.status==="RUNNING";
+  var stCls={PASSED:"chip-g",ESCALATED:"chip-r",RUNNING:"chip-a",NOT_REVIEWED:"chip-grey"}[R.status]||"chip-grey";
+  var h='<div class="drawer wb-step" id="wb-s5">'
+    +'<div class="wb-step-head"><div><div class="wb-step-no">Step 5</div><div class="wb-step-title">Proposal review</div><div class="wb-help">Two independent reviewers read the whole proposal. Technical QA passes at '+REVIEW_TECH_PASS+' with no critical gap; Regulatory QA passes at '+REVIEW_REG_PASS+' with zero red flags (PPRA, data sovereignty, SECP, SBP). “Review and fix” rewrites only the failing sections with the reviewer’s instructions, up to '+REVIEW_MAX_ROUNDS+' rounds, then escalates to you. Sections you approved are never rewritten.</div></div>'
+    +'<div style="text-align:right;flex:none"><span class="chip '+stCls+'" style="font-size:12px">'+wbEsc(R.status.replace("_"," "))+'</span><div class="wb-help" style="margin-top:4px">'+(R.round?'Round '+R.round+' of '+REVIEW_MAX_ROUNDS:'Not started')+'</div></div></div>';
+  if(written<PROP_SECTIONS.length)h+='<div class="wb-note" style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:12px">'+written+' of 13 sections written. Review needs the complete proposal (Step 4).</div>';
+  if(R.status==="ESCALATED")h+='<div class="wb-note" style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:var(--red)"><b>Needs your decision.</b> After '+REVIEW_MAX_ROUNDS+' rounds the proposal still fails a reviewer. Read the remaining gaps below, edit the sections by hand, then run the review again or approve and proceed on your own authority.</div>';
+  var canRun=!!SAMPLE&&written===PROP_SECTIONS.length;
+  h+='<div class="wb-actions" style="margin:0 0 14px">'
+    +(busy?'<button class="btn btn-danger" onclick="wbStop()">Stop</button>':'<button class="btn btn-primary" onclick="wbReviewLoop(\''+wbEsc(t.id)+'\')" '+(canRun?'':'disabled')+'>↻ Review and fix (up to '+REVIEW_MAX_ROUNDS+' rounds)</button>')
+    +'<button class="btn" onclick="wbRunReviewer(\''+wbEsc(t.id)+'\',\'technical\')" '+(canRun&&!busy?'':'disabled')+'>Technical QA only</button>'
+    +'<button class="btn" onclick="wbRunReviewer(\''+wbEsc(t.id)+'\',\'regulatory\')" '+(canRun&&!busy?'':'disabled')+'>Regulatory QA only</button>'
+    +(tq||rq?'<button class="btn" onclick="wbDownload(\''+wbEsc(t.id)+'\',\'review\')">⬇ Export audit</button>':'')+'</div>';
+  var card=function(title,r,pass,score,lines,fix,key){var b=WB.busy["review_"+key];
+    return'<div class="wb-ana'+(r&&pass?' done':'')+'" style="'+(r&&!pass?'border-color:var(--red-border);box-shadow:inset 3px 0 0 var(--red)':'')+'"><div class="wb-ana-head"><div><div class="wb-ana-title">'+title+'</div><div class="wb-ana-desc">'+(key==="technical"?"SLA, ISO, NOC, severity table, escalation, architecture specifics, timeline, team, BOM, no invented facts":"PPRA fair competition, data sovereignty, SECP and anti-corruption, SBP, commitments NETS cannot make")+'</div></div>'
+      +(r?'<div style="text-align:right"><div class="wb-grade-pct" style="font-size:30px;color:'+(pass?"var(--green)":"var(--red)")+'">'+score+'</div><span class="chip '+(pass?"chip-g":"chip-r")+'">'+(pass?"Passed":"Needs rewrite")+'</span></div>':'<span class="chip chip-grey">'+(b?'Reviewing':'Not run')+'</span>')+'</div>'
+      +(b?'<pre id="wb-out-review_'+key+'" class="wb-stream">Thinking...</pre>':'')
+      +(r&&!b?'<div class="wb-ana-body">'+(lines.length?'<ul style="margin:6px 0 6px 16px;padding:0">'+lines.map(function(x){var sev=/^CRITICAL/i.test(x)?"var(--red)":/^MAJOR/i.test(x)?"var(--amber)":"var(--fg-muted)";return'<li style="color:'+sev+';margin:2px 0">'+wbEsc(x)+'</li>'}).join("")+'</ul>':'<div class="wb-help">No gaps found.</div>')+(fix?'<details style="margin-top:6px"><summary class="wb-link">Reviewer’s instructions to the writer</summary><div class="wb-help" style="white-space:pre-wrap;margin-top:4px">'+wbEsc(fix)+'</div></details>':'')+'<div class="wb-help" style="margin-top:6px">Reviewed '+wbEsc(String(r.at||"").slice(0,16).replace("T"," "))+(r.sections_to_rewrite&&r.sections_to_rewrite.length?' · sections to change: '+wbEsc(r.sections_to_rewrite.join(", ")):'')+'</div></div>':'')+'</div>'};
+  h+='<div class="wb-ana-grid">'
+    +card("Technical QA",tq,tq&&tq.passed_audit,tq?tq.compliance_score:"",tq?(tq.missing_requirements||[]):[],tq&&tq.remediation_feedback,"technical")
+    +card("Regulatory QA",rq,rq&&rq.passed_regulatory_audit,rq?rq.regulatory_score:"",rq?(rq.legal_red_flags||[]).concat(rq.data_sovereignty_verified===false?["MAJOR: data sovereignty not verified"]:[]):[],rq&&rq.remediation_directives,"regulatory")
+    +'</div>';
+  if(R.history&&R.history.length)h+='<div class="wb-help" style="margin-top:10px">History: '+R.history.map(function(x){return'R'+x.round+' '+(x.which==="technical"?"Tech":"Reg")+' '+x.score+(x.passed?' ✓':' ✗')}).join(" · ")+'</div>';
+  h+='</div>';
   return h;
 }
 
@@ -1711,8 +1933,8 @@ function vWorkbench(){
     +'</div>';
 
   /* ── Stepper: where this tender is in the three steps ── */
-  var st1=!!a.rfpText,st2=!!(a.summary||a.grading||a.compliance||a.boq),st3=!!(d.bid_decision&&d.bid_decision!=="Pending"),st4=!!(a.proposal&&a.proposal.sections&&Object.keys(a.proposal.sections).length);
-  html+='<div class="wb-stepper">'+[["Document",st1,"wb-s1"],["Analysis",st2,"wb-s2"],["Bid plan",st3,"wb-s3"],["Proposal",st4,"wb-s4"]].map(function(x,i){return'<a class="wb-stp'+(x[1]?' done':'')+'" href="#'+x[2]+'" onclick="document.getElementById(\''+x[2]+'\').scrollIntoView({behavior:\'smooth\'});return false"><span class="wb-stp-n">'+(x[1]?'\u2713':(i+1))+'</span><span>'+x[0]+'</span></a>'+(i<3?'<span class="wb-stp-line'+(x[1]?' done':'')+'"></span>':'')}).join("")+'</div>';
+  var st1=!!a.rfpText,st2=!!(a.summary||a.grading||a.compliance||a.boq),st3=!!(d.bid_decision&&d.bid_decision!=="Pending"),st4=!!(a.proposal&&a.proposal.sections&&Object.keys(a.proposal.sections).length),st5=!!(a.review&&a.review.status==="PASSED");
+  html+='<div class="wb-stepper">'+[["Document",st1,"wb-s1"],["Analysis",st2,"wb-s2"],["Bid plan",st3,"wb-s3"],["Proposal",st4,"wb-s4"],["Review",st5,"wb-s5"]].map(function(x,i){return'<a class="wb-stp'+(x[1]?' done':'')+'" href="#'+x[2]+'" onclick="document.getElementById(\''+x[2]+'\').scrollIntoView({behavior:\'smooth\'});return false"><span class="wb-stp-n">'+(x[1]?'\u2713':(i+1))+'</span><span>'+x[0]+'</span></a>'+(i<4?'<span class="wb-stp-line'+(x[1]?' done':'')+'"></span>':'')}).join("")+'</div>';
 
   /* ── STEP 1: RFP document ── */
   var acq=t.acqStatus||"PENDING";var hasText=!!a.rfpText;
@@ -1836,6 +2058,8 @@ function vWorkbench(){
 
   /* ── STEP 4: Technical proposal ── */
   html+=wbProposalCard(t,a,d);
+  /* ── STEP 5: Proposal review ── */
+  html+=wbReviewCard(t,a,d);
 
   /* ── Trust panel: what was verified for this tender ── */
   var tr=trustFor(t);
@@ -1997,7 +2221,7 @@ function vSettings(){
   var dbDocs=T.length+(SCANS.length)+1;
   var pdfCount=T.filter(function(t){return t.doc}).length;
 
-  var kbCount=KB?KB.length:814;
+  var kbCount=(KB?KB.length:498)+KB_LIVE.length;
   var propCount=0;Object.keys(RFPA||{}).forEach(function(k){var p=RFPA[k].proposal;if(p&&p.sections&&Object.keys(p.sections).length)propCount++});
   var html='<div style="padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;font-size:13.5px;line-height:1.7;color:var(--fg-muted);box-shadow:var(--sh-1)">'
     +'<b style="color:var(--fg)">What is live today.</b> Two scheduled agents feed the dashboard: one scans three procurement portals every morning and qualifies tenders; one runs on your PC in the afternoon, downloads the RFP PDFs and sends their text back here. Everything after that happens inside this dashboard, one RFP at a time, with a person in control: four separate analyses of the document, a bid plan, and a technical proposal written from NETS\u2019s own past proposals. Every AI statement carries the RFP quote or the past-proposal paragraph it came from.'
@@ -2020,12 +2244,16 @@ function vSettings(){
     +'              \u2502   BID\n'
     +'              \u25bc\n'
     +'  Step 4  [ Technical proposal writer ]  13 sections, each grounded on\n'
-    +'              \u2502   the knowledge base: 814 paragraphs from 38 past NETS proposals\n'
+    +'              \u2502   the knowledge base: 498 paragraphs from 38 past NETS proposals\n'
     +'              \u25bc\n'
     +'          Approve / Edit / Regenerate per section  \u2192  Export Word\n'
     +'\n'
-    +'  NOT LIVE YET: automated Technical QA and Regulatory QA scoring loop (old Agents 4 and 5).\n'
-    +'  The Python exists in the repo (backend/agent4_technical.py, agent5_regulatory.py) but nothing runs it.</div>';
+    +'  Step 5  [ Technical QA \u2265 85 ] \u2192 [ Regulatory QA \u2265 90, 0 red flags ]  failing sections rewritten, max 3 rounds, then ESCALATE TO HUMAN\n'
+    +'              \u2502\n'
+    +'              \u25bc\n'
+    +'  Agent 6  approved proposal \u2192 chunked \u2192 Knowledge bank (tagged by vertical)\n'
+    +'\n'
+    +'  KEPT FOR LATER (server deployment): Render service, ChromaDB index, LangGraph pipeline in backend/. Not used by the dashboard today.</div>';
 
   var agents=[
     {name:"Agent 1: Scan and qualify",status:"Live",color:"g",
@@ -2063,13 +2291,20 @@ function vSettings(){
       tech:"Per-section JSON with refs_used; Approve, Edit, Regenerate per section; Word and Markdown export",
       output:"rfp_analysis/<id>.proposal; "+propCount+" proposal"+(propCount===1?"":"s")+" in progress",
       tested:"Wired 12 Nov 2026; first live run pending"},
-    {name:"Technical QA and Regulatory QA loop",status:"Not live",color:"r",
-      what:"The original design scored each draft (technical pass at 85, regulatory pass at 90, PPRA and data-sovereignty red flags) and sent failures back to the writer up to three times. The code exists but nothing runs it; the dashboard uses the quote-verification layer instead.",
-      schedule:"None",
-      where:"backend/agent4_technical.py and backend/agent5_regulatory.py in the repo",
-      tech:"LangGraph nodes, Pydantic schemas, tested offline once",
-      output:"None in the dashboard",
-      tested:"Offline unit tests only; proposed next step: add as Step 5 \u201cProposal review\u201d"}
+    {name:"Agent 6: Knowledge base growth",status:"Live",color:"g",
+      what:"When all 13 sections of a proposal are approved, the architect presses \u201cAdd to knowledge base\u201d. The proposal is cut into paragraphs, tagged with the tender\u2019s solution areas, and stored so the next proposal in that vertical can draw on it. The 38 seed proposals cover Enterprise Networking strongly, with Managed O&M, Network Security, Storage, Data Centre, Servers, Endpoint, Outsourcing, Consulting and ELV in smaller numbers. Verticals with no past proposal (Wireless, EV, DC power, Solar/UPS, UC, Cloud, SOC, IAM, Data security, VAPT, GRC) are blocked for the writer until Agent 6 adds one.",
+      schedule:"On approval, by the architect",
+      where:"In your browser; writes to the kb_live collection",
+      tech:"Same chunking as scripts/kb/build_kb.py; vertical tags from the tender\u2019s solution areas; the coverage check reads both the seed file and kb_live",
+      output:"kb_live/<chunk id> documents; rfp_analysis/<id>.kb_chunk_ids",
+      tested:"Wired 12 Nov 2026"},
+    {name:"Workbench Step 5: Technical QA and Regulatory QA loop",status:"Live",color:"g",
+      what:"Two independent reviewers read the complete proposal. Technical QA (pass at 85, no CRITICAL gap) checks SLA figures, ISO citations, NOC location, severity table, escalation matrix, architecture specifics, timeline, team, BOM and invented facts. Regulatory QA (pass at 90, zero red flags) checks PPRA fair competition, data sovereignty, SECP and anti-corruption, SBP, and commitments NETS cannot make. Failing sections are rewritten with the reviewer\u2019s instructions, up to three rounds, then the proposal is escalated to a person. Sections a person approved are never rewritten. Ported from backend/agent4_technical.py and agent5_regulatory.py, which stay in the repo for the later server deployment (Render, ChromaDB).",
+      schedule:"On demand, after all 13 sections are written",
+      where:"In your browser, through Claude",
+      tech:"Same prompts and thresholds as the Python nodes; results stored per round in rfp_analysis/<id>.review",
+      output:"review.technical, review.regulatory, review.status (PASSED, ESCALATED), history per round",
+      tested:"Wired 12 Nov 2026"}
   ];
 
   html+='<div class="sec-head" style="margin-top:24px;font-size:14px">The agents</div>';
