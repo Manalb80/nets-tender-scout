@@ -1,0 +1,4 @@
+node_modules/
+.next/
+npm_install.log
+next_build.log
