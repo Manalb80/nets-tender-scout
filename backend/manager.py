@@ -70,39 +70,58 @@ log = logging.getLogger("manager")
 # States (must match frontend MGR_STATES exactly)
 # ---------------------------------------------------------------------------
 STATES = {
-    "DISCOVERED":          "discovered",
-    "QUALIFIED_GO":        "qualified_go",
-    "QUALIFIED_NOGO":      "qualified_nogo",
-    "RFP_PENDING":         "rfp_pending",
-    "RFP_READY":           "rfp_ready",
-    "PROCESSING_ANALYSIS": "processing_analysis",
-    "ANALYSING":           "analysing",
-    "ANALYSED":            "analysed",
-    "AWAITING_DECISION":   "awaiting_decision",
-    "DECIDED_BID":         "decided_bid",
-    "DECIDED_NOBID":       "decided_nobid",
-    "DECIDED_HOLD":        "decided_hold",
-    "PROCESSING_WRITER":   "processing_writer",
-    "WRITING":             "writing",
-    "WRITTEN":             "written",
-    "PROCESSING_REVIEW":   "processing_review",
-    "REVIEWING":           "reviewing",
-    "REVIEWED":            "reviewed",
-    "QA_FAILED":           "qa_failed",
-    "APPROVED":            "approved",
-    "PROCESSING_KB":       "processing_kb",
-    "KB_ADDED":            "kb_added",
-    "SUBMITTED":           "submitted",
-    "WON":                 "won",
-    "LOST":                "lost",
-    "FAILED":              "failed",
-    "ESCALATED":           "escalated",
+    "DISCOVERED":              "discovered",
+    "QUALIFIED_GO":            "qualified_go",
+    "QUALIFIED_NOGO":          "qualified_nogo",
+    # SharePoint cloud handoff (Agent 4)
+    "PROVISIONING_SHAREPOINT": "provisioning_sharepoint",   # atomic lock: creating SP folder
+    "AWAITING_HUMAN_UPLOAD":   "awaiting_human_upload",     # HITL: human drops RFP into SP folder
+    "RFP_PENDING":             "rfp_pending",               # legacy compat (alias for awaiting_human_upload)
+    "RFP_READY":               "rfp_ready",
+    # Analysis
+    "PROCESSING_ANALYSIS":     "processing_analysis",
+    "ANALYSING":               "analysing",
+    "ANALYSED":                "analysed",
+    "AWAITING_DECISION":       "awaiting_decision",
+    # Decision
+    "DECIDED_BID":             "decided_bid",
+    "DECIDED_NOBID":           "decided_nobid",
+    "DECIDED_HOLD":            "decided_hold",
+    # Proposal
+    "PROCESSING_WRITER":       "processing_writer",
+    "WRITING":                 "writing",
+    "WRITTEN":                 "written",
+    # Review
+    "PROCESSING_REVIEW":       "processing_review",
+    "REVIEWING":               "reviewing",
+    "REVIEWED":                "reviewed",
+    "QA_FAILED":               "qa_failed",
+    # Approval and KB
+    "APPROVED":                "approved",
+    "PROCESSING_KB":           "processing_kb",
+    "KB_ADDED":                "kb_added",
+    # Terminal
+    "SUBMITTED":               "submitted",
+    "WON":                     "won",
+    "LOST":                    "lost",
+    # Error
+    "FAILED":                  "failed",
+    "ESCALATED":               "escalated",
 }
 
 MAX_RETRIES = 3
-HITL_STATES = {"rfp_pending", "analysed", "decided_hold", "written", "reviewed", "qa_failed", "escalated"}
+HITL_STATES = {
+    "awaiting_human_upload",  # human must upload RFP to SharePoint
+    "rfp_pending",            # legacy alias
+    "analysed",               # human must make BID / NO-BID / HOLD
+    "decided_hold",           # parked by human
+    "written",                # human must review sections before QA
+    "reviewed",               # human must approve all 13 sections
+    "qa_failed",              # QA failed, human must intervene
+    "escalated",              # retry limit hit, human must resolve
+}
 TERMINAL_STATES = {"qualified_nogo", "decided_nobid", "kb_added", "submitted", "won", "lost"}
-LOCK_STATES = {"processing_analysis", "processing_writer", "processing_review", "processing_kb"}
+LOCK_STATES = {"processing_analysis", "processing_writer", "processing_review", "processing_kb", "provisioning_sharepoint"}
 
 
 # ---------------------------------------------------------------------------
@@ -146,6 +165,55 @@ class FirestoreDB:
 
     def set_health(self, health: dict):
         self.db.collection("config").document("mgr_health").set(health)
+
+
+class MockDB:
+    """In-memory database for local testing. No cloud credentials needed.
+    Usage: python -m backend.manager --mock"""
+
+    def __init__(self):
+        self.tenders: dict[str, dict] = {}
+        self.pipeline: dict[str, dict] = {}
+        self.analyses: dict[str, dict] = {}
+        self.logs: list[dict] = []
+        self.health: dict = {}
+
+    def get_all_pipeline_docs(self) -> list[dict]:
+        return [{**v, "_id": k} for k, v in self.pipeline.items()]
+
+    def get_all_tenders(self) -> list[dict]:
+        return [{**v, "_id": k} for k, v in self.tenders.items()]
+
+    def get_analysis(self, tender_id: str) -> dict:
+        return self.analyses.get(tender_id, {})
+
+    def set_pipeline(self, tender_id: str, doc: dict):
+        self.pipeline[tender_id] = doc
+        log.info(f"[MockDB] pipeline/{tender_id} -> {doc.get('current_state')}")
+
+    def update_analysis(self, tender_id: str, patch: dict):
+        if tender_id not in self.analyses:
+            self.analyses[tender_id] = {}
+        self.analyses[tender_id].update(patch)
+
+    def log(self, entry: dict):
+        self.logs.append(entry)
+
+    def set_health(self, health: dict):
+        self.health = health
+
+    def seed_test_tender(self, tender_id: str, title: str, score: int, state: str | None = None):
+        """Inject a test tender for local development."""
+        self.tenders[tender_id] = {
+            "id": tender_id, "ti": title, "score": score,
+            "source": "Sindh Bank", "cl": "18-Nov-2026",
+            "qualVerdict": "GO" if score >= 70 else "SKIP",
+            "open": True, "solMatch": [],
+        }
+        if state:
+            self.analyses[tender_id] = {"pipeline_status": state}
+            self.pipeline[tender_id] = {"tender_id": tender_id, "current_state": state}
+        log.info(f"[MockDB] Seeded test tender: {tender_id} ({title}) score={score} state={state or 'inferred'}")
 
 
 # ---------------------------------------------------------------------------
@@ -251,6 +319,11 @@ def build_state_doc(tender: dict, analysis: dict, new_state: str, prev_doc: dict
         "failed_step": None,
         "escalated_at": None,
         "sharepoint_folder_url": prev.get("sharepoint_folder_url", ""),
+        "hitl_instruction": (
+            "Please upload the official RFP document package to the SharePoint folder."
+            if new_state == "awaiting_human_upload"
+            else prev.get("hitl_instruction")
+        ),
         "metadata": {
             "score": tender.get("score", 0),
             "deadline": tender.get("cl", ""),
@@ -434,17 +507,35 @@ class Manager:
             return "skipped"
 
         if state == STATES["QUALIFIED_GO"]:
+            # If RFP text already exists (e.g. from legacy Agent 1b), skip straight to ready
             if analysis.get("rfpText"):
                 self.set_status(tender, STATES["RFP_READY"])
                 return "dispatched"
-            # Check SharePoint for uploaded files
+            # Otherwise, provision a SharePoint folder (Agent 4: Cloud Handoff)
+            self.set_status(tender, STATES["PROVISIONING_SHAREPOINT"])
+            try:
+                self._run_cloud_handoff(tid, tender)
+            except Exception as e:
+                self.record_failure(tender, "cloud_handoff", e)
+            return "dispatched"
+
+        if state == STATES["AWAITING_HUMAN_UPLOAD"] or state == STATES["RFP_PENDING"]:
+            # Poll SharePoint for uploaded files
             if self.sp and self.sp.configured:
                 files = self.sp.check_for_uploads(tid)
                 if files:
-                    self._log(tid, f"SharePoint has {len(files)} file(s); TODO: extract text")
-                    # Future: extract text, set rfp_ready
-            self.set_status(tender, STATES["RFP_PENDING"])
-            return "hitl"
+                    self._log(tid, f"SharePoint has {len(files)} file(s) detected; extracting text")
+                    try:
+                        self._extract_sharepoint_rfp(tid, files)
+                        self.set_status(tender, STATES["RFP_READY"])
+                        return "dispatched"
+                    except Exception as e:
+                        self._log(tid, f"Text extraction failed: {e}", "warning")
+            # Also check if rfpText appeared from any source
+            if analysis.get("rfpText"):
+                self.set_status(tender, STATES["RFP_READY"])
+                return "dispatched"
+            return "hitl"  # still waiting
 
         if state == STATES["RFP_READY"]:
             if not analysis.get("rfpText"):
@@ -494,6 +585,8 @@ class Manager:
                 failed_step = analysis.get("pipeline_failed_step", "")
                 self._log(tid, f"Retrying failed step: {failed_step}")
                 rollback = {
+                    "cloud_handoff": STATES["QUALIFIED_GO"],
+                    "extract": STATES["AWAITING_HUMAN_UPLOAD"],
                     "analysis": STATES["RFP_READY"],
                     "writer": STATES["DECIDED_BID"],
                     "review": STATES["WRITTEN"],
@@ -517,7 +610,44 @@ class Manager:
             return STATES["QUALIFIED_GO"]
         return STATES["DISCOVERED"]
 
-    # -- Worker stubs (call actual worker modules) --
+    # -- Worker methods --
+
+    def _run_cloud_handoff(self, tid: str, tender: dict):
+        """Agent 4: Provision a SharePoint folder and set state to AWAITING_HUMAN_UPLOAD.
+        The human team downloads the RFP from the portal and uploads it to this folder.
+        Zero local D:\\ drive usage; all files route through corporate SharePoint."""
+        self._log(tid, "Agent 4: Provisioning SharePoint folder (Cloud Handoff)")
+        folder_url = ""
+        if self.sp and self.sp.configured:
+            folder_url = self.sp.provision_folder(tid)
+            self._log(tid, f"SharePoint folder provisioned: {folder_url}")
+        else:
+            # SharePoint not configured; generate the expected URL for manual creation
+            sp_tenant = os.environ.get("SHAREPOINT_TENANT", "netsinternational")
+            sp_root = os.environ.get("SHAREPOINT_RFP_ROOT", "NETS-Karachi Presales-Technical Proposals/RFP")
+            folder_url = f"https://{sp_tenant}-my.sharepoint.com/personal/iqra_iqbal_nets-international_com/Documents/{sp_root}/{tid}"
+            self._log(tid, f"SharePoint not configured; generated expected URL: {folder_url}", "warning")
+
+        self.set_status(tender, STATES["AWAITING_HUMAN_UPLOAD"], {
+            "sharepoint_folder_url": folder_url,
+        })
+
+    def _extract_sharepoint_rfp(self, tid: str, files: list[dict]):
+        """Download PDF(s) from SharePoint, extract text, write rfpText to DB.
+        Uses PyMuPDF (fitz) or falls back to pdfplumber."""
+        self._log(tid, f"Extracting text from {len(files)} SharePoint file(s)")
+        # In production, download via Graph API and extract:
+        # import fitz
+        # for f in files:
+        #     content = self.sp.download_file(tid, f["name"])
+        #     doc = fitz.open(stream=content, filetype="pdf")
+        #     text = "\n".join(page.get_text() for page in doc)
+        # self.db.update_analysis(tid, {"rfpText": text, "rfpSource": "SHAREPOINT"})
+        raise NotImplementedError(
+            "Wire SharePoint file download + PyMuPDF extraction here. "
+            "Until then, the artifact page accepts manual uploads (Step 1)."
+        )
+
     def _run_analyses(self, tid: str, analysis: dict):
         """Run the four analyses. In production, these call ai_engine.py."""
         self._log(tid, "Running analyses (summary, grading, compliance, boq)")
@@ -561,9 +691,19 @@ def main():
     ap.add_argument("--loop", action="store_true", help="Run continuously (poll every --interval seconds)")
     ap.add_argument("--interval", type=int, default=300, help="Poll interval in seconds (default 300 = 5 min)")
     ap.add_argument("--migrate", action="store_true", help="Stamp pipeline_status on all existing tenders")
+    ap.add_argument("--mock", action="store_true", help="Use in-memory MockDB (no cloud credentials needed)")
+    ap.add_argument("--seed", action="store_true", help="With --mock: inject sample tenders for testing")
     args = ap.parse_args()
 
-    db = FirestoreDB()
+    if args.mock:
+        db = MockDB()
+        if args.seed:
+            db.seed_test_tender("SINDH-BANK-2026-089", "Supply and Installation of Enterprise Core Switches", 92, "discovered")
+            db.seed_test_tender("PPRA-TS0000018001E", "Data Centre Refresh for SBP", 85, "qualified_go")
+            db.seed_test_tender("EPADS-FED-2026-042", "Managed NOC Services", 78, "awaiting_human_upload")
+        log.info("Using MockDB (in-memory, no cloud credentials)")
+    else:
+        db = FirestoreDB()
     sp = SharePointClient() if SharePointClient().configured else None
     mgr = Manager(db, sp)
 
