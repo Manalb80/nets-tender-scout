@@ -43,7 +43,7 @@ Environment variables:
     SHAREPOINT_TENANT      e.g. netsinternational
     SHAREPOINT_SITE_ID     Microsoft Graph site ID
     SHAREPOINT_DRIVE_ID    Drive ID for the document library
-    SHAREPOINT_RFP_ROOT    Folder path, e.g. "Digitisation/NETS_Discovery_Incoming/RFPs"
+    SHAREPOINT_RFP_ROOT    Folder path, e.g. "NETS-Karachi Presales-Technical Proposals"
     GRAPH_CLIENT_ID        Azure AD app registration client ID
     GRAPH_CLIENT_SECRET    Azure AD app registration client secret
     GRAPH_TENANT_ID        Azure AD tenant ID
@@ -228,7 +228,7 @@ class SharePointClient:
         self.client_secret = os.environ.get("GRAPH_CLIENT_SECRET", "")
         self.site_id = os.environ.get("SHAREPOINT_SITE_ID", "")
         self.drive_id = os.environ.get("SHAREPOINT_DRIVE_ID", "")
-        self.rfp_root = os.environ.get("SHAREPOINT_RFP_ROOT", "Digitisation/NETS_Discovery_Incoming/RFPs")
+        self.rfp_root = os.environ.get("SHAREPOINT_RFP_ROOT", "NETS-Karachi Presales-Technical Proposals")
         self._token = None
         self._token_expires = 0
 
@@ -624,7 +624,7 @@ class Manager:
         else:
             # SharePoint not configured; generate the expected URL for manual creation
             sp_tenant = os.environ.get("SHAREPOINT_TENANT", "netsinternational")
-            sp_root = os.environ.get("SHAREPOINT_RFP_ROOT", "NETS-Karachi Presales-Technical Proposals/RFP")
+            sp_root = os.environ.get("SHAREPOINT_RFP_ROOT", "NETS-Karachi Presales-Technical Proposals")
             folder_url = f"https://{sp_tenant}-my.sharepoint.com/personal/iqra_iqbal_nets-international_com/Documents/{sp_root}/{tid}"
             self._log(tid, f"SharePoint not configured; generated expected URL: {folder_url}", "warning")
 
