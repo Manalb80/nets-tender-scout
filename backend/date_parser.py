@@ -106,6 +106,8 @@ def parse_portal_date(date_string: str) -> dict:
         return {"date": None, "warning": True, "source": "empty", "original": ""}
 
     s = date_string.strip()
+    # Strip a leading weekday ("Thursday, November 19, 2026 11:00 AM" - EPADS format)
+    s = re.sub(r'(?i)^(mon|tues|wednes|thurs|fri|satur|sun)day,?\s*', '', s)
     result = {"date": None, "warning": False, "source": "none", "original": s}
 
     # ── 1. Relative dates ("Closing in 5 days", "16h 8m Left") ──
@@ -239,6 +241,7 @@ if __name__ == "__main__":
         ("22-Oct-2026", True),
         ("Nov 25, 2026", True),
         ("Nov 25, 202611:00 AM", True),  # PPRA concatenated
+        ("Thursday, November 19, 2026 11:00 AM", True),  # EPADS weekday-prefixed
         ("2026-11-25", True),
         ("2026-11-25T14:00:00Z", True),
         ("25/11/2026", True),

@@ -1,0 +1,3507 @@
+{
+ "meta": {
+  "exported_at": "2026-11-13T16:09:38.321605+00:00",
+  "source": "artifact DB tenders/ collection",
+  "total_scanned": 496,
+  "qualified_open": 169,
+  "rule": "score>=70, closing date parseable and in the future, not NOGO (same as the artifact's live set)"
+ },
+ "tenders": [
+  {
+   "id": "EPADS-P125500",
+   "ti": "Provision of Media connectivity through Satellite, Microwave and Optical Fiber for Wi-Fi C...",
+   "dept": "NTC (National Telecommunication corporation (NTC))",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/125500",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    },
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    },
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P189513",
+   "ti": "4851-80877-Router for Data Center, CUI-Lahore Campus",
+   "dept": "Comsats University, Islamabad (Lahore Campus)",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/189513",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P147468",
+   "ti": "Preventive Annual Maintenance Service Contract of Laundry equipment of Capital Hospital",
+   "dept": "Capital Hospital, Capital Development Authority (CDA) (Capital Development Aurhority (CDA))",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/147468",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P175308",
+   "ti": "Tender No.54 for Construction of Tower Pile Foundaitons (15-Degree) along-with Erection & ...",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Monday, November 16, 2026 11:30 AM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/175308",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181215",
+   "ti": "Tender No. 84/2026 PROCUREMENT OF MANAGED CYBER SECURITY OPERATIONS CENTER (CSOC/SOC) SERV...",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Monday, November 16, 2026 03:00 PM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181215",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_soc",
+     "name": "SOC / SIEM / SOAR / Monitoring"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P178167",
+   "ti": "Provision and installation of PPF on 26 Vehicles and Restoration/upgradation of Toyota Lan...",
+   "dept": "Directorate General Immigration & Passports",
+   "cl": "Monday, November 16, 2026 11:30 AM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/178167",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173151",
+   "ti": "Installation of Air Conditioners at Salam Block (ICT Network Room) at Main Campus - NUML",
+   "dept": "National University of Modern Languages, (NUML) (National University of Modern Languages (NUML))",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173151",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P174546",
+   "ti": "PROCUREMENT OF RACKMOUNT ATS SWITCH AND MEDIA CONVERTER FOR EVHF STATION, HUNZA",
+   "dept": "Logistics Centre (North) (Pakistan Airports Authority (PAA))",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/174546",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P175332",
+   "ti": "Tender No.56 Construction of Tower & Pole Foundations for 132KV D/C T/Line F/F 132KV Grid ...",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Monday, November 16, 2026 11:30 AM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/175332",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P170418",
+   "ti": "TENDER FOR PURCHASE OF BRANDED LAPTOPS, DESKTOP PCs, NETWORK PRINTER AND DOCUMENT SCANNERS...",
+   "dept": "National Investment Trust Limited (National Investment Trust Limited (NITL))",
+   "cl": "Monday, November 16, 2026 03:00 PM",
+   "days": 2,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/170418",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P166740",
+   "ti": "PRE-QUALIFICATION OF SOLAR EPC CONTRACTORS BAHRIA UNIVERSITY KARACHI CAMPUSES",
+   "dept": "P&D Dte",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/166740",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181812",
+   "ti": "SSGC/SC/NR/EPADS2/14537 (Hiring of Consulting Services of EIA/IEE of Laying and Integratio...",
+   "dept": "SSGC",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181812",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P134889",
+   "ti": "SSGC/SC/NR/EPADS/14500 (Construction of 02 Nos. CPS Solar Rooms, SMS Shahdadpur & Tando Ha...",
+   "dept": "SSGC",
+   "cl": "Monday, November 16, 2026 10:30 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/134889",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P111442",
+   "ti": "NCB-304 Procurement of  Combo Generator With Welding Plant (5KVA-10KVA)(50HZ) (Estimated c...",
+   "dept": "IESCO-PMU (Islamabad Electric Supply company (IESCO))",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/111442",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P108181",
+   "ti": "REPLACEMENT OF EXISTING DOORS WITH FIRE RATED DOORS AT BPAS/BDS UPS ROOMS AND OTHER MISC. ...",
+   "dept": "SBP BSC Faisalabad (SBP Banking Services Corporation (BSC))",
+   "cl": "Monday, November 16, 2026 03:00 PM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/108181",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P110398",
+   "ti": "HIRING OF CONSULTANCY AND SUPERVISION SERVICES FOR UPGRADATION OF FIRE FIGHTING SYSTEM AT ...",
+   "dept": "SBP Banking Services Corporation (SBP BSC) Islamabad",
+   "cl": "Monday, November 16, 2026 03:00 PM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/110398",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181887",
+   "ti": "Procurement of Non-Consultancy Services",
+   "dept": "Federal Board of Revenue",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181887",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P177348",
+   "ti": "Tender for Digital Transformation and Integrated Enterprise Resource Planning (ERP) System...",
+   "dept": "Pakistan Civil Aviation Authority",
+   "cl": "Monday, November 16, 2026 11:00 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/177348",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017532E-Procurement",
+   "ti": "Corrigendum -Construction of SECP Head Office Building Mauve Area G-11 Islamabad (Package -2A Architecture, Electrical & Plumbing Works)\nMiscellaneous\nP78769",
+   "dept": "",
+   "cl": "Nov 16, 2026\n11:00 AM",
+   "days": 2,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187554",
+   "ti": "Procurement of Licenses, Support, Maintenance for SIEM and EDR Technology (NADRA-HQ-RFB-12...",
+   "dept": "NADRA (HQ) (National Database and Registration Authority (NADRA))",
+   "cl": "Tuesday, November 17, 2026 11:00 AM",
+   "days": 3,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187554",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_soc",
+     "name": "SOC / SIEM / SOAR / Monitoring"
+    },
+    {
+     "id": "sec_endpoint",
+     "name": "Endpoint & Threat Protection (EPP/EDR/XDR)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017833E",
+   "ti": "Extension and Repair of Smoke Detector at NBP Head Office Karachi",
+   "dept": "",
+   "cl": "Nov 17, 2026",
+   "days": 3,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017833E-Procurement",
+   "ti": "Extension & Repair Maintenance of Smoke Detector at NBP Head Office Building Karachi.\nElectrical Items\nP192390",
+   "dept": "",
+   "cl": "Nov 17, 2026\n11:00 AM",
+   "days": 3,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    },
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P144822",
+   "ti": "Tender No.46 for Construction of Tower Foundations along-with Erection & Stringing at 132K...",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Tuesday, November 17, 2026 11:30 AM",
+   "days": 3,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/144822",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187551",
+   "ti": "Tender No.39/2026-27. Rehabilitation of Control House Building & repair of Switch Yard Fen...",
+   "dept": "Civil Directorate MEPCO, Civil Works Division MEPCO HQ (Multan Electric Power Company (MEPCO))",
+   "cl": "Tuesday, November 17, 2026 12:00 PM",
+   "days": 3,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187551",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173550",
+   "ti": "Hanging/Fixing of 06 Fiber OFC From Golra More to 26 No. Chungi Due to Construction of N-...",
+   "dept": "National Telecommunication Corporation (National Telecom Corporation (NTC))",
+   "cl": "Tuesday, November 17, 2026 10:30 AM",
+   "days": 3,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173550",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P178884",
+   "ti": "Tender No. P-82/2026 Supply, Installation, Testing and Commissioning of 30 KVA UPS with Ba...",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Tuesday, November 17, 2026 03:00 PM",
+   "days": 3,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/178884",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P159846",
+   "ti": "Procurement of Services of a Consultancy firm for Conducting Compensation and Benefits Sur...",
+   "dept": "SBP BSC Head Office Karachi",
+   "cl": "Tuesday, November 17, 2026 11:00 AM",
+   "days": 3,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/159846",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188001",
+   "ti": "Tender No.34/2026-27. Raising of boundary wall at 132 KV Grid Station Chowk Azam & D.G. Kh...",
+   "dept": "Civil Directorate MEPCO, Civil Works Division MEPCO HQ (Multan Electric Power Company (MEPCO))",
+   "cl": "Tuesday, November 17, 2026 12:00 PM",
+   "days": 3,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188001",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187470",
+   "ti": "Tender No.40/2026-27. Rehabilitation of Control House Building at 132 KV Grid Station Fero...",
+   "dept": "Civil Directorate MEPCO, Civil Works Division MEPCO HQ (Multan Electric Power Company (MEPCO))",
+   "cl": "Tuesday, November 17, 2026 12:00 PM",
+   "days": 3,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187470",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188211",
+   "ti": "Tender No.32/2026-27. Rehabilitation of Control House Buildings at 132 KV Grid Station Qas...",
+   "dept": "Civil Directorate MEPCO, Civil Works Division MEPCO HQ (Multan Electric Power Company (MEPCO))",
+   "cl": "Tuesday, November 17, 2026 12:00 PM",
+   "days": 3,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188211",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P191559",
+   "ti": "Tender No. P-87/2026 Procurement of Rack Mount Servers",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Wednesday, November 18, 2026 03:00 PM",
+   "days": 4,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/191559",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017744E",
+   "ti": "Procurement of Rack Mount Servers",
+   "dept": "",
+   "cl": "Nov 18, 2026",
+   "days": 4,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017748E",
+   "ti": "Procurement of Desktop Computers and UPS Batteries for NUST",
+   "dept": "",
+   "cl": "Nov 18, 2026",
+   "days": 4,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P191541",
+   "ti": "Procurement of Desktop Computers and UPS Batteries for CIPS (NIPCONS)- NUST H-12 Campus Is...",
+   "dept": "P&LP Directorate",
+   "cl": "Wednesday, November 18, 2026 11:00 AM",
+   "days": 4,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/191541",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P191538",
+   "ti": "Tender No. P-86/2026 Procurement of Enterprise Video Conferencing Solution, Color LaserJet...",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Wednesday, November 18, 2026 03:00 PM",
+   "days": 4,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/191538",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P180789",
+   "ti": "NCB-267 CONSTRUCTION OF 01 NO. LINE BAY AT 132 KV SOWAN GRID STATION (CONTROLLING 132 KV T...",
+   "dept": "IESCO-PMU (Islamabad Electric Supply Company (IESCO))",
+   "cl": "Wednesday, November 18, 2026 11:00 AM",
+   "days": 4,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/180789",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017743E",
+   "ti": "Procurement of Enterprise Video Conferencing Solution",
+   "dept": "",
+   "cl": "Nov 18, 2026",
+   "days": 4,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181257",
+   "ti": "NCB-268 Extension of 11 kV Control Room at 132 kV Grid Station HMC-3 Hattar Road Taxila un...",
+   "dept": "IESCO-PMU (Islamabad Electric Supply Company (IESCO))",
+   "cl": "Wednesday, November 18, 2026 11:00 AM",
+   "days": 4,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181257",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187686",
+   "ti": "NADRA-HQ-RFB-126/2026 (Enhancement of Data Centre Facility Components at DR Site, Sargodha...",
+   "dept": "NADRA (HQ) (National Database and Registration Authority (NADRA))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187686",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017693E",
+   "ti": "Supply of Server Hardware and Storage Arrays for Data Centre",
+   "dept": "",
+   "cl": "Nov 19, 2026",
+   "days": 5,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    },
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017769E-Procurement",
+   "ti": "Request for Proposal (RFP) for Integrated Service Level Agreement (SLA) Extension and Technology Refresh at Higher Education Institutions (HEIs)\nInfo and Comm Tech\nHEC-P190104",
+   "dept": "",
+   "cl": "Nov 19, 2026\n11:30 AM",
+   "days": 5,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173493",
+   "ti": "21/PD/PSR/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING, BA...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173493",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173355",
+   "ti": "19/PD/CANTT-2/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173355",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P90094",
+   "ti": "Tender No. P-49/2026 Renewal of SLA Support Services Contract for IT Hardware Equipment at...",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Thursday, November 19, 2026 03:00 PM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/90094",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173268",
+   "ti": "17/PD/CITY-2/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING,...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173268",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173313",
+   "ti": "18/PD/CANTT-1/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173313",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P190104",
+   "ti": "Request for Proposal (RFP) for Integrated Service Level Agreement (SLA) Extension and Tech...",
+   "dept": "Higher Education Commission - HEC (Higher Education Commision (HEC))",
+   "cl": "Thursday, November 19, 2026 11:30 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/190104",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173523",
+   "ti": "22/PD/GRT/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING, BA...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173523",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017769E",
+   "ti": "RFP for Integrated Service Level Agreement Extension",
+   "dept": "",
+   "cl": "Nov 19, 2026",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173196",
+   "ti": "16/PD/CITY-1/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING,...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173196",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173547",
+   "ti": "23/PD/MBD/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING, BA...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173547",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187833",
+   "ti": "Hiring of Manpower Outsource Services",
+   "dept": "Federal Service Tribunal, Islamabad",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187833",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P144840",
+   "ti": "Tender No.49 for Transportation, Installation & Fabrication for Conversion of S/C Tower in...",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Thursday, November 19, 2026 11:30 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/144840",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P173421",
+   "ti": "20/PD/SKT/2026-27 ASSEMBLING, EXCAVATION, ERECTION, MAKING CONCRETE FOUNDATION, CURING, BA...",
+   "dept": "Office of Manager Project Construction 132 kV (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/173421",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P144837",
+   "ti": "Tender No.48 for Transportation, Installation & Fabrication for Conversion of S/C Tower in...",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Thursday, November 19, 2026 11:30 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/144837",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000015493E-Procurement",
+   "ti": "UP-GRADATION OF MICROWAVE ASSEMBLY FACILITY\nMD APF\nMiscellaneous\nPACB/786-A/26210010/0545/P-4",
+   "dept": "",
+   "cl": "Nov 19, 2026\n10:30 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188853",
+   "ti": "Tender No. 17/GSC (2026-27) - Construction of tower foundation to raise the ground clearan...",
+   "dept": "Office of Project Director (GSC) (Multan Electric Power Company (MEPCO))",
+   "cl": "Thursday, November 19, 2026 11:15 AM",
+   "days": 5,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188853",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P172428",
+   "ti": "Supply, Installation, Testing and Commissioning of Video Conferencing System with Multiple...",
+   "dept": "DG Services WAPDA (General Manager Finance (COORD) WAPDA)",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/172428",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P182145",
+   "ti": "Extension of 11Kv Room at 132Kv Grid Station Lala Musa.",
+   "dept": "Project Director GSC GEPCO (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/182145",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P182133",
+   "ti": "Extension of 11Kv Room at 132Kv Grid Station Eminabad",
+   "dept": "Project Director GSC GEPCO (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 19, 2026 11:00 AM",
+   "days": 5,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/182133",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017692E",
+   "ti": "Procurement of Next Generation Firewall for SBP Network",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    },
+    {
+     "id": "sec_network",
+     "name": "Network Security (NGFW, VPN, NAC)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017804E",
+   "ti": "Supply Installation Testing and Commissioning of Network Data Diode",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017610E-Procurement",
+   "ti": "Supply of Compressor for HVAC Systems\nREQUEST FOR BIDS PROCUREMENT OF GOODS 1. The Comsats University, Islamabad (Islamabad Campus)...\nCivil Goods\nTN-777 (EFS # 36749) Supply of Compressor for HVAC Systems",
+   "dept": "",
+   "cl": "Nov 20, 2026\n11:00 AM",
+   "days": 6,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_grc",
+     "name": "GRC / vCISO / Security Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017794E",
+   "ti": "Procurement of Next Generation Firewalls with License and Support",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_network",
+     "name": "Network Security (NGFW, VPN, NAC)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P193551",
+   "ti": "Supply & Installation of CCTV Setup at Expo Centre Karachi",
+   "dept": "Trade Development Authority of Pakistan",
+   "cl": "Friday, November 20, 2026 11:00 AM",
+   "days": 6,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/193551",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017641E",
+   "ti": "Procurement of WiFi Access Points and Wireless Controllers",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P189432",
+   "ti": "Procurement of TDAP Helpdesk Logos and ancillaries",
+   "dept": "Trade Development Authority of Pakistan",
+   "cl": "Friday, November 20, 2026 11:00 AM",
+   "days": 6,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/189432",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_noc",
+     "name": "NOC / Helpdesk / L1-L2 Support"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017691E",
+   "ti": "Procurement of Cisco LAN Switches and Network Equipment",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017767E-Procurement",
+   "ti": "EXPRESSION OF INTEREST PROCUREMENT OF CONSULTANCY SERVICES ENGAGEMENT OF LEGAL CONSULTANT IN PAKISTAN AIRPORTS AUTHORITY\nServices\n12653",
+   "dept": "",
+   "cl": "Nov 20, 2026\n11:00 AM",
+   "days": 6,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188832",
+   "ti": "CONSULTANCY SERVICES FOR  ENGAGEMENT OF LEGAL CONSULTANT IN PAKISTAN AIRPORTS AUTHORITY",
+   "dept": "Pakistan Airports Authority",
+   "cl": "Friday, November 20, 2026 11:00 AM",
+   "days": 6,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188832",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017817E-Procurement",
+   "ti": "Supply and Installation of 06 KVA UPS for ZOT, LMT, FSD & Sihala Laboratories.\nSupply and Installation of 06 KVA UPS for ZOT,...\nEquipments\nQA-20180-MS",
+   "dept": "",
+   "cl": "Nov 20, 2026\n02:15 PM",
+   "days": 6,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017817E",
+   "ti": "Supply and Installation of 06 KVA UPS for ZOT LMT FSD Laboratories",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017521E-Procurement",
+   "ti": "Tender No.18 - 23 Supply of material\nElectrical Items\nTender No.18 - 23 Supply of material",
+   "dept": "",
+   "cl": "Nov 20, 2026\n11:00 AM",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P180123",
+   "ti": "T-28: Supply of Material for New 132 KV Grid Station Rasool Pura (Bandala-II)",
+   "dept": "Office of PD GSC FESCO (Faisalabad Electric Supply Company (FESCO))",
+   "cl": "Friday, November 20, 2026 11:00 AM",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/180123",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P191199",
+   "ti": "Consultancy Services for Design Vetting and Construction Supervision for \"Construction o...",
+   "dept": "Daanish University Trust",
+   "cl": "Friday, November 20, 2026 11:00 AM",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/191199",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017687E",
+   "ti": "Repair and Maintenance of Electrical Installation at Judges Colony",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017521E",
+   "ti": "Tender No.18 Supply of Electrical Items",
+   "dept": "",
+   "cl": "Nov 20, 2026",
+   "days": 6,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017893E-Procurement",
+   "ti": "Managed WAN Connectivity\nConnectivity between FIA HQ Islamabad and DR Site; nationwide immigration and government sites; Internet; Managed WAN Services, Hardware License, Onsite Local Support and Training.\nServices\nP186060",
+   "dept": "",
+   "cl": "Nov 21, 2026\n10:00 AM",
+   "days": 7,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    },
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017625E",
+   "ti": "Supply of Structured Cabling and FTTH Material",
+   "dept": "",
+   "cl": "Nov 21, 2026",
+   "days": 7,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    },
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017882E-Procurement",
+   "ti": "Renewal of in-use License Subscription of Nessus Expert\nInfo and Comm Tech\nGSD (PROC-I) /467403/ Renewal /Scanning license/2026",
+   "dept": "",
+   "cl": "Nov 21, 2026\n11:00 AM",
+   "days": 7,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_vapt",
+     "name": "VAPT / Vulnerability Management"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017630E",
+   "ti": "Procurement of Generator and UPS for Regional Office Islamabad",
+   "dept": "",
+   "cl": "Nov 21, 2026",
+   "days": 7,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017672E",
+   "ti": "Annual Maintenance Contract for IT Equipment and Network Infrastructure",
+   "dept": "",
+   "cl": "Nov 22, 2026",
+   "days": 8,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Networking"
+    },
+    {
+     "id": "maintenance",
+     "name": "Maintenance & Support"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017943E-Procurement",
+   "ti": "Supply of High-Grade Concrete Sleepers & Track Ballast\nImport of refined white sugar to ensure uninterrupted availability in the domestic market and stabilize retail prices.\nTender Description\nCivil Goods\nAPM/PPRA/2026/001",
+   "dept": "",
+   "cl": "Nov 22, 2026\n10:00 AM",
+   "days": 8,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "nms",
+     "name": "NMS / Observability / ITSM Platforms"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017938E-Procurement",
+   "ti": "Provision of IT support and Helpdesk services at IT department Head Office and DR site Korangi\nInfo and Comm Tech\nIT-A4972-SJ",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:15 PM",
+   "days": 9,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    },
+    {
+     "id": "managed_noc",
+     "name": "NOC / Helpdesk / L1-L2 Support"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P161898",
+   "ti": "Outsourcing of operation and maintenance of Track related Machines",
+   "dept": "Chief Engineer/ Open Line",
+   "cl": "Monday, November 23, 2026 10:30 AM",
+   "days": 9,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/161898",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    },
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P151479",
+   "ti": "SSGC/SC/NR/EPAD2/14525 (Maintenance & Service Contract for R430 Dell Rack Mount Services 1...",
+   "dept": "SSGC",
+   "cl": "Monday, November 23, 2026 10:00 AM",
+   "days": 9,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/151479",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "dc_infra",
+     "name": "Data Centre Infrastructure"
+    },
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017858E-Procurement",
+   "ti": "Supply and Installation of Aluminium Mobile Tower Scaffolding (40ft) at PSO Keamari Terminal C.\nSPECIAL INSTRUCTIONS: Any party interested to participate in any of the tender(s) may send its request for tender documents through SAP Ariba Portal in the following manner: 1. Scanned copy of the duly signed and stamped request on official letterhead of the bidder shall be uploaded on SAP Ariba Portal. In the subject request letter, please mention \"Tender Documents Collection Request - Tender No. ________\". 2. Request shall be accompanied by scanned copies of the following: a. Valid NTN b. GST Certificate c. Provincial Sales Tax Certificates (where applicable), d. CNIC of owner/ authorized representative e. Vendor should be an active tax payer.\nSupply and Installation of Aluminium Mobile Tower...\nEquipments\nOP-20157-MS",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:15 PM",
+   "days": 9,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017794E-Procurement",
+   "ti": "Procurement of Next Generation Firewalls with Four (04) License and Support for NTC\nProcurement of Next Generation Firewalls with...\nInfo and Comm Tech\nP187188",
+   "dept": "",
+   "cl": "Nov 23, 2026\n10:30 AM",
+   "days": 9,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_network",
+     "name": "Network Security (NGFW, VPN, NAC)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017872E-Procurement",
+   "ti": "AD-A4974-NZ-Telecommunication, 5G data and Tracking services contract for PSO locations all over Pakistan (for Two Years)\nServices\nAD-A4974-NZ",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:15 PM",
+   "days": 9,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017804E-Procurement",
+   "ti": "Supply, Installation, Testing and Commissioning of Network Data Diode\nSupply, Installation, Testing and Commissioning...\nInfo and Comm Tech\nP189564",
+   "dept": "",
+   "cl": "Nov 23, 2026\n11:00 AM",
+   "days": 9,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017797E-Procurement",
+   "ti": "Supply, Installation, Maintenance and Technical Support of Additional Licenses for in-use Privilege Access Management (PAM) Solution\nSupply, Installation, Maintenance and Technical...\nInfo and Comm Tech\nGSD (PROC-I) / 467400/ Additional PAM Licenses/2026",
+   "dept": "",
+   "cl": "Nov 23, 2026\n11:00 AM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "sec_iam",
+     "name": "Identity & Access Management (IAM/PAM/MFA)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P182064",
+   "ti": "Electrification and Installation of CCTV System and Allied Works at Main Store Mechanical ...",
+   "dept": "DD Mechanical-II",
+   "cl": "Monday, November 23, 2026 11:30 AM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/182064",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017825E-Procurement",
+   "ti": "Procurement of Electrical & Mechanical (E&M) Works for PSDP Project \"Installation of Weather Surveillance Radar at Multan, Islamic Republic of Pakistan\"\nThe FLOOD FORECASTING DIVISION (PAKISTAN...\nElectrical Items\n163550",
+   "dept": "",
+   "cl": "Nov 23, 2026\n10:00 AM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    },
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017978E-Procurement",
+   "ti": "ELIGIBLE STATE-OWNED ENTITIES FOR PROVISION OF END-TO-END UNIQUE IDENTIFICATION MARKING (UIM) / TAX STAMP SERVICES FOR HOUSEHOLD ELECTRICAL GOODS, STORAGE BATTERIES AND\nLUBRICANTS\nThis Invitation to Bid/Proposal is addressed to...\nMiscellaneous\n9(2)TDU/IR/2026",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:00 PM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P194616",
+   "ti": "(T-875) HIRING OF FIRM/CONTRACTOR FOR SUPPLY OF SKILLED / UN-SKILLED MANPOWER AT JPCL TPS,...",
+   "dept": "Jamshoro Power Company Limited",
+   "cl": "Monday, November 23, 2026 11:30 AM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/194616",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017799E-Procurement",
+   "ti": "Maintenance & Technical Support Services for in-use Cisco Network devices\nMaintenance & Technical Support Services for...\nInfo and Comm Tech\nGSD (PROC-I) / 467401/ Maintenance Cisco devices / 2026",
+   "dept": "",
+   "cl": "Nov 23, 2026\n11:00 AM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017842E",
+   "ti": "QlikSense Enterprise Server Software Subscription",
+   "dept": "",
+   "cl": "Nov 23, 2026",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017842E-Procurement",
+   "ti": "QlikSense Enterprise Server Software Subscription\nIT-20179-YP-QlikSense Enterprise Server Software...\nMiscellaneous\nIT-20179-YP",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:15 PM",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "servers",
+     "name": "Servers & Compute"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017799E",
+   "ti": "Maintenance and Technical Support Services for Cisco Network devices",
+   "dept": "",
+   "cl": "Nov 23, 2026",
+   "days": 9,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017999E-Procurement",
+   "ti": "Provision & Installation of Electricity Sub-Meters for Each Departments/Directorates at NADRA HQs\nProvision & Installation of Electricity Sub-Meters for Each Departments/Directorates at NADRA HQs\nGOVERNMENT OF PAKISTAN MINISTRY OF INTERIOR &...\nElectrical Items\n(NADRA-HQ-RFB-133/2026) Provision & Installation of Electricity Sub-Meters for Each Departments/Directorates at NADRA HQs",
+   "dept": "",
+   "cl": "Nov 23, 2026\n11:00 AM",
+   "days": 9,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P124666",
+   "ti": "Replacement of Existing Doors with Fire Rated Doors at BPAS/BDS UPS Rooms, SBP Banking Ser...",
+   "dept": "State Bank of Pakistan (SBP), Lahore (SBP Banking Services Corporation (BSC))",
+   "cl": "Monday, November 23, 2026 11:00 AM",
+   "days": 9,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/124666",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017795E",
+   "ti": "Replacement of Doors with Fire Rated Doors at UPS Rooms SBP BSC Karachi",
+   "dept": "",
+   "cl": "Nov 23, 2026",
+   "days": 9,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017923E-Procurement",
+   "ti": "SECOND ROUND (2026): AUTHORIZATION OF ADDITIONAL VENDORS FOR INSTALLATION AND MAINTENANCE OF VIDEO ANALYTICS SYSTEM FOR COTTON BALES COUNTING IN TEXTILE SECTOR\nMiscellaneous\n9(9)/Tdu/2026",
+   "dept": "",
+   "cl": "Nov 23, 2026\n11:00 AM",
+   "days": 9,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "ai_auto",
+     "name": "Automation, AI/ML & DevOps"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P59645",
+   "ti": "Tender No. P-39 Consultancy Services for an Independent End-to-End Assessment of Contact C...",
+   "dept": "Pakistan Revenue Automation Pvt Limited",
+   "cl": "Monday, November 23, 2026 03:00 PM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/59645",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P183645",
+   "ti": "Purchase of Store Material Electrical Items for the Routine / Maintenance work of P & Q Bl...",
+   "dept": "DD Mechanical-II",
+   "cl": "Monday, November 23, 2026 11:30 AM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/183645",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000018032E-Procurement",
+   "ti": "Individual Consultant - Strategic Advisory (003/HR/CONS/01/2026)\ne-proposals for the consultancy services of...\nServices\nP190503",
+   "dept": "",
+   "cl": "Nov 23, 2026\n10:00 AM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P190503",
+   "ti": "Individual Consultant - Strategic Advisory (003/HR/CONS/01/2026)",
+   "dept": "National Disaster Risk Management Fund (National Disaster Risk Management Fund (NDRMF))",
+   "cl": "Monday, November 23, 2026 10:00 AM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/190503",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P182403",
+   "ti": "NCB-269 Construction of Boundary wall/RCC Retaining Wall at 132 kV Lillah Grid Station und...",
+   "dept": "IESCO-PMU (Islamabad Electric Supply Company (IESCO))",
+   "cl": "Monday, November 23, 2026 11:00 AM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/182403",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017889E-Procurement",
+   "ti": "Electrification Works for New Fire Fighting Shed at Lahore Aviation\nIC-20182-JG\nElectrical Items\nIC-20182-JG",
+   "dept": "",
+   "cl": "Nov 23, 2026\n02:15 PM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P182043",
+   "ti": "Purchase of Store Material Electrical Items for the Routine / Maintenance work of R & S Bl...",
+   "dept": "DD Mechanical-II",
+   "cl": "Monday, November 23, 2026 11:30 AM",
+   "days": 9,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/182043",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017824E-Procurement",
+   "ti": "Purchase of NG Firewalls and Enterprise Switches\nEquipments\nNADRA-HQ-RFB-131/2026",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    },
+    {
+     "id": "sec_network",
+     "name": "Network Security (NGFW, VPN, NAC)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017809E-Procurement",
+   "ti": "Enhancement of Ransomware Protected Backup Capacity for Existing CyberSense Vault Solution\nEquipments\nNADRA-HQ-RFB-130/2026",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 100,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    },
+    {
+     "id": "sec_endpoint",
+     "name": "Endpoint & Threat Protection (EPP/EDR/XDR)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017824E",
+   "ti": "Purchase of NG Firewalls and Enterprise Switches",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Networking"
+    },
+    {
+     "id": "security",
+     "name": "Cybersecurity"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017809E",
+   "ti": "Enhancement of Ransomware Protected Backup Capacity for CyberSense Vault Solution",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "storage",
+     "name": "Storage & Backup"
+    },
+    {
+     "id": "sec_endpoint",
+     "name": "Endpoint & Threat Protection (EPP/EDR/XDR)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017792E-Procurement",
+   "ti": "Supply of Optical Fiber Cables to NTC on DDP Site Basis\nInfo and Comm Tech\nP188589",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017792E",
+   "ti": "Supply of Optical Fiber Cables to NTC on DDP Site Basis",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017843E-Procurement",
+   "ti": "341-Procurement of Analog Telephone Sets at SBP Head office Karachi\n341\nElectrical Items\nED/PROC-HOK/1256372/2026/341",
+   "dept": "",
+   "cl": "Nov 24, 2026\n12:00 PM",
+   "days": 10,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P195606",
+   "ti": "Tender for Excavation/Transportation of Rock Salt Contract for Jansukh Mine No. 22 at PMDC...",
+   "dept": "Pakistan Mineral Development Corporation (Pakistan Mineral Development Corporation (PMDC))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/195606",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188790",
+   "ti": "Outsourcing of mess facility",
+   "dept": "Foreign Service Academy (FSA) (Foreign Service Academy (FSA))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188790",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P187959",
+   "ti": "REFURBISHMENT WORK OF ATC TOWER ACCESS FLOOR AT AIIAP, LAHORE",
+   "dept": "ALLAMA IQBAL INTERNATIONAL AIRPORT (PAKISTAN AIRPORTS AUTHORITY) (Pakistan Airports Authority (PAA))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/187959",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181503",
+   "ti": "Hiring the Services of Resident Engineers through reputed Firms",
+   "dept": "Military Accountant General Office, Rawalpindi (Pakistan Military Accounts Department (PMAD))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181503",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017843E",
+   "ti": "Procurement of Analog Telephone Sets at SBP Head Office Karachi",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power",
+     "name": "Power & Electrical"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P181689",
+   "ti": "Supply Installation, Commissioning of 200 KW On-Grid Solar System at FIA HQ Building",
+   "dept": "Federal Investigation Agency(FIA) (Federal Investigation Agency (FIA))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/181689",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000015004E-Procurement",
+   "ti": "CORRIGENDUM 02 PROCUREMENT OF NON-CONSULTANCY SERVICES FOR PRODUCTION OF PROMOTIONAL VIDEOS\nServices\n12591D",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000014891E-Procurement",
+   "ti": "UP-GRADATION OF ESS TESTING FACILITY (SOLAR RADIATION TEST & BURN-IN TEST STATION)\nMD APF\nMiscellaneous\nPACB/786-A/26211016/0538/P-4, PACB/786-A/26216023/0540/P-4",
+   "dept": "",
+   "cl": "Nov 24, 2026\n10:30 AM",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017813E-Framework-Agreement",
+   "ti": "PROCUREMENT OF NON-CONSULTANCY SERVICES-Out-Sourcing of General, Non-Core Services\nServices\nFFW10545",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P194538",
+   "ti": "Hiring of a Management Firm for Project Management and Monitoring of the Prime Minister's...",
+   "dept": "Inter Boards Coordination Commission (IBCC) (Inter Boards Coordination Commission (IBCC))",
+   "cl": "Tuesday, November 24, 2026 11:00 AM",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/194538",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017909E-Procurement",
+   "ti": "Hiring of a Management Firm for Project Management and Monitoring of the Prime Minister's Youth Chromebook Scheme\nProcurement of Non-Consultancy Services for Hiring of a Management Firm for Project Management and Monitoring of the Prime Minister's Youth Chromebook Scheme through Open Competitive Bidding using Single Stage-Two Envelope Procedure with Quality and Cost Based Selection (QCBS), in accordance with the Public Procurement Rules, 2026.\nServices\nP194538",
+   "dept": "",
+   "cl": "Nov 24, 2026\n11:00 AM",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000015004E",
+   "ti": "CORRIGENDUM 02 PROCUREMENT OF NON-CONSULTANCY SERVICES",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000014891E",
+   "ti": "UP-GRADATION OF ESS TESTING FACILITY (SOLAR RADIATION TEST)",
+   "dept": "",
+   "cl": "Nov 24, 2026",
+   "days": 10,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017548E",
+   "ti": "Cybersecurity Assessment and SIEM Implementation",
+   "dept": "",
+   "cl": "Nov 25, 2026",
+   "days": 11,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "security",
+     "name": "Cybersecurity"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017505E",
+   "ti": "Managed NOC Services and IT Helpdesk Outsourcing",
+   "dept": "",
+   "cl": "Nov 25, 2026",
+   "days": 11,
+   "score": 95,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "security",
+     "name": "Cybersecurity"
+    },
+    {
+     "id": "managed_it",
+     "name": "Managed IT Services"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P118372",
+   "ti": "Procurement of Maintenance Services for CCTV Systems Installed at Different Locations of S...",
+   "dept": "SBP Banking Services Corporation (BSC)",
+   "cl": "Wednesday, November 25, 2026 11:00 AM",
+   "days": 11,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/118372",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "elv",
+     "name": "ELV Systems"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000016507E-Procurement",
+   "ti": "PROCUREMENT OF POWER ANALYZER FOR GRID STATIONS UNDER DIRECTOR GENERAL FIELD OPERATIONS NGCP NORTH MULTAN\nEquipments\nDG-FO-NGCP-MN-01-2026-27",
+   "dept": "",
+   "cl": "Nov 25, 2026\n02:30 PM",
+   "days": 11,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000016507E",
+   "ti": "PROCUREMENT OF POWER ANALYZER FOR GRID STATIONS",
+   "dept": "",
+   "cl": "Nov 25, 2026",
+   "days": 11,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P178032",
+   "ti": "ESTIMATED COST OF LAYING WATER SUPPLY PIPELINE FROM PUMP NEAR HOUSE NO.234 TO EXISTING WAT...",
+   "dept": "Divisional Superintendent, Pakistan Railway Pakistan",
+   "cl": "Wednesday, November 25, 2026 12:00 PM",
+   "days": 11,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/178032",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "ai_auto",
+     "name": "Automation, AI/ML & DevOps"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P183306",
+   "ti": "LP 05 CEMB NOVEMBER 2026 (O & M SERVICES FOR SOLAR SYSYTEM)",
+   "dept": "The Centre of Excellence in Molecular Biology (CEMB) (The Centre of Excellence in Molecular Biology (CEMB))",
+   "cl": "Wednesday, November 25, 2026 10:00 AM",
+   "days": 11,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/183306",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P172653",
+   "ti": "REPAIR / MAINTENANCE OF 750 KVA GENERATOR CHILLED WATER MOTOR / SUBMERSIBLE PUMP AND MISCE...",
+   "dept": "Sector Development E&M Dev. (FMP) (Capital Development Aurhority (CDA))",
+   "cl": "Wednesday, November 25, 2026 11:30 AM",
+   "days": 11,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/172653",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017863E-Procurement",
+   "ti": "Contract for Operation and Maintenance of 04 Nos.Lifts Installed at NBP, G-5/1 Building, Islamabad\nContract for Operation and Maintenance of 04 Nos.Lifts\nServices\nP188574",
+   "dept": "",
+   "cl": "Nov 26, 2026\n11:00 AM",
+   "days": 12,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188574",
+   "ti": "Contract for Operation and Maintenance of 04 Nos.Lifts   Installed at NBP, G-5/1 Building,...",
+   "dept": "National Bank of Pakistan",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 85,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188574",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "managed_om",
+     "name": "Managed O&M / AMC / Break-Fix"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P191460",
+   "ti": "PD (GSC) QESCO-02 (2026-2027) - Construction of 220kV Type Tower Foundations, Erection a...",
+   "dept": "Quetta Electric Supply Company (QESCO) (Quetta Electric Supply Company (QESCO))",
+   "cl": "Thursday, November 26, 2026 11:30 AM",
+   "days": 12,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/191460",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P188958",
+   "ti": "Tender No. 18/GSC (2026-27) - Construction of tower foundation to raise the ground clearan...",
+   "dept": "Office of Project Director (GSC) (Multan Electric Power Company (MEPCO))",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/188958",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "wireless_access",
+     "name": "Wireless Access & Mobile Sites"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P186060",
+   "ti": "Managed WAN Connectivity",
+   "dept": "FIA IBMS DIRECTORATE",
+   "cl": "Thursday, November 26, 2026 10:00 AM",
+   "days": 12,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/186060",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P192810",
+   "ti": "Acquiring of Transaction SMS services for NHMP E-Ticketing for 01 Year further extendable ...",
+   "dept": "NHMP, Headquarters",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/192810",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "nms",
+     "name": "NMS / Observability / ITSM Platforms"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P194277",
+   "ti": "Tender for Excavation and Carriage/Transportation of Rock Salt Contract for Sohal Mine No....",
+   "dept": "Pakistan Mineral Development Corporation",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/194277",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "fttx",
+     "name": "FTTX / Fibre Access Network"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P193506",
+   "ti": "Extension of 11Kv Room at 132Kv Grid Station Bhimber.",
+   "dept": "Project Director GSC GEPCO (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/193506",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P193485",
+   "ti": "Extension of 11Kv Room at 132Kv Grid Station Kot Agha.",
+   "dept": "Project Director GSC GEPCO (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/193485",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P193497",
+   "ti": "Extension of 11Kv Room at 132Kv Grid Station Mandi BahauDin.",
+   "dept": "Project Director GSC GEPCO (Gujranwala Electric Power Company Limited (GEPCO))",
+   "cl": "Thursday, November 26, 2026 11:00 AM",
+   "days": 12,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/193497",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017500E",
+   "ti": "IP Telephony and Unified Communications System Upgrade",
+   "dept": "",
+   "cl": "Nov 27, 2026",
+   "days": 13,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P171330",
+   "ti": "Expression of Interest (EOI) for Third Party Validation (TPV) Services for Solar Works of ...",
+   "dept": "Private Power & Infrastructure Board (PPIB) (Ministry of Energy (Power Division))",
+   "cl": "Friday, November 27, 2026 10:30 AM",
+   "days": 13,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/171330",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000016931E",
+   "ti": "EOI FOR THIRD PARTY VALIDATION SERVICES FOR SOLAR POWER PROJECTS",
+   "dept": "",
+   "cl": "Nov 27, 2026",
+   "days": 13,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017578E",
+   "ti": "Cloud Migration and Hybrid Infrastructure Services",
+   "dept": "",
+   "cl": "Nov 28, 2026",
+   "days": 14,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "cloud",
+     "name": "Cloud & Hybrid IT"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017487E",
+   "ti": "Supply and Installation of Solar Power System 500KW",
+   "dept": "",
+   "cl": "Nov 28, 2026",
+   "days": 14,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P172878",
+   "ti": "EXPRESSION OF INTEREST (EOI)-THIRD PARTY VALIDATION (TPV) SERVICES FOR NON-SOLAR WORKS OF ...",
+   "dept": "Private Power & Infrastructure Board (PPIB) (Ministry of Energy (Power Division))",
+   "cl": "Monday, November 30, 2026 10:30 AM",
+   "days": 16,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/172878",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000016977E",
+   "ti": "EOI FOR THIRD PARTY VALIDATION SERVICES FOR NON-SOLAR POWER",
+   "dept": "",
+   "cl": "Nov 30, 2026",
+   "days": 16,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P121459",
+   "ti": "REPLACEMENT OF CARDS OF TELEPHONE EXCHANGE AT SBP BSC (BANK) RAWALPINDI",
+   "dept": "SBP Banking Services Corporation (SBP Banking Services Corporation (BSC))",
+   "cl": "Tuesday, December 1, 2026 03:20 PM",
+   "days": 17,
+   "score": 75,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/121459",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "uc",
+     "name": "Unified Communications"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017715E",
+   "ti": "Pre-Qualification of Firms for Electrical Power Infrastructure",
+   "dept": "",
+   "cl": "Dec 01, 2026",
+   "days": 17,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017983E-Procurement",
+   "ti": "ICB-01 Procurement of 145 KV Circuit Breaker With SSS along with allied accessories under cost deposit, 7th STG/ MULTI YEAR TARIFF (MYT), Upgradation of GSO Network\nEstimated cost (Rs. 574 M) including GST & all other applicable taxes\"\nICB-01 Procurement of 145 KV Circuit Breaker With...\nCivil Goods\nICB-01 Procurement of 145 KV Circuit Breaker With SSS along with allied accessories under cost deposit, 7th STG/ MULTI YEAR TARIFF (MYT), Upgradation of GSO Network\nEstimated cost (Rs. 574 M) including GST & all other applicable taxes\"",
+   "dept": "",
+   "cl": "Dec 02, 2026\n11:00 AM",
+   "days": 18,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017734E-Framework-Agreement",
+   "ti": "HIRING OF TECHNICAL SERVICES UNDER OPEN FRAMEWORK AGREEMENTS FOR POWER INFRASTRUCTURE PROJECTS\nServices\nFFW10114",
+   "dept": "",
+   "cl": "Dec 03, 2026\n10:00 AM",
+   "days": 19,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017751E-Framework-Agreement",
+   "ti": "HIRING OF TECHNICAL SERVICES UNDER OPEN FRAMEWORK AGREEMENTS FOR POWER INFRASTRUCTURE PROJECTS\nServices\nFFW10986",
+   "dept": "",
+   "cl": "Dec 03, 2026\n10:00 AM",
+   "days": 19,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017734E",
+   "ti": "HIRING OF TECHNICAL SERVICES FOR POWER INFRASTRUCTURE",
+   "dept": "",
+   "cl": "Dec 03, 2026",
+   "days": 19,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-FW0000017736E-Framework-Agreement",
+   "ti": "HIRING OF TECHNICAL SERVICES UNDER OPEN FRAMEWORK AGREEMENTS FOR POWER INFRASTRUCTURE PROJECTS\nServices\nFFW10980",
+   "dept": "",
+   "cl": "Dec 03, 2026\n10:00 AM",
+   "days": 19,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    },
+    {
+     "id": "outsourcing",
+     "name": "Resource Outsourcing / Staff Augmentation"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017741E-Procurement",
+   "ti": "Solar System and Solarization of Car Parking Shed\n80KW rooftop Solar System and 50 kW Solarized Car...\nServices\n02/2026",
+   "dept": "",
+   "cl": "Dec 03, 2026\n11:00 AM",
+   "days": 19,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017741E",
+   "ti": "Solar System and Solarization of Car Parking Shed 80KW",
+   "dept": "",
+   "cl": "Dec 03, 2026",
+   "days": 19,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "power_energy",
+     "name": "Power, UPS, Solar & Energy Infrastructure"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P92854",
+   "ti": "REQUEST FOR PROPOSAL (RFP) FOR CONSULTANCY SERVICES FOR ESTABLISHMENT, OPERATION  AND MANA...",
+   "dept": "Port Qasim Authority (PSP Department)",
+   "cl": "Thursday, December 3, 2026 12:00 PM",
+   "days": 19,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/92854",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000017375E",
+   "ti": "SD-WAN Implementation and Network Modernization",
+   "dept": "",
+   "cl": "Dec 05, 2026",
+   "days": 21,
+   "score": 80,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "networking",
+     "name": "Enterprise Networking (LAN/WAN/SD-WAN/ACI)"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P139221",
+   "ti": "Hiring of Independent Technical Consultant for Monitoring of Refinery Upgrade Projects",
+   "dept": "Procurement Dept, Inter State Gas Systems. (Inter State Gas Systems (ISGS))",
+   "cl": "Thursday, December 10, 2026 03:00 PM",
+   "days": 26,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/139221",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "PPRA-TS0000016912E",
+   "ti": "CONSULTANCY SERVICES FOR INTEGRATED NATIONAL URBAN REGENERATION",
+   "dept": "",
+   "cl": "Dec 22, 2026",
+   "days": 38,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "PPRA",
+   "detailUrl": "",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  },
+  {
+   "id": "EPADS-P171585",
+   "ti": "CONSULTANCY SERVICES FOR INTEGRATED NATIONAL URBAN REGENERATION IN ISLAMABAD AND OTHER MAJ...",
+   "dept": "Estate Office",
+   "cl": "Tuesday, December 22, 2026 11:00 AM",
+   "days": 38,
+   "score": 70,
+   "verdict": "REVIEW",
+   "source": "EPADS",
+   "detailUrl": "https://epads.gov.pk/opportunities/federal/procurements/171585",
+   "acqStatus": "PENDING",
+   "assignee": "",
+   "goNogo": "",
+   "solMatch": [
+    {
+     "id": "pm_consult",
+     "name": "Project Management & IT Consulting"
+    }
+   ]
+  }
+ ]
+}

@@ -37,6 +37,9 @@ export default function RootLayout({ children }) {
                 <a href="/" className="rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-brand">
                   Overview
                 </a>
+                <a href="/leadership" className="rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-brand">
+                  Leadership
+                </a>
                 <a href="/knowledge" className="rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-brand">
                   Knowledge bank
                 </a>
