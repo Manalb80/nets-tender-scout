@@ -21,11 +21,29 @@ Copy to `.env.local`:
 NEXT_PUBLIC_SHAREPOINT_BASE=https://netsinternational-my.sharepoint.com/personal/iqra_iqbal_nets-international_com/Documents/NETS-Karachi%20Presales-Technical%20Proposals
 ```
 
+## CSS scoping contract (protects the legacy artifact)
+Three locks, set in `tailwind.config.js` and `styles/globals.css`:
+1. `corePlugins.preflight: false`: Tailwind's global reset is off. The reset is
+   what breaks foreign pages, not the utilities.
+2. `important: "#nets-next-root"`: every utility is emitted scoped, e.g.
+   `#nets-next-root .p-6 {...}`. Loaded next to the legacy artifact, no rule
+   can touch anything outside the wrapper.
+3. A minimal hand-written reset lives under `.nets-next` in `styles/globals.css`.
+   Dark mode is class-based (`.dark` on the wrapper), never media-query.
+
+Every page must render inside `<div id="nets-next-root" className="nets-next">`.
+
 ## Components
 - `components/RfpIntakeCard.jsx`: Step 1 RFP intake with upload, portal
   download link, SharePoint cloud folder path (truncated, copy with "Copied"
   feedback), and smart folder opening (base folder until the per-tender
   subfolder is provisioned and `sharepointConfirmed` is set).
+- `components/ExecutiveDetailsDrawer.jsx`: leadership right-hand slide-out.
+  Two tabs (Executive overview / RFP details), confirmed vs indicative source
+  badges, exact-aware portal link, Esc/backdrop/X close, controlled via
+  `open` + `onClose`. Exports `portalLink()` for reuse in tables.
+- `components/KnowledgeBankBrowser.jsx`: read-only proposal library. Phrase
+  search with highlights, vertical filter with counts, proposals/paragraphs
+  modes, split list + reader with section jump. Pure props, no fetching.
 
-More components are ported one view at a time per the production migration
-plan (Knowledge Bank first, then Workbench, then role dashboards).
+Port order: Knowledge Bank page wiring, then Workbench, then role dashboards.

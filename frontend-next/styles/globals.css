@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Scoped reset for the NETS production frontend.
+ *
+ * Tailwind's preflight is disabled in tailwind.config.js, so this file provides
+ * the minimal reset our components need, confined to the `.nets-next` wrapper.
+ * Nothing in here can style the legacy artifact or any host page element.
+ */
+@layer base {
+  .nets-next {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #0f172a; /* slate-900 */
+    -webkit-font-smoothing: antialiased;
+  }
+  .nets-next.dark,
+  .dark .nets-next {
+    color: #e2e8f0; /* slate-200 */
+  }
+
+  /* Box model + margin reset, scoped */
+  .nets-next *,
+  .nets-next *::before,
+  .nets-next *::after {
+    box-sizing: border-box;
+    margin: 0;
+    border-width: 0;
+    border-style: solid;
+    border-color: currentColor;
+  }
+
+  /* Form elements inherit typography, scoped */
+  .nets-next button,
+  .nets-next input,
+  .nets-next select,
+  .nets-next textarea {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+  }
+  .nets-next button {
+    cursor: pointer;
+  }
+
+  .nets-next a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nets-next img,
+  .nets-next svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  .nets-next ul,
+  .nets-next ol {
+    padding: 0;
+  }
+}
