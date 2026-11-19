@@ -1,4 +1,9 @@
 """
+SUPERSEDED by scripts/run_scan.py (backend/tender_scan). Kept for reference only: the daily
+workflow no longer runs this file. Known faults: reads at most 10 pages per portal, drops expired
+tenders without closing them, uses third-party relay sites, and fetches Sindh Bank from a host that
+does not respond.
+
 Lightweight scraper for GitHub Actions.
 Scrapes THREE portals: Sindh Bank, PPRA EPMS, and EPADS.
 Uses fallback strategies for cloud servers that get blocked.

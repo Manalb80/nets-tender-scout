@@ -4,22 +4,43 @@ on:
   schedule:
     - cron: '47 5 * * 1-6'
   workflow_dispatch:
+  pull_request:
+    paths: ['backend/tender_scan/**', 'backend/scorer.py', 'scripts/run_scan.py', 'tests/**']
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 sqlalchemy psycopg2-binary pytest
+      - name: Tests (no network; Postgres store tested against a disposable database)
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: python -m pytest tests -q
+
   scan:
+    # The scan only runs if the tests pass, and never on pull requests.
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install dependencies
-        run: pip install requests beautifulsoup4 sqlalchemy psycopg2-binary psycopg
-
+      - run: pip install requests beautifulsoup4 sqlalchemy psycopg2-binary
       - name: Run tender scan
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python scripts/github_scan.py
+        run: python scripts/run_scan.py
