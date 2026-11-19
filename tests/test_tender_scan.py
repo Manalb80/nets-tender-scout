@@ -238,7 +238,7 @@ def test_stored_tender_that_no_longer_qualifies_is_corrected_not_left_stale():
     p = plan_for(results(ppra=portal([row("PPRA", "TS0000000002E", "Hiring of Retainer Doctor", "Dec 20, 2026 11:00 AM")])), prev)
     d = p["upserts"][0]["data"]
     assert d["ti"] == "Hiring of Retainer Doctor" and d["score"] < SCORE_THRESHOLD
-    assert p["scan"]["demoted_count"] == 1 and p["scan"]["qualified_count"] == 0 and p["scan"]["open_qualified_count"] == 0
+    assert p["scan"]["demoted_count"] == 1 and p["scan"]["qualified_count"] == 0 and p["scan"]["open_qualified_count"] == 0 and p["scan"]["nogo_count"] == 0
     again = plan_for(results(ppra=portal([row("PPRA", "TS0000000002E", "Hiring of Retainer Doctor", "Dec 20, 2026 11:00 AM")])),
                      {"PPRA-TS0000000002E": dict(prev["PPRA-TS0000000002E"], score=d["score"])})
     assert again["upserts"] == [], "once corrected it is not written again"

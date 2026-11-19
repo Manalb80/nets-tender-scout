@@ -132,7 +132,7 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
                            open=closing >= now, days=days_left(closing, now), date_missing=False)
             if not rec.get("doc") and prev and prev.get("doc"):
                 rec.pop("doc")                                 # never blank a document link already stored
-            if rec["qualVerdict"] == "NOGO":
+            if rec["qualVerdict"] == "NOGO" and score >= SCORE_THRESHOLD:
                 nogo += 1
             upserts.append({"id": doc_id, "exists": prev is not None, "data": rec})
 
