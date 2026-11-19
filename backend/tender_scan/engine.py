@@ -28,9 +28,11 @@ SCAN_FIELDS = ("id", "ti", "desc", "dept", "ad", "cl", "cl_iso", "closing_at", "
                "qualVerdict", "dqReason", "qualGates", "lastScan", "scorer_version", "schema",
                "not_on_portal_since")
 SCAN_KEYS = ("schema", "date", "timestamp", "status", "total_on_portal", "per_portal", "pages_read", "complete",
-             "errors", "qualified_count", "open_qualified_count", "nogo_count", "new_count", "updated_count",
-             "closed_count", "demoted_count", "closures_skipped", "date_missing_count", "skipped_no_id",
-             "scorer_version")
+             "reported_total", "errors", "qualified_count", "open_qualified_count", "nogo_count", "new_count",
+             "updated_count", "closed_count", "demoted_count", "closures_skipped", "unchecked_count",
+             "unchecked_ids", "date_missing_count", "skipped_no_id", "scorer_version")
+# A partial scan cannot tell "withdrawn" from "not reached". Those tenders are listed as unchecked, never closed.
+UNCHECKED_ID_CAP = 500
 
 
 class ScanError(Exception):
@@ -81,6 +83,7 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
     existing_ids = set(previous)
     upserts, closures, warnings = [], [], []
     per_portal, pages, complete, errors, skipped_closures = {}, {}, {}, {}, {}
+    reported, unchecked = {}, {}
     skipped_no_id = date_missing = nogo = 0
     seen_ids = {s: set() for s in SOURCES}
 
@@ -96,6 +99,7 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
             rows.append(dict(r, _id=resolve_existing_id(cid, source, existing_ids)))
         uniq = _dedupe(rows, now)
         per_portal[key], pages[key], complete[key] = len(res["rows"]), res.get("pages", 0), bool(res.get("complete"))
+        reported[key] = res.get("reported_total")
         if res.get("error"):
             errors[key] = res["error"]
         seen_ids[source] = set(uniq)
@@ -158,26 +162,32 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
         key = PORTAL_KEY[source]
         if not complete[key]:
             skipped_closures[key] = "portal was not read completely" + (": " + errors[key] if key in errors else "")
+            unchecked.setdefault(key, []).append(doc_id)
             continue
         if last_counts.get(key) and per_portal[key] < GUARD_RATIO * last_counts[key]:
             skipped_closures[key] = "only %d rows against %d last time" % (per_portal[key], last_counts[key])
+            unchecked.setdefault(key, []).append(doc_id)
             continue
         closures.append({"id": doc_id, "reason": "not_on_portal",
                          "data": {"open": False, "not_on_portal_since": today}})
 
     for key, why in sorted(skipped_closures.items()):
-        warnings.append("%s: nothing was closed (%s)" % (key, why))
+        warnings.append("%s: %d open tender(s) left unchecked, nothing was closed (%s)"
+                        % (key, len(unchecked.get(key, [])), why))
     ok = [k for k in complete if complete[k]]
     scan = {"schema": SCHEMA_VERSION, "date": today, "timestamp": now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "status": "complete" if len(ok) == len(SOURCES) else ("partial" if per_portal and sum(per_portal.values()) else "failed"),
             "total_on_portal": sum(per_portal.values()), "per_portal": per_portal, "pages_read": pages,
-            "complete": complete, "errors": errors,
+            "complete": complete, "reported_total": reported, "errors": errors,
             "qualified_count": sum(1 for u in upserts if u["data"]["score"] >= SCORE_THRESHOLD),
             "open_qualified_count": sum(1 for u in upserts if u["data"]["open"] and u["data"]["score"] >= SCORE_THRESHOLD),
             "nogo_count": nogo, "new_count": sum(1 for u in upserts if not u["exists"]),
             "demoted_count": sum(1 for u in upserts if u["data"]["score"] < SCORE_THRESHOLD),
             "updated_count": sum(1 for u in upserts if u["exists"]), "closed_count": len(closures),
-            "closures_skipped": skipped_closures, "date_missing_count": date_missing,
+            "closures_skipped": skipped_closures,
+            "unchecked_count": {k: len(v) for k, v in sorted(unchecked.items())},
+            "unchecked_ids": {k: sorted(v)[:UNCHECKED_ID_CAP] for k, v in sorted(unchecked.items())},
+            "date_missing_count": date_missing,
             "skipped_no_id": skipped_no_id, "scorer_version": scorer_version}
     plan = {"scan": scan, "upserts": upserts, "closures": closures, "warnings": warnings}
     validate(plan)

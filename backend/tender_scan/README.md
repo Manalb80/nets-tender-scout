@@ -24,9 +24,22 @@ No browser, no AI model, no relay services.
    no date is never created and never open. Relative times ("4h 8m Left") are stored as a real date and time.
 4. **Closing a missing tender needs proof.** Only when the portal was read completely and returned at least
    70% of the rows of the last complete scan.
-5. **Other people's fields are never written.** Only the fields in `engine.SCAN_FIELDS`.
-6. **One scan record layout** (`engine.SCAN_KEYS`), and the plan is validated before anything is written.
-7. **Postgres writes are one transaction.** A failed scan leaves the database exactly as it was.
+5. **A tender left unchecked is named, not assumed.** When a portal is incomplete, its previously open
+   tenders are neither closed nor quietly treated as confirmed: the scan record carries `unchecked_count`
+   and `unchecked_ids` per portal, and the dashboard shows them as unchecked rather than confirmed open.
+6. **Other people's fields are never written.** Only the fields in `engine.SCAN_FIELDS`.
+7. **One scan record layout** (`engine.SCAN_KEYS`), and the plan is validated before anything is written.
+8. **Postgres writes are one transaction.** A failed scan leaves the database exactly as it was.
+
+## Re-checking one portal
+
+When a scan leaves a portal incomplete, re-check that portal alone, without waiting for tomorrow's run:
+
+```
+python scripts/run_scan.py --portals ppra
+```
+
+The portals left out are reported as not scanned, so nothing of theirs is closed or changed.
 
 ## Tests
 

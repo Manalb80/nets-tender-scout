@@ -212,9 +212,53 @@ def test_missing_tender_is_closed_only_when_the_portal_was_read_completely():
     seen = [row("PPRA", "TS0000000001E", "Core switch", "Dec 01, 2026 11:00 AM")]
     done = plan_for(results(ppra=portal(seen)), prev)
     assert [(c["id"], c["reason"]) for c in done["closures"]] == [("PPRA-TS0000000009E", "not_on_portal")]
+    assert done["scan"]["unchecked_count"] == {} and done["scan"]["unchecked_ids"] == {}
     part = plan_for(results(ppra=portal(seen, complete=False, error="page 6 did not respond")), prev)
     assert part["closures"] == [] and "ppra" in part["scan"]["closures_skipped"] and part["warnings"]
     assert part["scan"]["status"] == "partial"
+    # the unchecked tender is named, so the next run can re-check exactly it
+    assert part["scan"]["unchecked_count"] == {"ppra": 1}
+    assert part["scan"]["unchecked_ids"] == {"ppra": ["PPRA-TS0000000009E"]}
+    assert "1 open tender(s) left unchecked" in part["warnings"][0]
+
+
+def test_unchecked_ids_are_capped_and_the_count_stays_exact():
+    from tender_scan.engine import UNCHECKED_ID_CAP
+    n = UNCHECKED_ID_CAP + 25
+    prev = {"PPRA-TS%07dE" % i: {"source": "PPRA", "open": True, "cl": "Dec 20, 2026"} for i in range(n)}
+    p = plan_for(results(ppra=portal([], complete=False, error="portal did not respond")), prev)
+    assert p["scan"]["unchecked_count"] == {"ppra": n}
+    assert len(p["scan"]["unchecked_ids"]["ppra"]) == UNCHECKED_ID_CAP
+
+
+def test_the_row_count_guard_also_reports_what_it_left_unchecked():
+    prev = {"S-%07d" % i: {"source": "Sindh Bank", "open": True, "cl": "20-Dec-2026"} for i in range(4)}
+    rows = [row("Sindh Bank", "S-9999999", "Server supply", "20-Dec-2026")] * 10
+    p = plan_for(results(sindh=portal(rows)), prev, last={"sindh": 100})
+    assert p["closures"] == [] and p["scan"]["unchecked_count"] == {"sindh": 4}
+
+
+def test_reported_total_is_carried_into_the_scan_record():
+    r = portal([row("PPRA", "TS0000000001E", "Core switch", "Dec 01, 2026 11:00 AM")])
+    r["reported_total"] = 2053
+    assert plan_for(results(ppra=r))["scan"]["reported_total"]["ppra"] == 2053
+
+
+def test_a_targeted_rescan_reads_one_portal_and_closes_nothing_elsewhere():
+    """--portals ppra: the other portals are not fetched, so none of their tenders may be closed."""
+    calls = []
+    def get(url):
+        calls.append(url)
+        return fx("ppra_page1.html") if "ppra" in url.lower() or "epms" in url.lower() else None
+    only = portals.fetch_all(get, 1, 0, ["PPRA"])
+    assert set(only) == {"PPRA"} and calls and all("sindhbank" not in u for u in calls)
+    prev = {"S-0000001": {"source": "Sindh Bank", "open": True, "cl": "20-Dec-2026"},
+            "PPRA-TS0000000009E": {"source": "PPRA", "open": True, "cl": "Dec 20, 2026"}}
+    p = run_scan(only, prev, NOW, score_stub, "scorer-test", None)
+    assert [c["id"] for c in p["closures"]] == []
+    assert p["scan"]["unchecked_count"].get("sindh") == 1
+    with pytest.raises(ValueError):
+        portals.fetch_all(get, 1, 0, ["nope"])
 
 
 def test_row_count_guard_stops_a_bad_scrape_from_closing_a_portal():

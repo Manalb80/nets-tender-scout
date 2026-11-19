@@ -88,6 +88,13 @@ def fetch_epads(get: HttpGet, max_pages: int = 120, delay: float = 1.0) -> Dict:
     return _paged("EPADS", lambda p: "%s/?page=%d" % (parsers.EPADS_BASE, p), parsers.parse_epads, get, max_pages, delay)
 
 
-def fetch_all(get: HttpGet, max_pages: int = 120, delay: float = 1.0) -> Dict[str, Dict]:
-    return {"Sindh Bank": fetch_sindh(get), "PPRA": fetch_ppra(get, max_pages, delay),
-            "EPADS": fetch_epads(get, max_pages, delay)}
+def fetch_all(get: HttpGet, max_pages: int = 120, delay: float = 1.0, sources=None) -> Dict[str, Dict]:
+    """sources: a subset to read, for a targeted re-scan of one portal. A portal left out is reported as
+    not scanned, so the engine leaves its tenders alone instead of closing them."""
+    fetchers = {"Sindh Bank": lambda: fetch_sindh(get), "PPRA": lambda: fetch_ppra(get, max_pages, delay),
+                "EPADS": lambda: fetch_epads(get, max_pages, delay)}
+    want = set(fetchers) if sources is None else set(sources)
+    bad = want - set(fetchers)
+    if bad:
+        raise ValueError("unknown portal(s): %s" % sorted(bad))
+    return {name: f() for name, f in fetchers.items() if name in want}
