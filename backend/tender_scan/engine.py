@@ -8,7 +8,9 @@ Rules it enforces
   3. A tender missing from a portal is closed only when that portal was read completely AND returned at
      least GUARD_RATIO of the rows it returned last time. One bad scrape can no longer close a portal's tenders.
   4. Fields a person or another agent owns are never written (see SCAN_FIELDS).
-  5. The scan record has one fixed layout (SCAN_KEYS). The plan is validated before it is returned.
+  5. A stored tender that is still listed but no longer reaches the score threshold is rewritten with its
+     true title and score, so it leaves the qualified set instead of lingering with stale data.
+  6. The scan record has one fixed layout (SCAN_KEYS). The plan is validated before it is returned.
 """
 from datetime import datetime, timezone
 from typing import Callable, Dict, List, Optional
@@ -27,7 +29,8 @@ SCAN_FIELDS = ("id", "ti", "desc", "dept", "ad", "cl", "cl_iso", "closing_at", "
                "not_on_portal_since")
 SCAN_KEYS = ("schema", "date", "timestamp", "status", "total_on_portal", "per_portal", "pages_read", "complete",
              "errors", "qualified_count", "open_qualified_count", "nogo_count", "new_count", "updated_count",
-             "closed_count", "closures_skipped", "date_missing_count", "skipped_no_id", "scorer_version")
+             "closed_count", "demoted_count", "closures_skipped", "date_missing_count", "skipped_no_id",
+             "scorer_version")
 
 
 class ScanError(Exception):
@@ -102,8 +105,8 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
             prev = previous.get(doc_id)
             text = clean_title(r["title"] + (" " + r["description"] if r.get("description") else ""))
             score, verdict, solutions, keywords, qual = score_fn(text)
-            if score < SCORE_THRESHOLD:
-                continue
+            if score < SCORE_THRESHOLD and not (prev is not None and int(prev.get("score") or 0) >= SCORE_THRESHOLD):
+                continue                                       # not ours, and nothing stored to correct
             closing, kind = parse_closing(r["closing"], now)
             rec = {"id": doc_id, "ti": clean_title(r["title"]), "desc": clean_title(r.get("description", "")),
                    "dept": clean_title(r.get("department", ""))[:150], "ad": clean_closing(r.get("advertised", "")),
@@ -169,9 +172,10 @@ def run_scan(portal_results: Dict[str, Dict], previous: Dict[str, Dict], now: da
             "status": "complete" if len(ok) == len(SOURCES) else ("partial" if per_portal and sum(per_portal.values()) else "failed"),
             "total_on_portal": sum(per_portal.values()), "per_portal": per_portal, "pages_read": pages,
             "complete": complete, "errors": errors,
-            "qualified_count": len(upserts),
-            "open_qualified_count": sum(1 for u in upserts if u["data"]["open"]),
+            "qualified_count": sum(1 for u in upserts if u["data"]["score"] >= SCORE_THRESHOLD),
+            "open_qualified_count": sum(1 for u in upserts if u["data"]["open"] and u["data"]["score"] >= SCORE_THRESHOLD),
             "nogo_count": nogo, "new_count": sum(1 for u in upserts if not u["exists"]),
+            "demoted_count": sum(1 for u in upserts if u["data"]["score"] < SCORE_THRESHOLD),
             "updated_count": sum(1 for u in upserts if u["exists"]), "closed_count": len(closures),
             "closures_skipped": skipped_closures, "date_missing_count": date_missing,
             "skipped_no_id": skipped_no_id, "scorer_version": scorer_version}
@@ -194,8 +198,10 @@ def validate(plan: Dict) -> None:
         extra = set(d) - set(SCAN_FIELDS)
         if extra:
             raise ScanError("field a scan may not write: %s" % sorted(extra))
-        if d["source"] not in SOURCES or not isinstance(d["score"], int) or d["score"] < SCORE_THRESHOLD:
+        if d["source"] not in SOURCES or not isinstance(d["score"], int):
             raise ScanError("bad source or score on %s" % d["id"])
+        if d["score"] < SCORE_THRESHOLD and not u["exists"]:
+            raise ScanError("%s is below the threshold and not already stored" % d["id"])
         if not isinstance(d["open"], bool):
             raise ScanError("open must be true or false on %s" % d["id"])
         if d["open"] and (d.get("date_missing") or d.get("days") is None or d["days"] < 0):

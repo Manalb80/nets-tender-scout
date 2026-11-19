@@ -122,14 +122,14 @@ class PostgresStore:
         from sqlalchemy import text
         with self.engine.begin() as conn:
             self.ensure_schema(conn)
-            rows = conn.execute(text("SELECT id, source_portal, is_open, closing, closing_at, closing_date, document_url "
+            rows = conn.execute(text("SELECT id, source_portal, is_open, closing, closing_at, closing_date, document_url, score "
                                      "FROM tenders")).mappings().all()
         out = {}
         for r in rows:
             at = r["closing_at"].isoformat() if r["closing_at"] is not None else None
             cl = r["closing"] or (r["closing_date"].strftime("%Y-%m-%d") if r["closing_date"] is not None else "")
             out[r["id"]] = {"id": r["id"], "source": r["source_portal"] or "Sindh Bank", "open": bool(r["is_open"]),
-                            "cl": cl, "closing_at": at, "doc": r["document_url"] or ""}
+                            "cl": cl, "closing_at": at, "doc": r["document_url"] or "", "score": r["score"] or 0}
         return out
 
     def last_counts(self) -> Dict[str, int]:

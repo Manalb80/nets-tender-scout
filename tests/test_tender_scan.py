@@ -232,6 +232,18 @@ def test_a_tender_still_listed_but_below_the_threshold_is_not_closed():
     assert p["closures"] == [] and p["upserts"] == []
 
 
+def test_stored_tender_that_no_longer_qualifies_is_corrected_not_left_stale():
+    """Earlier scans stored wrong titles and scores under real tender numbers."""
+    prev = {"PPRA-TS0000000002E": {"source": "PPRA", "open": True, "cl": "Dec 20, 2026", "score": 95, "ti": "Cisco switch renewal"}}
+    p = plan_for(results(ppra=portal([row("PPRA", "TS0000000002E", "Hiring of Retainer Doctor", "Dec 20, 2026 11:00 AM")])), prev)
+    d = p["upserts"][0]["data"]
+    assert d["ti"] == "Hiring of Retainer Doctor" and d["score"] < SCORE_THRESHOLD
+    assert p["scan"]["demoted_count"] == 1 and p["scan"]["qualified_count"] == 0 and p["scan"]["open_qualified_count"] == 0
+    again = plan_for(results(ppra=portal([row("PPRA", "TS0000000002E", "Hiring of Retainer Doctor", "Dec 20, 2026 11:00 AM")])),
+                     {"PPRA-TS0000000002E": dict(prev["PPRA-TS0000000002E"], score=d["score"])})
+    assert again["upserts"] == [], "once corrected it is not written again"
+
+
 def test_stored_tender_whose_date_passed_is_closed_even_if_the_portal_failed():
     prev = {"PPRA-TS0000000003E": {"source": "PPRA", "open": True, "cl": "Nov 10, 2026"}}
     p = plan_for(results(ppra=portal([], complete=False, error="down")), prev)
@@ -275,7 +287,7 @@ def test_all_portals_down_is_a_failed_scan_that_closes_nothing():
 def test_validation_refuses_a_broken_plan():
     p = plan_for(results(ppra=portal([row("PPRA", "TS0000000001E", "Core switch", "Dec 01, 2026 11:00 AM")])))
     for breaker in (lambda d: d.update(assignee="someone"), lambda d: d.update(open="yes"),
-                    lambda d: d.update(date_missing=True), lambda d: d.update(ti="a\nb"), lambda d: d.update(score=10)):
+                    lambda d: d.update(date_missing=True), lambda d: d.update(ti="a\nb"), lambda d: d.update(score=10), lambda d: d.update(score="90")):
         bad = copy.deepcopy(p)
         breaker(bad["upserts"][0]["data"])
         with pytest.raises(ScanError):
@@ -295,7 +307,7 @@ def test_real_scorer_runs_through_the_engine():
     from scorer import score_tender
     res = results(ppra=portal(parsers.parse_ppra(fx("ppra_page1.html"))), sindh=portal(parsers.parse_sindh(fx("sindh.html"))))
     p = run_scan(res, {}, NOW, score_tender, "scorer-real")
-    assert all(u["data"]["score"] >= SCORE_THRESHOLD for u in p["upserts"])
+    assert all(u["data"]["score"] >= SCORE_THRESHOLD for u in p["upserts"]) and p["scan"]["demoted_count"] == 0
 
 
 # ── stores ──
