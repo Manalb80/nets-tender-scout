@@ -351,6 +351,9 @@ def test_postgres_store_end_to_end():
         c.execute(text("INSERT INTO tenders (id, title, closing, is_open, score, document_url) VALUES "
                        "('PPRA-TS0000000001E','old title','Dec 01, 2026',TRUE,80,'https://x/kept.pdf'),"
                        "('PPRA-TS0000000009E','gone','Dec 20, 2026',TRUE,80,NULL)"))
+    with eng.begin() as c:   # the live table on 19 Nov 2026 had lost this column and every scheduled scan failed on it
+        c.execute(text("ALTER TABLE tenders DROP COLUMN qual_verdict"))
+        c.execute(text("ALTER TABLE tenders ALTER COLUMN title TYPE TEXT"))
     store = PostgresStore(PG)
     prev = store.load_previous()
     assert prev["PPRA-TS0000000001E"]["open"] is True and store.last_counts() == {}

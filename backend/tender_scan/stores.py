@@ -105,9 +105,14 @@ class PostgresStore:
         for col, typ, _ in _COLUMNS:
             conn.execute(text("ALTER TABLE tenders ADD COLUMN IF NOT EXISTS %s %s" % (col, typ)))
         # Tables created by the old script have narrower text columns. Widening never loses data.
-        for col, typ in (("title", "VARCHAR(500)"), ("department", "VARCHAR(200)"), ("advertised", "VARCHAR(80)"),
-                         ("closing", "VARCHAR(80)")):
-            conn.execute(text("ALTER TABLE tenders ALTER COLUMN %s TYPE %s" % (col, typ)))
+        # Only a VARCHAR that is too short is touched; TEXT or already-wide columns are left alone.
+        widths = {r[0]: r[1] for r in conn.execute(text(
+            "SELECT column_name, character_maximum_length FROM information_schema.columns "
+            "WHERE table_name = 'tenders' AND table_schema = current_schema() AND data_type = 'character varying'"))}
+        for col, need in (("title", 500), ("department", 200), ("advertised", 80), ("closing", 80),
+                          ("document_url", 1000), ("detail_url", 1000)):
+            if widths.get(col) is not None and widths[col] < need:
+                conn.execute(text("ALTER TABLE tenders ALTER COLUMN %s TYPE VARCHAR(%d)" % (col, need)))
         for col, typ in (("source_url", "VARCHAR(1000)"), ("acquisition_status", "VARCHAR(30) DEFAULT 'PENDING'"),
                          ("doc_accessible", "BOOLEAN DEFAULT TRUE"), ("local_folder", "VARCHAR(500)")):
             conn.execute(text("ALTER TABLE tenders ADD COLUMN IF NOT EXISTS %s %s" % (col, typ)))
