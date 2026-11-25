@@ -1,1 +1,5 @@
 __pycache__/
+
+# Agent 1b run output
+rfp_out/
+rfp_state/
