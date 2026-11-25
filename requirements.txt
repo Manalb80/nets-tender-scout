@@ -9,6 +9,10 @@ psycopg2-binary==2.9.10
 pydantic==2.10.4
 langgraph==0.2.60
 
+# Agent 1b SharePoint fetcher (scripts/run_rfp_fetch.py)
+msal==1.39.0
+pypdf==6.17.0
+
 # LLM providers (install whichever you use, all are optional)
 openai==1.58.1
 google-genai==1.5.0
