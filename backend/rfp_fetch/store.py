@@ -38,6 +38,9 @@ def write_batches(writes: List[Dict], out_dir: str) -> List[str]:
     """Each batch: at most 50 writes and under 1 MiB. Deletes of rfp_text parts go last so the text never
     disappears before its replacement is written."""
     os.makedirs(out_dir, exist_ok=True)
+    for old in os.listdir(out_dir):    # a plan from an earlier run must never be applied by mistake
+        if old.startswith("batch_") and old.endswith(".json"):
+            os.remove(os.path.join(out_dir, old))
     order = {"sp_index": 0, "rfp_text": 1, "rfp_analysis": 2, "tenders": 3, "config": 4}
     writes = sorted(writes, key=lambda w: (w["op"] == "delete" and w["collection"] == "rfp_text", order.get(w["collection"], 9)))
     batches, cur, size = [], [], 0
@@ -57,3 +60,26 @@ def write_batches(writes: List[Dict], out_dir: str) -> List[str]:
             json.dump(b, f, ensure_ascii=False)
         paths.append(p)
     return paths
+
+
+def apply_to_snapshot(paths: List[str], state: str) -> int:
+    """Rehearsal only: apply batch files to the local snapshot folder the way the dashboard database would
+    (set replaces, update merges, delete removes), so a second run can be tested without touching the dashboard."""
+    n = 0
+    for p in paths:
+        with open(p, encoding="utf-8") as f:
+            batch = json.load(f)
+        for w in batch:
+            folder = os.path.join(state, w["collection"])
+            target = os.path.join(folder, w["doc_id"] + ".json")
+            if w["op"] == "delete":
+                if os.path.exists(target):
+                    os.remove(target)
+            else:
+                data = dict(load_doc(state, w["collection"], w["doc_id"]) or {}) if w["op"] == "update" else {}
+                data.update(w["data"])
+                os.makedirs(folder, exist_ok=True)
+                with open(target, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False)
+            n += 1
+    return n
